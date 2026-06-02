@@ -1,0 +1,33 @@
+:root {
+  --orvalya-navy: #1b3a5c;
+  --orvalya-blue: #2e86ab;
+  --orvalya-bg: #f7fafc;
+  --orvalya-text: #0b1220;
+  --orvalya-muted: #5b6776;
+
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 16px/145% var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light;
+  color: var(--orvalya-text);
+  background: var(--orvalya-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+body {
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
