@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
+import DocumentosPrestador from './DocumentosPrestador'
 
 export default function DashboardPage() {
   const { user, perfil, signOut } = useAuth()
@@ -48,9 +49,7 @@ function DashboardPrestador() {
         <Tarjeta titulo="Documentos" valor="0 / 3" desc="Certificados cargados" />
         <Tarjeta titulo="Contratos activos" valor="0" desc="Órdenes de servicio" />
       </div>
-      <Seccion titulo="Mis documentos">
-        <ItemVacio texto="No cargaste documentos todavía. Subí tu Certificado DGI, BPS y BSE para activar tu perfil." />
-      </Seccion>
+      <DocumentosPrestador />
       <Seccion titulo="Mis contratos">
         <ItemVacio texto="No tenés contratos activos. Cuando una empresa te contrate, aparecerán acá." />
       </Seccion>

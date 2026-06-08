@@ -12,35 +12,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [perfil, setPerfil] = useState<Perfil | null>(null)
 
   const fetchPerfil = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('perfiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    if (error) console.error('fetchPerfil error:', error)
-    setPerfil(data ?? null)
+    try {
+      const { data, error } = await supabase
+        .from('perfiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      if (error) {
+        console.error('fetchPerfil error:', error)
+        setPerfil(null)
+      } else {
+        setPerfil(data ?? null)
+      }
+    } catch (err) {
+      console.error('fetchPerfil catch:', err)
+      setPerfil(null)
+    }
   }, [])
 
   useEffect(() => {
     let mounted = true
-    supabase.auth.getSession()
-      .then(({ data, error }) => {
-        if (error) throw error
-        if (!mounted) return
-        setSession(data.session ?? null)
-        if (data.session?.user) fetchPerfil(data.session.user.id)
-      })
-      .catch(() => { if (!mounted) return; setSession(null) })
-      .finally(() => { if (!mounted) return; setLoading(false) })
+    
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          console.error('Error getting session:', error)
+          if (mounted) setSession(null)
+          return
+        }
+        
+        if (mounted) {
+          setSession(session)
+          if (session?.user) {
+            // Fetch perfil in background, don't wait for it
+            fetchPerfil(session.user.id).catch(err => console.error('BG fetch error:', err))
+          }
+        }
+      } catch (err) {
+        console.error('Session error:', err)
+        if (mounted) setSession(null)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+    
+    initSession()
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
       if (!mounted) return
       setSession(nextSession)
-      if (nextSession?.user) fetchPerfil(nextSession.user.id)
-      else setPerfil(null)
+      if (nextSession?.user) {
+        // Fetch perfil in background, don't wait for it
+        fetchPerfil(nextSession.user.id).catch(err => console.error('BG fetch error:', err))
+      } else {
+        setPerfil(null)
+      }
       setLoading(false)
     })
-    return () => { mounted = false; sub.subscription.unsubscribe() }
+    
+    return () => { 
+      mounted = false
+      subscription?.unsubscribe() 
+    }
   }, [fetchPerfil])
 
   const user = session?.user ?? null
