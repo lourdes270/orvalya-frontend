@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { supabase } from '../../lib/supabase'
 import DocumentosPrestador from './DocumentosPrestador'
+import PerfilPrestador from './PerfilPrestador'
 
 export default function DashboardPage() {
   const { user, perfil, signOut } = useAuth()
@@ -40,33 +41,19 @@ function DashboardPrestador() {
 
   useEffect(() => {
     if (!perfil) return
-    
     const loadData = async () => {
-      // 1. Get semaforo from prestadores
       const { data: prestador } = await supabase
-        .from('prestadores')
-        .select('semaforo')
-        .eq('id', perfil.id)
-        .single()
-      
-      if (prestador) {
-        setSemaforo(prestador.semaforo ?? 'rojo')
-      }
-
-      // 2. Count documentos from documentos table
+        .from('prestadores').select('semaforo').eq('id', perfil.id).single()
+      if (prestador) setSemaforo(prestador.semaforo ?? 'rojo')
       const { count } = await supabase
-        .from('documentos')
-        .select('*', { count: 'exact' })
-        .eq('prestador_id', perfil.id)
-      
+        .from('documentos').select('*', { count: 'exact' }).eq('prestador_id', perfil.id)
       setDocsCount(count ?? 0)
     }
-
-    loadData().catch(err => console.error('Error loading dashboard data:', err))
+    loadData().catch(console.error)
   }, [perfil])
 
   const semaforoIcon = semaforo === 'verde' ? '🟢' : semaforo === 'amarillo' ? '🟡' : '🔴'
-  const semaforoLabel = semaforo === 'verde' ? 'Completo' : semaforo === 'amarillo' ? 'Incompleto' : 'Incompleto'
+  const semaforoLabel = semaforo === 'verde' ? 'Completo' : 'Incompleto'
 
   return (
     <div>
@@ -75,6 +62,7 @@ function DashboardPrestador() {
         <Tarjeta titulo="Documentos" valor={`${docsCount} / 3`} desc="Certificados cargados" />
         <Tarjeta titulo="Contratos activos" valor="0" desc="Órdenes de servicio" />
       </div>
+      <PerfilPrestador />
       <DocumentosPrestador />
       <Seccion titulo="Mis contratos">
         <ItemVacio texto="No tenés contratos activos. Cuando una empresa te contrate, aparecerán acá." />
