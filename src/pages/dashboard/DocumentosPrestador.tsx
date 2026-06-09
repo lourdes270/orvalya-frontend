@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../../contexts/useAuth'
 import { supabase } from '../../lib/supabase'
 
@@ -23,6 +23,49 @@ export default function DocumentosPrestador() {
       archivo: null, fecha_vencimiento: '', subiendo: false, subido: false, error: ''
     }]))
   )
+
+  // Load existing documents from Supabase on mount
+  useEffect(() => {
+    if (!perfil) return
+
+    const loadDocuments = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('documentos')
+          .select('nombre, fecha_vencimiento')
+          .eq('prestador_id', perfil.id)
+
+        // Ignore permission errors - might be RLS policy issue
+        if (error && error.message?.includes('permission denied')) {
+          console.warn('Permission denied loading documents (RLS issue), will retry on next action')
+          return
+        }
+
+        if (error) {
+          console.error('Error loading documents:', error)
+          return
+        }
+
+        if (data && data.length > 0) {
+          const updatedDocs = { ...docs }
+          data.forEach(doc => {
+            if (updatedDocs[doc.nombre]) {
+              updatedDocs[doc.nombre] = {
+                ...updatedDocs[doc.nombre],
+                subido: true,
+                fecha_vencimiento: doc.fecha_vencimiento || ''
+              }
+            }
+          })
+          setDocs(updatedDocs)
+        }
+      } catch (err) {
+        console.error('Exception loading documents:', err)
+      }
+    }
+
+    loadDocuments()
+  }, [perfil])
 
   const setDoc = (key: string, changes: Partial<DocEstado>) => {
     setDocs(prev => ({ ...prev, [key]: { ...prev[key], ...changes } }))
