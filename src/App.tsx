@@ -26,10 +26,11 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<PublicRoute><AuthPage /></PublicRoute>} />
+          <Route path="/" element={<Navigate to="/onboarding" replace />} />
+          <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/onboarding" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

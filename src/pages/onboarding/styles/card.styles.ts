@@ -1,0 +1,38 @@
+export const CARD_STYLES = {
+  perfilCard: (isMobile: boolean): React.CSSProperties => ({
+    width: '100%',
+    padding: isMobile ? '20px' : '24px',
+    marginBottom: '16px',
+    border: '1.5px solid #DEE2E6',
+    borderRadius: '10px',
+    backgroundColor: '#ffffff',
+    cursor: 'pointer',
+    textAlign: 'left',
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '16px',
+    minHeight: isMobile ? '80px' : 'auto',
+  }),
+  rubroCard: (isMobile: boolean): React.CSSProperties => ({
+    width: '100%',
+    padding: isMobile ? '16px' : '20px',
+    marginBottom: '12px',
+    border: '1.5px solid #DEE2E6',
+    borderRadius: '8px',
+    backgroundColor: '#ffffff',
+    cursor: 'pointer',
+  }),
+  rubroCardExpanded: (): React.CSSProperties => ({
+    borderColor: '#1F3864',
+    backgroundColor: '#EEF2FF',
+  }),
+  opcionFiscal: (seleccionado: boolean): React.CSSProperties => ({
+    width: '100%',
+    padding: '20px',
+    marginBottom: '12px',
+    border: `1.5px solid ${seleccionado ? '#1F3864' : '#DEE2E6'}`,
+    borderRadius: '8px',
+    backgroundColor: seleccionado ? '#EEF2FF' : '#ffffff',
+    cursor: 'pointer',
+  }),
+}

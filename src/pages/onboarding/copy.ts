@@ -1,0 +1,54 @@
+export const COPY = {
+  paso0: {
+    titulo: '¿Cómo vas a usar Orvalya?',
+    subtitulo: 'Elegí tu perfil. Podés cambiarlo después.',
+    prestador: {
+      titulo: 'Ofrezco servicios',
+      descripcion: 'Trabajo de forma independiente o tengo mi propio negocio.'
+    },
+    contratante: {
+      titulo: 'Necesito contratar servicios',
+      descripcion: 'Soy empresa y quiero gestionar contratistas con respaldo legal.'
+    }
+  },
+  paso1: {
+    titulo: '¿Qué servicios ofrecés?',
+    subtitulo: 'Elegí uno o varios. Si hacés muchas cosas, marcalas todas.',
+    errorSinSeleccion: 'Elegí al menos un servicio para continuar.'
+  },
+  paso2: {
+    titulo: '¿Cómo te encontramos?',
+    subtitulo: 'Esta info aparece en tu perfil. Podés cambiarla después.',
+    campos: {
+      nombre: {
+        label: 'Tu nombre o el nombre de tu emprendimiento',
+        placeholder: 'Ej: María García / Limpieza García',
+        error: 'Tu nombre es obligatorio.'
+      },
+      zona: {
+        label: '¿En qué zona podés trabajar?',
+        placeholder: 'Ej: Montevideo, Canelones, todo el país',
+        ayuda: 'No importa si todavía no estás trabajando — poné dónde podrías hacerlo.',
+        error: 'Indicá en qué zona podés trabajar.'
+      },
+      whatsapp: {
+        label: 'WhatsApp (opcional)',
+        placeholder: 'Ej: 099 123 456',
+        ayuda: 'Los contratantes van a poder contactarte por acá.'
+      }
+    }
+  },
+  paso3: {
+    titulo: '¿Cuál es tu situación?',
+    subtitulo: 'Todos son bienvenidos. Esto nos ayuda a mostrarte las oportunidades que te corresponden.',
+    nota: '✓ Podés aparecer en búsquedas desde hoy. Te acompañamos en el camino a la formalización.'
+  },
+  errores: {
+    guardado: 'No pudimos guardar tu perfil. Revisá tu conexión e intentá de nuevo.'
+  },
+  botones: {
+    siguiente: 'Siguiente',
+    comenzar: 'Comenzar',
+    volver: '←'
+  }
+}
