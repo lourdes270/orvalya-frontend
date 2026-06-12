@@ -44,12 +44,13 @@ export async function guardarPerfil(
     return
   }
   try {
+    const zonaValue = typeof form.zona === 'string' ? form.zona.trim() : JSON.stringify(form.zona)
     const { error: updateError } = await supabase
       .from('perfiles')
       .update({
         tipo: 'prestador',
         nombre: form.nombre.trim(),
-        zona: form.zona.trim(),
+        zona: zonaValue,
         telefono: form.whatsapp.trim(),
         descripcion: JSON.stringify(selecciones),
         rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
@@ -60,7 +61,7 @@ export async function guardarPerfil(
       ...perfil,
       tipo: 'prestador',
       nombre: form.nombre.trim(),
-      zona: form.zona.trim(),
+      zona: zonaValue,
       telefono: form.whatsapp.trim(),
       descripcion: JSON.stringify(selecciones),
       rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
@@ -86,7 +87,14 @@ export function puedeAvanzar(paso: PasoOnboarding, form: OnboardingForm, selecci
     case 1:
       return Object.values(selecciones).some(arr => arr.length > 0) || form.otroTexto.trim().length > 0
     case 2:
-      return form.nombre.trim().length > 0 && form.zona.trim().length > 0
+      if (form.nombre.trim().length === 0) return false
+      // Check zona - can be string (old format) or ZonasSeleccion object (new format)
+      if (typeof form.zona === 'string') {
+        return form.zona.trim().length > 0
+      } else {
+        // New format: check if at least one zone is selected
+        return form.zona.todoUruguay || form.zona.departamentos.length > 0
+      }
     case 3:
       return estadoFiscal !== null
     default:
@@ -117,11 +125,12 @@ export async function registrarUsuario(
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) throw new Error('No se pudo establecer la sesión')
 
+    const zonaValue = typeof form.zona === 'string' ? form.zona.trim() : JSON.stringify(form.zona)
     const perfilData = {
       id: user.id,
       tipo: 'prestador',
       nombre: form.nombre.trim(),
-      zona: form.zona.trim(),
+      zona: zonaValue,
       telefono: form.whatsapp.trim(),
       descripcion: JSON.stringify(selecciones),
       rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,

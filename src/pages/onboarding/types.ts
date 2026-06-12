@@ -15,9 +15,15 @@ export interface Rubro {
   tieneTextoLibre?: boolean
 }
 
+export interface ZonasSeleccion {
+  todoUruguay: boolean
+  departamentos: string[]
+  zonasMontevideo: string[]
+}
+
 export interface OnboardingForm {
   nombre: string
-  zona: string
+  zona: string | ZonasSeleccion
   whatsapp: string
   otroTexto: string
 }
