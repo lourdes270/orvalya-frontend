@@ -116,6 +116,18 @@ export default function Step2DatosBasicos({
     setForm({ ...form, zona: JSON.stringify(newZonas) })
   }
 
+  const getShortZoneLabel = (zona: string): string => {
+    const labels: Record<string, string> = {
+      'Zona Centro': 'Centro',
+      'Zona Este': 'Este',
+      'Zona Oeste': 'Oeste',
+      'Zona Norte': 'Norte',
+      'Zona Sur': 'Sur',
+      'Todo Montevideo': 'Todo Mvd',
+    }
+    return labels[zona] || zona
+  }
+
   return (
     <div style={STYLES.wrapper(isMobile)}>
       <div style={{ position: 'relative', ...STYLES.card(isMobile) }}>
@@ -134,7 +146,11 @@ export default function Step2DatosBasicos({
           </label>
           <input
             type="text"
-            style={STYLES.input(isMobile)}
+            style={{
+              ...STYLES.input(isMobile),
+              height: isMobile ? '52px' : undefined,
+              fontSize: isMobile ? '16px' : undefined,
+            }}
             placeholder={COPY.paso2.campos.nombre.placeholder}
             value={form.nombre}
             onChange={(e) => handleChange('nombre', e.target.value)}
@@ -152,12 +168,13 @@ export default function Step2DatosBasicos({
             onBlur={validarZona}
             style={{
               width: '100%',
-              padding: '14px',
+              height: isMobile ? '48px' : undefined,
+              padding: isMobile ? '0' : '14px',
               border: zonas.todoUruguay ? 'none' : '1.5px solid #DEE2E6',
               borderRadius: '8px',
               backgroundColor: zonas.todoUruguay ? '#1F3864' : '#ffffff',
               color: zonas.todoUruguay ? '#ffffff' : '#1F3864',
-              fontSize: '16px',
+              fontSize: isMobile ? '15px' : '16px',
               fontWeight: '600',
               cursor: 'pointer',
               marginBottom: '20px',
@@ -177,12 +194,12 @@ export default function Step2DatosBasicos({
                   onClick={() => toggleDepartamento(depto)}
                   onBlur={validarZona}
                   style={{
-                    padding: '10px 14px',
+                    padding: isMobile ? '8px 12px' : '10px 14px',
                     border: zonas.departamentos.includes(depto) ? '1.5px solid #1F3864' : '1.5px solid #DEE2E6',
                     borderRadius: '20px',
                     backgroundColor: zonas.departamentos.includes(depto) ? '#EEF2FF' : '#ffffff',
                     color: zonas.departamentos.includes(depto) ? '#1F3864' : '#6b7280',
-                    fontSize: '14px',
+                    fontSize: isMobile ? '13px' : '14px',
                     fontWeight: zonas.departamentos.includes(depto) ? '600' : '400',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
@@ -196,25 +213,30 @@ export default function Step2DatosBasicos({
 
           {/* Montevideo zones (shown only if Montevideo is selected) */}
           {zonas.departamentos.includes('Montevideo') && !zonas.todoUruguay && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr 1fr' : 'flex',
+              gap: '10px',
+              marginBottom: '20px',
+            }}>
               {ZONAS_MONTEVIDEO.map((zona) => (
                 <button
                   key={zona}
                   type="button"
                   onClick={() => toggleZonaMontevideo(zona)}
                   style={{
-                    padding: '10px 14px',
+                    padding: isMobile ? '8px 12px' : '10px 14px',
                     border: zonas.zonasMontevideo.includes(zona) ? '1.5px solid #1F3864' : '1.5px solid #DEE2E6',
                     borderRadius: '20px',
                     backgroundColor: zonas.zonasMontevideo.includes(zona) ? '#EEF2FF' : '#ffffff',
                     color: zonas.zonasMontevideo.includes(zona) ? '#1F3864' : '#6b7280',
-                    fontSize: '14px',
+                    fontSize: isMobile ? '13px' : '14px',
                     fontWeight: zonas.zonasMontevideo.includes(zona) ? '600' : '400',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
                   }}
                 >
-                  {zona}
+                  {isMobile ? getShortZoneLabel(zona) : zona}
                 </button>
               ))}
             </div>
@@ -226,7 +248,11 @@ export default function Step2DatosBasicos({
           </label>
           <input
             type="text"
-            style={STYLES.input(isMobile)}
+            style={{
+              ...STYLES.input(isMobile),
+              height: isMobile ? '52px' : undefined,
+              fontSize: isMobile ? '16px' : undefined,
+            }}
             placeholder={COPY.paso2.campos.whatsapp.placeholder}
             value={form.whatsapp}
             onChange={(e) => handleChange('whatsapp', e.target.value)}
