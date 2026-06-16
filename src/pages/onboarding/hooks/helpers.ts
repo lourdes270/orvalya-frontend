@@ -10,7 +10,7 @@ export async function fetchPerfilFromSupabase(setPerfil: (p: any) => void, setEr
       const { data: perfilData, error: perfilError } = await supabase
         .from('perfiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .single()
       if (perfilError) throw perfilError
       if (perfilData) {
@@ -171,14 +171,16 @@ export async function registrarUsuario(
 
     if (insertError) throw insertError
 
-    const { data: perfilResult } = await supabase
+    const { data: perfilResult, error: fetchError } = await supabase
       .from('perfiles')
       .select('*')
       .eq('id', user.id)
       .single()
-    
-    if (perfilResult) {
-      setPerfil(perfilResult)
+
+    const perfilFinal = perfilResult ?? perfilData
+    setPerfil(perfilFinal)
+    if (fetchError && !perfilResult) {
+      console.warn('Perfil creado pero no se pudo re-leer:', fetchError)
     }
 
     localStorage.removeItem(DRAFT_KEY)

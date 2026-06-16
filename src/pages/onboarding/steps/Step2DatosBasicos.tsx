@@ -24,12 +24,25 @@ export default function Step2DatosBasicos({
 }: Step2DatosBasicosProps) {
   const [errores, setErrores] = useState<Record<string, string>>({})
 
-  // Initialize zonas if not already set
-  const zonas = (typeof form.zona === 'string' ? null : form.zona) || {
+  const zonasVacias: ZonasSeleccion = {
     todoUruguay: false,
     departamentos: [],
     zonasMontevideo: [],
   }
+
+  const getZonas = (zona: string | ZonasSeleccion): ZonasSeleccion => {
+    if (typeof zona !== 'string') return zona
+    if (!zona.trim()) return zonasVacias
+    try {
+      const parsed = JSON.parse(zona) as ZonasSeleccion
+      if (typeof parsed.todoUruguay === 'boolean') return parsed
+    } catch {
+      // formato antiguo: string plano
+    }
+    return zonasVacias
+  }
+
+  const zonas = getZonas(form.zona)
 
   const validarNombre = () => {
     if (form.nombre.trim().length === 0) {
@@ -67,8 +80,8 @@ export default function Step2DatosBasicos({
   }
 
   const validarZona = () => {
-    const z = typeof form.zona === 'string' ? null : form.zona
-    if (!z || (z.departamentos.length === 0 && !z.todoUruguay)) {
+    const z = getZonas(form.zona)
+    if (z.departamentos.length === 0 && !z.todoUruguay) {
       setErrores(prev => ({ ...prev, zona: 'Elegí al menos una zona donde podés trabajar.' }))
     } else {
       setErrores(prev => {
@@ -94,7 +107,7 @@ export default function Step2DatosBasicos({
       departamentos: !zonas.todoUruguay ? [...DEPARTAMENTOS] : [],
       zonasMontevideo: !zonas.todoUruguay ? [...ZONAS_MONTEVIDEO] : [],
     }
-    setForm({ ...form, zona: JSON.stringify(newZonas) })
+    setForm({ ...form, zona: newZonas })
     if (errores.zona) {
       setErrores(prev => {
         const { zona, ...rest } = prev
@@ -119,7 +132,7 @@ export default function Step2DatosBasicos({
       departamentos: newDepartamentos,
       zonasMontevideo: newZonasMontevideo,
     }
-    setForm({ ...form, zona: JSON.stringify(newZonas) })
+    setForm({ ...form, zona: newZonas })
     if (errores.zona) {
       setErrores(prev => {
         const { zona, ...rest } = prev
@@ -137,7 +150,7 @@ export default function Step2DatosBasicos({
       ...zonas,
       zonasMontevideo: newZonasMontevideo,
     }
-    setForm({ ...form, zona: JSON.stringify(newZonas) })
+    setForm({ ...form, zona: newZonas })
   }
 
   const getShortZoneLabel = (zona: string): string => {
