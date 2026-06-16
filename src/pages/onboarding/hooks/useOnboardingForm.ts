@@ -24,6 +24,8 @@ export function useOnboardingForm() {
   const [paso, setPaso] = useState<PasoOnboarding>(0)
   const [form, setForm] = useState<OnboardingForm>({
     nombre: '',
+    email: '',
+    telefono: '',
     zona: '',
     whatsapp: '',
     otroTexto: '',
@@ -64,7 +66,8 @@ export function useOnboardingForm() {
   const handleRegistro = async (email: string, password: string) => {
     setLoading(true)
     setError('')
-    await registrarUsuario(email, password, form, selecciones, estadoFiscal, setPerfil, navigate, setError)
+    // Use the email from form (Step2) instead of the email parameter (Step4)
+    await registrarUsuario(form.email || email, password, form, selecciones, estadoFiscal, setPerfil, navigate, setError)
     setLoading(false)
   }
 

@@ -6,6 +6,7 @@ interface Step4RegistroProps {
   onRegistrar: (email: string, password: string) => Promise<void>
   loading: boolean
   error: string
+  email: string
 }
 
 export default function Step4Registro({
@@ -13,8 +14,9 @@ export default function Step4Registro({
   onRegistrar,
   loading,
   error,
+  email: initialEmail,
 }: Step4RegistroProps) {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(initialEmail)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -138,21 +140,26 @@ export default function Step4Registro({
               value={email}
               onChange={(e) => handleChange('email', e.target.value)}
               placeholder="tu@email.com"
+              readOnly={!!initialEmail}
               style={{
                 width: '100%',
                 height: '52px',
                 padding: '0 16px',
-                border: '1.5px solid #DEE2E6',
+                border: initialEmail ? '1.5px solid #1F3864' : '1.5px solid #DEE2E6',
                 borderRadius: '8px',
                 fontSize: '16px',
                 boxSizing: 'border-box',
                 outline: 'none',
                 transition: 'border-color 0.2s',
+                backgroundColor: initialEmail ? '#f8f9fa' : '#ffffff',
+                cursor: initialEmail ? 'not-allowed' : 'text',
               }}
-              onFocus={(e) => e.target.style.borderColor = '#1F3864'}
+              onFocus={(e) => !initialEmail && (e.target.style.borderColor = '#1F3864')}
               onBlur={(e) => {
-                e.target.style.borderColor = '#DEE2E6'
-                handleBlur('email', e.target.value)
+                if (!initialEmail) {
+                  e.target.style.borderColor = '#DEE2E6'
+                  handleBlur('email', e.target.value)
+                }
               }}
             />
             {touched.email && fieldErrors.email && (

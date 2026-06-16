@@ -33,10 +33,34 @@ export default function Step2DatosBasicos({
 
   const validarNombre = () => {
     if (form.nombre.trim().length === 0) {
-      setErrores(prev => ({ ...prev, nombre: COPY.paso2.campos.nombre.error }))
+      setErrores(prev => ({ ...prev, nombre: 'El nombre es obligatorio' }))
     } else {
       setErrores(prev => {
         const { nombre, ...rest } = prev
+        return rest
+      })
+    }
+  }
+
+  const validarEmail = () => {
+    if (form.email.trim().length === 0) {
+      setErrores(prev => ({ ...prev, email: 'El email es obligatorio' }))
+    } else if (!form.email.includes('@')) {
+      setErrores(prev => ({ ...prev, email: 'El email debe contener @' }))
+    } else {
+      setErrores(prev => {
+        const { email, ...rest } = prev
+        return rest
+      })
+    }
+  }
+
+  const validarTelefono = () => {
+    if (form.telefono.trim().length === 0) {
+      setErrores(prev => ({ ...prev, telefono: 'El teléfono es obligatorio' }))
+    } else {
+      setErrores(prev => {
+        const { telefono, ...rest } = prev
         return rest
       })
     }
@@ -158,6 +182,38 @@ export default function Step2DatosBasicos({
           />
           {errores.nombre && <p style={STYLES.error()}>{errores.nombre}</p>}
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
+            Email
+          </label>
+          <input
+            type="email"
+            style={{
+              ...STYLES.input(isMobile),
+              height: isMobile ? '52px' : undefined,
+              fontSize: isMobile ? '16px' : undefined,
+            }}
+            placeholder="tu@email.com"
+            value={form.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            onBlur={validarEmail}
+          />
+          {errores.email && <p style={STYLES.error()}>{errores.email}</p>}
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
+            Teléfono
+          </label>
+          <input
+            type="tel"
+            style={{
+              ...STYLES.input(isMobile),
+              height: isMobile ? '52px' : undefined,
+              fontSize: isMobile ? '16px' : undefined,
+            }}
+            placeholder="099 123 456"
+            value={form.telefono}
+            onChange={(e) => handleChange('telefono', e.target.value)}
+            onBlur={validarTelefono}
+          />
+          {errores.telefono && <p style={STYLES.error()}>{errores.telefono}</p>}
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
             Zonas de trabajo
           </label>
           
@@ -186,7 +242,7 @@ export default function Step2DatosBasicos({
 
           {/* Department chips */}
           {!zonas.todoUruguay && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: zonas.departamentos.includes('Montevideo') ? '20px' : '0' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
               {DEPARTAMENTOS.map((depto) => (
                 <button
                   key={depto}
@@ -203,9 +259,29 @@ export default function Step2DatosBasicos({
                     fontWeight: zonas.departamentos.includes(depto) ? '600' : '400',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
+                    position: 'relative',
                   }}
                 >
                   {depto}
+                  {zonas.departamentos.includes(depto) && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-4px',
+                      right: '-4px',
+                      width: '16px',
+                      height: '16px',
+                      backgroundColor: '#1F3864',
+                      borderRadius: '50%',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold',
+                    }}>
+                      ✓
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -214,8 +290,8 @@ export default function Step2DatosBasicos({
           {/* Montevideo zones (shown only if Montevideo is selected) */}
           {zonas.departamentos.includes('Montevideo') && !zonas.todoUruguay && (
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile ? '1fr 1fr' : 'flex',
+              display: 'flex',
+              flexWrap: 'wrap',
               gap: '10px',
               marginBottom: '20px',
             }}>
@@ -234,9 +310,29 @@ export default function Step2DatosBasicos({
                     fontWeight: zonas.zonasMontevideo.includes(zona) ? '600' : '400',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
+                    position: 'relative',
                   }}
                 >
                   {isMobile ? getShortZoneLabel(zona) : zona}
+                  {zonas.zonasMontevideo.includes(zona) && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-4px',
+                      right: '-4px',
+                      width: '16px',
+                      height: '16px',
+                      backgroundColor: '#1F3864',
+                      borderRadius: '50%',
+                      color: '#ffffff',
+                      fontSize: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 'bold',
+                    }}>
+                      ✓
+                    </span>
+                  )}
                 </button>
               ))}
             </div>

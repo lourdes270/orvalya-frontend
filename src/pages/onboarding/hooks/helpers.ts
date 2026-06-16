@@ -50,8 +50,10 @@ export async function guardarPerfil(
       .update({
         tipo: 'prestador',
         nombre: form.nombre.trim(),
+        email: form.email.trim(),
+        telefono: form.telefono.trim(),
         zona: zonaValue,
-        telefono: form.whatsapp.trim(),
+        whatsapp: form.whatsapp.trim(),
         descripcion: JSON.stringify(selecciones),
         rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
       })
@@ -61,8 +63,10 @@ export async function guardarPerfil(
       ...perfil,
       tipo: 'prestador',
       nombre: form.nombre.trim(),
+      email: form.email.trim(),
+      telefono: form.telefono.trim(),
       zona: zonaValue,
-      telefono: form.whatsapp.trim(),
+      whatsapp: form.whatsapp.trim(),
       descripcion: JSON.stringify(selecciones),
       rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
     })
@@ -88,6 +92,9 @@ export function puedeAvanzar(paso: PasoOnboarding, form: OnboardingForm, selecci
       return Object.values(selecciones).some(arr => arr.length > 0) || form.otroTexto.trim().length > 0
     case 2:
       if (form.nombre.trim().length === 0) return false
+      if (form.email.trim().length === 0) return false
+      if (!form.email.includes('@')) return false
+      if (form.telefono.trim().length === 0) return false
       // Check zona - can be string (old format) or ZonasSeleccion object (new format)
       if (typeof form.zona === 'string') {
         return form.zona.trim().length > 0
@@ -120,18 +127,22 @@ export async function registrarUsuario(
     if (signUpError) throw signUpError
     if (!user) throw new Error('No se pudo crear el usuario')
 
-    // Wait for session to be established
-    await new Promise(resolve => setTimeout(resolve, 500))
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) throw new Error('No se pudo establecer la sesión')
+    // Explicitly sign in to establish session
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+    if (signInError) throw signInError
 
     const zonaValue = typeof form.zona === 'string' ? form.zona.trim() : JSON.stringify(form.zona)
     const perfilData = {
       id: user.id,
       tipo: 'prestador',
       nombre: form.nombre.trim(),
+      email: form.email.trim(),
+      telefono: form.telefono.trim(),
       zona: zonaValue,
-      telefono: form.whatsapp.trim(),
+      whatsapp: form.whatsapp.trim(),
       descripcion: JSON.stringify(selecciones),
       rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
     }

@@ -23,6 +23,8 @@ export interface ZonasSeleccion {
 
 export interface OnboardingForm {
   nombre: string
+  email: string
+  telefono: string
   zona: string | ZonasSeleccion
   whatsapp: string
   otroTexto: string
