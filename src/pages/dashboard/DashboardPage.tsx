@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { X } from '@phosphor-icons/react'
 import { useAuth } from '../../contexts/useAuth'
 import type { Perfil } from '../../contexts/AuthContextType'
 import { supabase } from '../../lib/supabase'
@@ -8,11 +9,55 @@ import PerfilPrestador from './PerfilPrestador'
 
 export { formatZonaDisplay } from './formatZona'
 
+const CINCO_MINUTOS_MS = 5 * 60 * 1000
+
+function esPerfilRecienCreado(createdAt: string | null | undefined): boolean {
+  if (!createdAt) return false
+  return Date.now() - new Date(createdAt).getTime() < CINCO_MINUTOS_MS
+}
+
+function BannerBienvenida({ onClose }: { onClose: () => void }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: '12px',
+      padding: '14px 16px',
+      backgroundColor: '#40C057',
+      color: '#ffffff',
+    }}>
+      <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.5, flex: 1 }}>
+        ¡Bienvenida a Orvalya! Completá tus documentos para aparecer en búsquedas.
+      </p>
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Cerrar"
+        style={{
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '4px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          color: '#ffffff',
+        }}
+      >
+        <X size={20} weight="bold" />
+      </button>
+    </div>
+  )
+}
+
 export default function DashboardPage() {
   const { user, perfil: perfilGlobal, setPerfil, signOut } = useAuth()
   const navigate = useNavigate()
   const [perfil, setPerfilLocal] = useState<Perfil | null>(null)
   const [cargandoPerfil, setCargandoPerfil] = useState(true)
+  const [bannerCerrado, setBannerCerrado] = useState(false)
 
   useEffect(() => {
     if (!user?.id) {
@@ -59,6 +104,7 @@ export default function DashboardPage() {
   }
 
   const perfilActivo = perfil ?? perfilGlobal
+  const mostrarBanner = !bannerCerrado && esPerfilRecienCreado(perfilActivo?.created_at)
 
   if (cargandoPerfil) {
     return (
@@ -69,7 +115,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F9FA', padding: '40px 16px' }}>
+    <div style={{ minHeight: '100vh', background: '#F8F9FA' }}>
+      {mostrarBanner && <BannerBienvenida onClose={() => setBannerCerrado(true)} />}
+      <div style={{ padding: '40px 16px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div>
@@ -85,6 +133,7 @@ export default function DashboardPage() {
         {perfilActivo?.tipo === 'prestador'
           ? <DashboardPrestador perfil={perfilActivo} onPerfilUpdate={handlePerfilUpdate} />
           : <DashboardContratante />}
+      </div>
       </div>
     </div>
   )

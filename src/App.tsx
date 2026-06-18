@@ -1,9 +1,32 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { useAuth } from './contexts/useAuth'
 import AuthPage from './pages/auth/AuthPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
+import LandingPage from './pages/landing/LandingPage'
 import OnboardingPage from './pages/onboarding/OnboardingPage'
+import NotFoundPage from './pages/NotFoundPage'
+
+function DocumentTitle() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    if (pathname === '/') {
+      document.title = 'Orvalya'
+    } else if (pathname.startsWith('/onboarding')) {
+      document.title = 'Registrate | Orvalya'
+    } else if (pathname.startsWith('/dashboard')) {
+      document.title = 'Mi perfil | Orvalya'
+    } else if (pathname.startsWith('/auth')) {
+      document.title = 'Iniciar sesión | Orvalya'
+    } else {
+      document.title = 'Orvalya'
+    }
+  }, [pathname])
+
+  return null
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, perfil, loading } = useAuth()
@@ -25,12 +48,13 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <DocumentTitle />
         <Routes>
-          <Route path="/" element={<Navigate to="/onboarding" replace />} />
+          <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
           <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/onboarding" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

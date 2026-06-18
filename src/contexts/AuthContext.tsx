@@ -92,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [])
 
   const signOut = useCallback(async () => {
+    localStorage.removeItem('orvalya_onboarding_draft')
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }, [])

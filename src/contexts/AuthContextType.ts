@@ -13,6 +13,7 @@ export type Perfil = {
   avatar_url: string | null
   declaracion_jurada_aceptada: boolean
   suscripcion_activa: boolean
+  created_at?: string | null
 }
 
 export type AuthContextValue = {
