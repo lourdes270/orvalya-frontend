@@ -18,37 +18,36 @@ interface DraftData {
   estadoFiscal: EstadoFiscal | null
 }
 
+const defaultForm: OnboardingForm = {
+  nombre: '',
+  email: '',
+  telefono: '',
+  zona: '',
+  whatsapp: '',
+  otroTexto: '',
+}
+
+function loadDraft(): DraftData | null {
+  try {
+    const saved = localStorage.getItem(DRAFT_KEY)
+    if (!saved) return null
+    return JSON.parse(saved) as DraftData
+  } catch {
+    localStorage.removeItem(DRAFT_KEY)
+    return null
+  }
+}
+
 export function useOnboardingForm() {
   const { setPerfil } = useAuth()
   const navigate = useNavigate()
-  const [paso, setPaso] = useState<PasoOnboarding>(0)
-  const [form, setForm] = useState<OnboardingForm>({
-    nombre: '',
-    email: '',
-    telefono: '',
-    zona: '',
-    whatsapp: '',
-    otroTexto: '',
-  })
-  const [selecciones, setSelecciones] = useState<SeleccionCategorias>({})
-  const [estadoFiscal, setEstadoFiscal] = useState<EstadoFiscal | null>(null)
+  const draft = loadDraft()
+  const [paso, setPaso] = useState<PasoOnboarding>(draft?.paso ?? 0)
+  const [form, setForm] = useState<OnboardingForm>(draft?.form ?? defaultForm)
+  const [selecciones, setSelecciones] = useState<SeleccionCategorias>(draft?.selecciones ?? {})
+  const [estadoFiscal, setEstadoFiscal] = useState<EstadoFiscal | null>(draft?.estadoFiscal ?? null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  useEffect(() => {
-    const saved = localStorage.getItem(DRAFT_KEY)
-    if (saved) {
-      try {
-        const data: DraftData = JSON.parse(saved)
-        setPaso(data.paso)
-        setForm(data.form)
-        setSelecciones(data.selecciones)
-        setEstadoFiscal(data.estadoFiscal)
-      } catch {
-        localStorage.removeItem(DRAFT_KEY)
-      }
-    }
-  }, [])
 
   const saveDraft = () => {
     const data: DraftData = { paso, form, selecciones, estadoFiscal }

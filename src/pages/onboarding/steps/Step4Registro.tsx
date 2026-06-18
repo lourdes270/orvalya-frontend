@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Eye, EyeSlash, CheckCircle } from '@phosphor-icons/react'
 
 interface Step4RegistroProps {
@@ -16,7 +16,12 @@ export default function Step4Registro({
   error,
   email: initialEmail,
 }: Step4RegistroProps) {
-  const [email, setEmail] = useState(initialEmail)
+  const prefilledEmail = initialEmail.trim()
+  const [email, setEmail] = useState(prefilledEmail)
+
+  useEffect(() => {
+    if (prefilledEmail) setEmail(prefilledEmail)
+  }, [prefilledEmail])
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -140,23 +145,23 @@ export default function Step4Registro({
               value={email}
               onChange={(e) => handleChange('email', e.target.value)}
               placeholder="tu@email.com"
-              readOnly={!!initialEmail}
+              readOnly={!!prefilledEmail}
               style={{
                 width: '100%',
                 height: '52px',
                 padding: '0 16px',
-                border: initialEmail ? '1.5px solid #1F3864' : '1.5px solid #DEE2E6',
+                border: prefilledEmail ? '1.5px solid #1F3864' : '1.5px solid #DEE2E6',
                 borderRadius: '8px',
                 fontSize: '16px',
                 boxSizing: 'border-box',
                 outline: 'none',
                 transition: 'border-color 0.2s',
-                backgroundColor: initialEmail ? '#f8f9fa' : '#ffffff',
-                cursor: initialEmail ? 'not-allowed' : 'text',
+                backgroundColor: prefilledEmail ? '#f8f9fa' : '#ffffff',
+                cursor: prefilledEmail ? 'not-allowed' : 'text',
               }}
-              onFocus={(e) => !initialEmail && (e.target.style.borderColor = '#1F3864')}
+              onFocus={(e) => !prefilledEmail && (e.target.style.borderColor = '#1F3864')}
               onBlur={(e) => {
-                if (!initialEmail) {
+                if (!prefilledEmail) {
                   e.target.style.borderColor = '#DEE2E6'
                   handleBlur('email', e.target.value)
                 }
