@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../../contexts/useAuth'
 import { supabase } from '../../lib/supabase'
+import type { Perfil } from '../../contexts/AuthContextType'
+import { formatZonaDisplay } from './formatZona'
 
-export default function PerfilPrestador() {
-  const { perfil, setPerfil } = useAuth()
+interface PerfilPrestadorProps {
+  perfil: Perfil
+  onPerfilUpdate: (perfil: Perfil) => void
+}
+
+export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPrestadorProps) {
   const [form, setForm] = useState({
     nombre: '',
     telefono: '',
@@ -20,7 +25,7 @@ export default function PerfilPrestador() {
     setForm({
       nombre: perfil.nombre ?? '',
       telefono: perfil.telefono ?? '',
-      zona: perfil.zona ?? '',
+      zona: formatZonaDisplay(perfil.zona),
       rut: perfil.rut ?? '',
       descripcion: perfil.descripcion ?? '',
     })
@@ -37,7 +42,7 @@ export default function PerfilPrestador() {
         .update(form)
         .eq('id', perfil.id)
       if (error) throw error
-      setPerfil({ ...perfil, ...form })
+      onPerfilUpdate({ ...perfil, ...form })
       setGuardado(true)
       setTimeout(() => setGuardado(false), 3000)
     } catch {

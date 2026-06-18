@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { useAuth } from '../../contexts/useAuth'
 import { supabase } from '../../lib/supabase'
+import type { Perfil } from '../../contexts/AuthContextType'
 
 const DOCUMENTOS = [
   { key: 'certificado_dgi', nombre: 'Certificado DGI' },
@@ -16,8 +16,7 @@ type DocEstado = {
   error: string
 }
 
-export default function DocumentosPrestador() {
-  const { perfil } = useAuth()
+export default function DocumentosPrestador({ perfil }: { perfil: Perfil }) {
   const [docs, setDocs] = useState<Record<string, DocEstado>>(
     Object.fromEntries(DOCUMENTOS.map(d => [d.key, {
       archivo: null, fecha_vencimiento: '', subiendo: false, subido: false, error: ''

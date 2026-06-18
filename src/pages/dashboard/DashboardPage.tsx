@@ -1,17 +1,71 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
+import type { Perfil } from '../../contexts/AuthContextType'
 import { supabase } from '../../lib/supabase'
 import DocumentosPrestador from './DocumentosPrestador'
 import PerfilPrestador from './PerfilPrestador'
 
+export { formatZonaDisplay } from './formatZona'
+
 export default function DashboardPage() {
-  const { user, perfil, signOut } = useAuth()
+  const { user, perfil: perfilGlobal, setPerfil, signOut } = useAuth()
   const navigate = useNavigate()
+  const [perfil, setPerfilLocal] = useState<Perfil | null>(null)
+  const [cargandoPerfil, setCargandoPerfil] = useState(true)
+
+  useEffect(() => {
+    if (!user?.id) {
+      setCargandoPerfil(false)
+      return
+    }
+
+    let mounted = true
+
+    const fetchPerfil = async () => {
+      setCargandoPerfil(true)
+      try {
+        const { data, error } = await supabase
+          .from('perfiles')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+
+        if (!mounted) return
+        if (error) throw error
+        if (data) {
+          setPerfilLocal(data)
+          setPerfil(data)
+        }
+      } catch (err) {
+        console.error('Error al cargar perfil:', err)
+      } finally {
+        if (mounted) setCargandoPerfil(false)
+      }
+    }
+
+    fetchPerfil()
+    return () => { mounted = false }
+  }, [user?.id, setPerfil])
+
+  const handlePerfilUpdate = (updated: Perfil) => {
+    setPerfilLocal(updated)
+    setPerfil(updated)
+  }
 
   const handleSignOut = async () => {
     await signOut()
     navigate('/')
+  }
+
+  const perfilActivo = perfil ?? perfilGlobal
+
+  if (cargandoPerfil) {
+    return (
+      <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', color: '#8C96A3' }}>
+        Cargando perfil...
+      </div>
+    )
   }
 
   return (
@@ -21,26 +75,26 @@ export default function DashboardPage() {
           <div>
             <h1 style={{ color: '#1F3864', fontSize: '24px', fontWeight: 700, margin: 0 }}>Orvalya</h1>
             <p style={{ color: '#8C96A3', fontSize: '13px', margin: '4px 0 0' }}>
-              {user?.email} · {perfil?.tipo === 'prestador' ? 'Prestador' : 'Empresa contratante'}
+              {user?.email} · {perfilActivo?.tipo === 'prestador' ? 'Prestador' : 'Empresa contratante'}
             </p>
           </div>
           <button onClick={handleSignOut} style={{ padding: '8px 16px', background: '#fff', border: '1.5px solid #DEE2E6', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#495057' }}>
             Cerrar sesión
           </button>
         </div>
-        {perfil?.tipo === 'prestador' ? <DashboardPrestador /> : <DashboardContratante />}
+        {perfilActivo?.tipo === 'prestador'
+          ? <DashboardPrestador perfil={perfilActivo} onPerfilUpdate={handlePerfilUpdate} />
+          : <DashboardContratante />}
       </div>
     </div>
   )
 }
 
-function DashboardPrestador() {
-  const { perfil } = useAuth()
+function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerfilUpdate: (p: Perfil) => void }) {
   const [semaforo, setSemaforo] = useState<string>('rojo')
   const [docsCount, setDocsCount] = useState(0)
 
   useEffect(() => {
-    if (!perfil) return
     const loadData = async () => {
       const { data: prestador } = await supabase
         .from('prestadores').select('semaforo').eq('id', perfil.id).single()
@@ -50,7 +104,7 @@ function DashboardPrestador() {
       setDocsCount(count ?? 0)
     }
     loadData().catch(console.error)
-  }, [perfil])
+  }, [perfil.id])
 
   const semaforoIcon = semaforo === 'verde' ? '🟢' : semaforo === 'amarillo' ? '🟡' : '🔴'
   const semaforoLabel = semaforo === 'verde' ? 'Completo' : 'Incompleto'
@@ -62,8 +116,8 @@ function DashboardPrestador() {
         <Tarjeta titulo="Documentos" valor={`${docsCount} / 3`} desc="Certificados cargados" />
         <Tarjeta titulo="Contratos activos" valor="0" desc="Órdenes de servicio" />
       </div>
-      <PerfilPrestador />
-      <DocumentosPrestador />
+      <PerfilPrestador perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
+      <DocumentosPrestador perfil={perfil} />
       <Seccion titulo="Mis contratos">
         <ItemVacio texto="No tenés contratos activos. Cuando una empresa te contrate, aparecerán acá." />
       </Seccion>
