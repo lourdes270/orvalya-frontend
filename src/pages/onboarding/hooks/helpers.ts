@@ -120,69 +120,40 @@ export async function registrarUsuario(
   setError: (e: string) => void
 ) {
   try {
-    const { data: { user }, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    })
+    const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password })
     if (signUpError) throw signUpError
     if (!user) throw new Error('No se pudo crear el usuario')
 
-    // Explicitly sign in to establish session
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     if (signInError) throw signInError
 
+    // Esperamos que el trigger cree el perfil
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
     const zonaValue = typeof form.zona === 'string' ? form.zona.trim() : JSON.stringify(form.zona)
-    const perfilData = {
-      id: user.id,
-      tipo: 'prestador',
-      nombre: form.nombre.trim(),
-      email: form.email.trim(),
-      telefono: form.telefono.trim(),
-      zona: zonaValue,
-      whatsapp: form.whatsapp.trim(),
-      descripcion: JSON.stringify(selecciones),
-      rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
-    }
 
-    let insertError = null
-    let retryCount = 0
+    const { error: updateError } = await supabase
+      .from('perfiles')
+      .update({
+        tipo: 'prestador',
+        nombre: form.nombre.trim(),
+        telefono: form.telefono.trim(),
+        zona: zonaValue,
+        whatsapp: form.whatsapp?.trim() || null,
+        descripcion: JSON.stringify(selecciones),
+        rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
+      })
+      .eq('id', user.id)
 
-    while (retryCount < 2) {
-      const { error } = await supabase
-        .from('perfiles')
-        .upsert(perfilData, { onConflict: 'id' })
-      
-      insertError = error
-      if (!error) break
-      
-      // If permission error, retry after delay
-      if (error.message?.includes('permission') || error.code === '42501') {
-        retryCount++
-        if (retryCount < 2) {
-          await new Promise(resolve => setTimeout(resolve, 1000))
-        }
-      } else {
-        break
-      }
-    }
+    if (updateError) throw updateError
 
-    if (insertError) throw insertError
-
-    const { data: perfilResult, error: fetchError } = await supabase
+    const { data: perfilResult } = await supabase
       .from('perfiles')
       .select('*')
       .eq('id', user.id)
       .single()
 
-    const perfilFinal = perfilResult ?? perfilData
-    setPerfil(perfilFinal)
-    if (fetchError && !perfilResult) {
-      console.warn('Perfil creado pero no se pudo re-leer:', fetchError)
-    }
-
+    setPerfil(perfilResult)
     localStorage.removeItem(DRAFT_KEY)
     navigate('/dashboard')
   } catch (err: any) {
