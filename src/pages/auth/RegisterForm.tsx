@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
+import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
+import { activarPerfilContratante } from '../../lib/registroHelpers'
 import { s } from './styles'
 
 export function RegisterForm() {
-  const { signUp } = useAuth()
+  const { signUp, signInWithPassword, setPerfil } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,7 +30,16 @@ export function RegisterForm() {
     setLoading(true)
     try {
       await signUp({ email, password })
-      navigate('/dashboard')
+      await signInWithPassword({ email, password })
+
+      const tipoRegistro = sessionStorage.getItem(REGISTRO_TIPO_KEY)
+      if (tipoRegistro === 'contratante') {
+        const perfil = await activarPerfilContratante(email)
+        setPerfil(perfil)
+        sessionStorage.removeItem(REGISTRO_TIPO_KEY)
+      }
+
+      navigate('/aceptar-terminos')
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al crear la cuenta.'
       setErrors({ general: msg })

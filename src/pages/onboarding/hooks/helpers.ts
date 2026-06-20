@@ -155,7 +155,7 @@ export async function registrarUsuario(
 
     setPerfil(perfilResult)
     localStorage.removeItem(DRAFT_KEY)
-    navigate('/dashboard')
+    navigate('/aceptar-terminos')
   } catch (err: any) {
     if (err.message === 'User already registered') {
       setError('Este email ya tiene una cuenta. ¿Querés iniciar sesión?')

@@ -12,7 +12,13 @@ export type Perfil = {
   descripcion: string | null
   avatar_url: string | null
   declaracion_jurada_aceptada: boolean
+  declaracion_jurada_fecha?: string | null
   suscripcion_activa: boolean
+  suscripcion_plan?: string | null
+  suscripcion_hasta?: string | null
+  contratos_activos_count?: number | null
+  whatsapp?: string | null
+  updated_at?: string | null
   created_at?: string | null
 }
 

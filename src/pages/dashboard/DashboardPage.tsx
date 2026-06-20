@@ -4,7 +4,7 @@ import { X } from '@phosphor-icons/react'
 import { useAuth } from '../../contexts/useAuth'
 import type { Perfil } from '../../contexts/AuthContextType'
 import { supabase } from '../../lib/supabase'
-import DocumentosPrestador from './DocumentosPrestador'
+import DocumentosPrestador from './documentos/DocumentosPrestador'
 import PerfilPrestador from './PerfilPrestador'
 
 export { formatZonaDisplay } from './formatZona'
@@ -149,7 +149,9 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
         .from('prestadores').select('semaforo').eq('id', perfil.id).single()
       if (prestador) setSemaforo(prestador.semaforo ?? 'rojo')
       const { count } = await supabase
-        .from('documentos').select('*', { count: 'exact' }).eq('prestador_id', perfil.id)
+        .from('documentos').select('*', { count: 'exact', head: true })
+        .eq('prestador_id', perfil.id)
+        .in('estado', ['vigente', 'pendiente', 'aprobado'])
       setDocsCount(count ?? 0)
     }
     loadData().catch(console.error)

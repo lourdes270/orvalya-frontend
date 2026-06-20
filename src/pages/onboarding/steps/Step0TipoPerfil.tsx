@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { COPY } from '../copy'
 import { STYLES } from '../styles/onboarding.styles'
 import { CARD_STYLES } from '../styles/card.styles'
+import { REGISTRO_TIPO_KEY } from '../../../lib/registroConstants'
 import type { TipoPerfil } from '../types'
 
 interface Step0TipoPerfilProps {
@@ -18,8 +19,10 @@ export default function Step0TipoPerfil({ isMobile }: Step0TipoPerfilProps) {
     setLoading(true)
     try {
       if (tipo === 'contratante') {
+        sessionStorage.setItem(REGISTRO_TIPO_KEY, 'contratante')
         navigate('/auth')
       } else {
+        sessionStorage.removeItem(REGISTRO_TIPO_KEY)
         navigate('/onboarding?paso=1')
       }
     } finally {
