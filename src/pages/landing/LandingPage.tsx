@@ -144,6 +144,15 @@ export default function LandingPage() {
         borderTop: '1px solid #E8EEF4',
         textAlign: 'center',
       }}>
+        <p style={{ margin: '0 0 8px', fontSize: '13px' }}>
+          <a href="/terminos" style={{ color: NAVY, fontWeight: 600, textDecoration: 'underline' }}>
+            Términos y Condiciones
+          </a>
+          {' · '}
+          <a href="/privacidad" style={{ color: NAVY, fontWeight: 600, textDecoration: 'underline' }}>
+            Política de Privacidad
+          </a>
+        </p>
         <p style={{ margin: 0, fontSize: '13px', color: '#8C96A3' }}>
           Orvalya © 2026 · Uruguay
         </p>
