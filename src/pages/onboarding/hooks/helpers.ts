@@ -1,4 +1,9 @@
 import { supabase } from '../../../lib/supabase'
+import {
+  FAKE_REGISTRATION_SUCCESS_MSG,
+  runRegistrationGuard,
+} from '../../../lib/botProtection/runRegistrationGuard'
+import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal, PasoOnboarding } from '../types'
 
 const DRAFT_KEY = 'orvalya_onboarding_draft'
@@ -112,14 +117,26 @@ export function puedeAvanzar(paso: PasoOnboarding, form: OnboardingForm, selecci
 export async function registrarUsuario(
   email: string,
   password: string,
+  bot: RegistrationBotPayload,
   form: OnboardingForm,
   selecciones: SeleccionCategorias,
   estadoFiscal: EstadoFiscal | null,
   setPerfil: (p: any) => void,
   navigate: (to: string) => void,
-  setError: (e: string) => void
+  setError: (e: string) => void,
+  setFakeSuccess?: (msg: string) => void,
 ) {
   try {
+    const guard = await runRegistrationGuard(bot, 'onboarding-step4')
+    if (!guard.ok) {
+      if (guard.kind === 'honeypot') {
+        setFakeSuccess?.(FAKE_REGISTRATION_SUCCESS_MSG)
+        return
+      }
+      setError(guard.message)
+      return
+    }
+
     const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password })
     if (signUpError) throw signUpError
     if (!user) throw new Error('No se pudo crear el usuario')

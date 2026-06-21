@@ -91,6 +91,34 @@ Componentes orquestadores (`App.tsx`, `LegalAcceptancePage.tsx`, `DocumentosPres
 
 ---
 
+## Parte 5: Protección anti-bot en registro
+
+### Implementado (junio 2026)
+- **hCaptcha** en formularios de registro (`RegisterForm` contratante/auth y `Step4Registro` prestador onboarding).
+  - Site key pública en `VITE_HCAPTCHA_SITE_KEY` (`.env`, no commitear).
+  - Verificación server-side vía Edge Function **`verify-captcha`** antes de `supabase.auth.signUp()`.
+  - Secret key solo en Supabase secrets (`HCAPTCHA_SECRET_KEY`), nunca en frontend.
+- **Honeypot** (`middle_name`): campo oculto con `position: absolute; left: -9999px`. Si tiene valor → rechazo silencioso con mensaje genérico de éxito (sin crear cuenta); intento logueado en consola.
+- **Rate limiting**: máx. 5 intentos por IP / endpoint / 15 min en tabla **`rate_limit_attempts`** (migración `004`). Mensaje: *"Demasiados intentos, esperá unos minutos"*.
+
+### Archivos clave
+| Archivo | Rol |
+|---------|-----|
+| `src/components/botProtection/*` | Widget captcha + honeypot |
+| `src/lib/botProtection/*` | Guard unificado pre-signUp |
+| `supabase/functions/verify-captcha/` | Verificación hCaptcha + rate limit |
+| `supabase/migrations/004_rate_limit_attempts.sql` | Tabla contador |
+
+### Alineación con Política de Privacidad
+Sección 6 promete *"controles anti-bot"* — esta implementación cumple esa promesa en el flujo de registro.
+
+### Deploy requerido
+1. Aplicar migración `004_rate_limit_attempts.sql` en Supabase SQL Editor.
+2. `supabase secrets set HCAPTCHA_SECRET_KEY=...` (solo vía CLI/dashboard, no en repo).
+3. `supabase functions deploy verify-captcha --no-verify-jwt`.
+
+---
+
 ## Pendiente fuera de este PR
 
 - Texto legal completo en `/terminos` y `/privacidad` (placeholders mínimos incluidos).

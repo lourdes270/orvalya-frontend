@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
+import { HoneypotField } from '../../components/botProtection/HoneypotField'
+import { RegistrationCaptcha } from '../../components/botProtection/RegistrationCaptcha'
+import {
+  FAKE_REGISTRATION_SUCCESS_MSG,
+  runRegistrationGuard,
+} from '../../lib/botProtection/runRegistrationGuard'
 import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
 import { activarPerfilContratante } from '../../lib/registroHelpers'
 import { s } from './styles'
@@ -11,7 +17,10 @@ export function RegisterForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [honeypot, setHoneypot] = useState('')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [successMsg, setSuccessMsg] = useState('')
   const [loading, setLoading] = useState(false)
 
   const validate = () => {
@@ -27,8 +36,22 @@ export function RegisterForm() {
     const errs = validate()
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setErrors({})
+    setSuccessMsg('')
     setLoading(true)
     try {
+      const guard = await runRegistrationGuard(
+        { captchaToken: captchaToken ?? '', honeypot },
+        'auth-register',
+      )
+      if (!guard.ok) {
+        if (guard.kind === 'honeypot') {
+          setSuccessMsg(FAKE_REGISTRATION_SUCCESS_MSG)
+          return
+        }
+        setErrors({ general: guard.message })
+        return
+      }
+
       await signUp({ email, password })
       await signInWithPassword({ email, password })
 
@@ -49,7 +72,8 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={s.form}>
+    <form onSubmit={handleSubmit} style={{ ...s.form, position: 'relative' }}>
+      <HoneypotField value={honeypot} onChange={setHoneypot} />
       <div style={s.field}>
         <label style={s.label}>Email</label>
         <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" style={{ ...s.input, ...(errors.email ? s.inputError : {}) }} />
@@ -65,8 +89,10 @@ export function RegisterForm() {
         <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repetí tu contraseña" style={{ ...s.input, ...(errors.confirm ? s.inputError : {}) }} />
         {errors.confirm && <p style={s.error}>{errors.confirm}</p>}
       </div>
+      <RegistrationCaptcha onVerify={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
       {errors.general && <p style={s.error}>{errors.general}</p>}
-      <button type="submit" style={s.btn} disabled={loading}>
+      {successMsg && <p style={{ ...s.error, color: '#059669' }}>{successMsg}</p>}
+      <button type="submit" style={s.btn} disabled={loading || !captchaToken}>
         {loading ? 'Creando cuenta...' : 'Crear cuenta'}
       </button>
     </form>

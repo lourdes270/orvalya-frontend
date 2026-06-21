@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Eye, EyeSlash, CheckCircle } from '@phosphor-icons/react'
+import { HoneypotField } from '../../../components/botProtection/HoneypotField'
+import { RegistrationCaptcha } from '../../../components/botProtection/RegistrationCaptcha'
+import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 
 interface Step4RegistroProps {
   isMobile: boolean
-  onRegistrar: (email: string, password: string) => Promise<void>
+  onRegistrar: (email: string, password: string, bot: RegistrationBotPayload) => Promise<void>
   loading: boolean
   error: string
+  fakeSuccess: string
   email: string
 }
 
@@ -14,6 +18,7 @@ export default function Step4Registro({
   onRegistrar,
   loading,
   error,
+  fakeSuccess,
   email: initialEmail,
 }: Step4RegistroProps) {
   const prefilledEmail = initialEmail.trim()
@@ -26,6 +31,8 @@ export default function Step4Registro({
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [honeypot, setHoneypot] = useState('')
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [touched, setTouched] = useState({ email: false, password: false, confirm: false })
   const [fieldErrors, setFieldErrors] = useState({ email: '', password: '', confirm: '' })
 
@@ -68,12 +75,12 @@ export default function Step4Registro({
   }
 
   const hasErrors = Object.values(fieldErrors).some(err => err !== '')
-  const isFormValid = email && password && confirmPassword && !hasErrors
+  const isFormValid = email && password && confirmPassword && !hasErrors && !!captchaToken
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isFormValid) return
-    await onRegistrar(email, password)
+    if (!isFormValid || !captchaToken) return
+    await onRegistrar(email, password, { captchaToken, honeypot })
   }
 
   return (
@@ -137,7 +144,8 @@ export default function Step4Registro({
         }} />
 
         {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>
+          <HoneypotField value={honeypot} onChange={setHoneypot} />
           {/* Email */}
           <div>
             <input
@@ -286,6 +294,8 @@ export default function Step4Registro({
             )}
           </div>
 
+          <RegistrationCaptcha onVerify={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
+
           {/* Submit Button */}
           <button
             type="submit"
@@ -328,6 +338,11 @@ export default function Step4Registro({
           {error && (
             <p style={{ color: '#dc2626', fontSize: '14px', textAlign: 'center', margin: '4px 0 0 0' }}>
               {error}
+            </p>
+          )}
+          {fakeSuccess && (
+            <p style={{ color: '#059669', fontSize: '14px', textAlign: 'center', margin: '4px 0 0 0' }}>
+              {fakeSuccess}
             </p>
           )}
         </form>

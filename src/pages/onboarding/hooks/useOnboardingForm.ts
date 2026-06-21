@@ -7,6 +7,7 @@ import type {
   SeleccionCategorias,
   EstadoFiscal,
 } from '../types'
+import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 import { toggleSubrubro, puedeAvanzar, registrarUsuario } from './helpers'
 
 const DRAFT_KEY = 'orvalya_onboarding_draft'
@@ -48,6 +49,7 @@ export function useOnboardingForm() {
   const [estadoFiscal, setEstadoFiscal] = useState<EstadoFiscal | null>(draft?.estadoFiscal ?? null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fakeSuccess, setFakeSuccess] = useState('')
 
   const saveDraft = () => {
     const data: DraftData = { paso, form, selecciones, estadoFiscal }
@@ -62,11 +64,22 @@ export function useOnboardingForm() {
     navigate('/onboarding?paso=4')
   }
 
-  const handleRegistro = async (email: string, password: string) => {
+  const handleRegistro = async (email: string, password: string, bot: RegistrationBotPayload) => {
     setLoading(true)
     setError('')
-    // Use the email from form (Step2) instead of the email parameter (Step4)
-    await registrarUsuario(form.email || email, password, form, selecciones, estadoFiscal, setPerfil, navigate, setError)
+    setFakeSuccess('')
+    await registrarUsuario(
+      form.email || email,
+      password,
+      bot,
+      form,
+      selecciones,
+      estadoFiscal,
+      setPerfil,
+      navigate,
+      setError,
+      setFakeSuccess,
+    )
     setLoading(false)
   }
 
@@ -77,6 +90,7 @@ export function useOnboardingForm() {
     estadoFiscal,
     loading,
     error,
+    fakeSuccess,
     setPaso,
     setForm,
     setSelecciones,
