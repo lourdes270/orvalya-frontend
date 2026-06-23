@@ -1,4 +1,4 @@
-export type PasoOnboarding = 0 | 1 | 2 | 3 | 4
+export type PasoOnboarding = 0 | 1 | 2 | 3 | 4 | 5
 export type TipoPerfil = 'prestador' | 'contratante'
 export type EstadoFiscal = 'activo' | 'tramite' | 'sin_rut'
 
@@ -28,6 +28,7 @@ export interface OnboardingForm {
   zona: string | ZonasSeleccion
   whatsapp: string
   otroTexto: string
+  rango_edad: string
 }
 
 export interface SeleccionCategorias {

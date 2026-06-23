@@ -367,6 +367,24 @@ export default function Step2DatosBasicos({
             onChange={(e) => handleChange('whatsapp', e.target.value)}
           />
           <p style={STYLES.ayuda()}>{COPY.paso2.campos.whatsapp.ayuda}</p>
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
+            {COPY.paso2.campos.rangoEdad.label}
+          </label>
+          <select
+            value={form.rango_edad}
+            onChange={(e) => handleChange('rango_edad', e.target.value)}
+            style={{
+              ...STYLES.input(isMobile),
+              height: isMobile ? '52px' : undefined,
+              fontSize: isMobile ? '16px' : undefined,
+            }}
+          >
+            <option value="">Preferir no indicar</option>
+            {['18-25', '26-35', '36-45', '46-55', '55+'].map(r => (
+              <option key={r} value={r}>{r} años</option>
+            ))}
+          </select>
+          <p style={STYLES.ayuda()}>{COPY.paso2.campos.rangoEdad.ayuda}</p>
         </div>
         {!isMobile && (
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>

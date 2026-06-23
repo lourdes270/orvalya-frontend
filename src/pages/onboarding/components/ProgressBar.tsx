@@ -1,21 +1,21 @@
 import { PROGRESS_BAR_STYLES } from '../styles/progress-bar.styles'
 
 interface ProgressBarProps {
-  pasoActual: 1 | 2 | 3
+  pasoActual: 1 | 2 | 3 | 4
   isMobile: boolean
 }
 
 // Barra de progreso del onboarding
 export default function ProgressBar({ pasoActual, isMobile }: ProgressBarProps) {
   if (isMobile) {
-    const widths: Record<1 | 2 | 3, string> = { 1: '33%', 2: '66%', 3: '100%' }
+    const widths: Record<1 | 2 | 3 | 4, string> = { 1: '25%', 2: '50%', 3: '75%', 4: '100%' }
     return (
       <>
         <div style={PROGRESS_BAR_STYLES.mobile()}>
           <div style={PROGRESS_BAR_STYLES.fill(widths[pasoActual])} />
         </div>
         <div style={PROGRESS_BAR_STYLES.labels()}>
-          {['Servicios', 'Tus datos', 'Situación'].map((label, i) => (
+          {['Foto', 'Servicios', 'Tus datos', 'Situación'].map((label, i) => (
             <span
               key={label}
               style={i + 1 === pasoActual ? PROGRESS_BAR_STYLES.labelActive() : {}}
@@ -30,7 +30,7 @@ export default function ProgressBar({ pasoActual, isMobile }: ProgressBarProps) 
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-      {[1, 2, 3].map((paso) => {
+      {[1, 2, 3, 4].map((paso) => {
         const isCompleted = paso < pasoActual
         const isActive = paso === pasoActual
         return (
@@ -53,9 +53,9 @@ export default function ProgressBar({ pasoActual, isMobile }: ProgressBarProps) 
               {isCompleted ? '✓' : paso}
             </div>
             <span style={{ fontSize: '11px', color: isActive ? '#1F3864' : '#9ca3af' }}>
-              {paso === 1 ? 'Servicios' : paso === 2 ? 'Tus datos' : 'Situación'}
+              {paso === 1 ? 'Foto' : paso === 2 ? 'Servicios' : paso === 3 ? 'Tus datos' : 'Situación'}
             </span>
-            {paso < 3 && (
+            {paso < 4 && (
               <div
                 style={{
                   position: 'absolute',

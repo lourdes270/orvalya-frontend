@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { MagnifyingGlass, FileText, Buildings } from '@phosphor-icons/react'
+import { OrvalyaLogo } from '../../components/OrvalyaLogo'
 
 const NAVY = '#0F2D52'
 const TEAL = '#00B4A6'
@@ -32,9 +33,7 @@ export default function LandingPage() {
         padding: '16px 20px',
         borderBottom: '1px solid #E8EEF4',
       }}>
-        <span style={{ fontSize: '22px', fontWeight: 700, color: NAVY, letterSpacing: '-0.02em' }}>
-          Orvalya
-        </span>
+        <OrvalyaLogo height={28} />
         <button
           type="button"
           onClick={() => navigate('/auth')}
@@ -66,13 +65,23 @@ export default function LandingPage() {
           ¿Trabajás de forma independiente en Uruguay?
         </h1>
         <p style={{
-          margin: '0 auto 28px',
+          margin: '0 auto 12px',
           maxWidth: '480px',
           fontSize: '16px',
           lineHeight: 1.6,
           color: '#4A6078',
         }}>
           Registrate gratis, aparecé en búsquedas y gestioná tu documentación laboral en un solo lugar.
+        </p>
+        <p style={{
+          margin: '0 auto 28px',
+          maxWidth: '480px',
+          fontSize: '15px',
+          lineHeight: 1.5,
+          color: NAVY,
+          fontWeight: 600,
+        }}>
+          Las empresas te buscan a vos — sin intermediarios, sin llamadas, gratis.
         </p>
         <button
           type="button"

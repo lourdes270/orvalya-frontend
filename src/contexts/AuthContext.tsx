@@ -91,6 +91,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error
     }, [])
 
+  const signInWithGoogle = useCallback(async () => {
+    const redirectTo = `${window.location.origin}/dashboard`
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    })
+    if (error) throw error
+  }, [])
+
   const signOut = useCallback(async () => {
     localStorage.removeItem('orvalya_onboarding_draft')
     const { error } = await supabase.auth.signOut()
@@ -98,8 +107,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo<AuthContextValue>(
-    () => ({ loading, session, user, perfil, setPerfil, signInWithPassword, signUp, signOut }),
-    [loading, session, user, perfil, setPerfil, signInWithPassword, signUp, signOut],
+    () => ({ loading, session, user, perfil, setPerfil, signInWithPassword, signUp, signInWithGoogle, signOut }),
+    [loading, session, user, perfil, setPerfil, signInWithPassword, signUp, signInWithGoogle, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

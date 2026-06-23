@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X } from '@phosphor-icons/react'
 import { useAuth } from '../../contexts/useAuth'
+import { useIsMobile } from '../../hooks/useIsMobile'
 import type { Perfil } from '../../contexts/AuthContextType'
 import { supabase } from '../../lib/supabase'
 import DocumentosPrestador from './documentos/DocumentosPrestador'
 import PerfilPrestador from './PerfilPrestador'
+import { statsGridStyle } from './dashboardLayout'
 
 export { formatZonaDisplay } from './formatZona'
 
@@ -140,6 +142,7 @@ export default function DashboardPage() {
 }
 
 function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerfilUpdate: (p: Perfil) => void }) {
+  const isMobile = useIsMobile(640)
   const [semaforo, setSemaforo] = useState<string>('rojo')
   const [docsCount, setDocsCount] = useState(0)
 
@@ -162,7 +165,7 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+      <div style={statsGridStyle(isMobile)}>
         <Tarjeta titulo="Semáforo" valor={`${semaforoIcon} ${semaforoLabel}`} desc="Estado de documentación" />
         <Tarjeta titulo="Documentos" valor={`${docsCount} / 3`} desc="Certificados cargados" />
         <Tarjeta titulo="Contratos activos" valor="0" desc="Órdenes de servicio" />
@@ -177,9 +180,10 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
 }
 
 function DashboardContratante() {
+  const isMobile = useIsMobile(640)
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+      <div style={statsGridStyle(isMobile)}>
         <Tarjeta titulo="Proveedores" valor="0" desc="Prestadores vinculados" />
         <Tarjeta titulo="Contratos activos" valor="0" desc="Órdenes generadas" />
         <Tarjeta titulo="Alertas" valor="0" desc="Documentos por vencer" />

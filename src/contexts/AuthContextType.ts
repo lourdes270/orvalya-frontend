@@ -18,6 +18,7 @@ export type Perfil = {
   suscripcion_hasta?: string | null
   contratos_activos_count?: number | null
   whatsapp?: string | null
+  rango_edad?: string | null
   updated_at?: string | null
   created_at?: string | null
 }
@@ -30,6 +31,7 @@ export type AuthContextValue = {
   setPerfil: (perfil: Perfil) => void
   signInWithPassword: (args: { email: string; password: string }) => Promise<void>
   signUp: (args: { email: string; password: string }) => Promise<void>
+  signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }
 

@@ -4,6 +4,7 @@ import {
   runRegistrationGuard,
 } from '../../../lib/botProtection/runRegistrationGuard'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
+import { uploadAvatar } from '../../../lib/uploadAvatar'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal, PasoOnboarding } from '../types'
 
 const DRAFT_KEY = 'orvalya_onboarding_draft'
@@ -94,20 +95,19 @@ export function toggleSubrubro(rubroId: string, subrubroId: string, setSeleccion
 export function puedeAvanzar(paso: PasoOnboarding, form: OnboardingForm, selecciones: SeleccionCategorias, estadoFiscal: EstadoFiscal | null): boolean {
   switch (paso) {
     case 1:
-      return Object.values(selecciones).some(arr => arr.length > 0) || form.otroTexto.trim().length > 0
+      return true
     case 2:
+      return Object.values(selecciones).some(arr => arr.length > 0) || form.otroTexto.trim().length > 0
+    case 3:
       if (form.nombre.trim().length === 0) return false
       if (form.email.trim().length === 0) return false
       if (!form.email.includes('@')) return false
       if (form.telefono.trim().length === 0) return false
-      // Check zona - can be string (old format) or ZonasSeleccion object (new format)
       if (typeof form.zona === 'string') {
         return form.zona.trim().length > 0
-      } else {
-        // New format: check if at least one zone is selected
-        return form.zona.todoUruguay || form.zona.departamentos.length > 0
       }
-    case 3:
+      return form.zona.todoUruguay || form.zona.departamentos.length > 0
+    case 4:
       return estadoFiscal !== null
     default:
       return true
@@ -121,6 +121,7 @@ export async function registrarUsuario(
   form: OnboardingForm,
   selecciones: SeleccionCategorias,
   estadoFiscal: EstadoFiscal | null,
+  avatarDataUrl: string | null,
   setPerfil: (p: any) => void,
   navigate: (to: string) => void,
   setError: (e: string) => void,
@@ -159,10 +160,16 @@ export async function registrarUsuario(
         whatsapp: form.whatsapp?.trim() || null,
         descripcion: JSON.stringify(selecciones),
         rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
+        rango_edad: form.rango_edad?.trim() || null,
       })
       .eq('id', user.id)
 
     if (updateError) throw updateError
+
+    if (avatarDataUrl) {
+      const blob = await fetch(avatarDataUrl).then(r => r.blob())
+      await uploadAvatar(user.id, blob)
+    }
 
     const { data: perfilResult } = await supabase
       .from('perfiles')

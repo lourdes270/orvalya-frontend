@@ -35,6 +35,10 @@ export const COPY = {
         label: 'WhatsApp (opcional)',
         placeholder: 'Ej: 099 123 456',
         ayuda: 'Los contratantes van a poder contactarte por acá.'
+      },
+      rangoEdad: {
+        label: 'Rango de edad (opcional)',
+        ayuda: 'Solo se muestra de forma discreta en tu perfil.',
       }
     }
   },
