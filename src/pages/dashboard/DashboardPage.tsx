@@ -149,20 +149,19 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
 
   useEffect(() => {
     const loadData = async () => {
-      const { data: prestador } = await supabase
-        .from('prestadores').select('semaforo').eq('id', perfil.id).single()
-      if (prestador) setSemaforo(prestador.semaforo ?? 'rojo')
       const { count } = await supabase
         .from('documentos').select('*', { count: 'exact', head: true })
         .eq('prestador_id', perfil.id)
         .in('estado', ['vigente', 'pendiente', 'aprobado'])
-      setDocsCount(count ?? 0)
+      const total = count ?? 0
+      setDocsCount(total)
+      setSemaforo(total >= 3 ? 'verde' : total >= 1 ? 'amarillo' : 'rojo')
     }
     loadData().catch(console.error)
   }, [perfil.id])
 
   const semaforoIcon = semaforo === 'verde' ? '🟢' : semaforo === 'amarillo' ? '🟡' : '🔴'
-  const semaforoLabel = semaforo === 'verde' ? 'Completo' : 'Incompleto'
+  const semaforoLabel = semaforo === 'verde' ? 'Completo' : semaforo === 'amarillo' ? 'En progreso' : 'Incompleto'
 
   return (
     <div>
