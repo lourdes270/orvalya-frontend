@@ -33,7 +33,7 @@ export default function LandingPage() {
         padding: '16px 20px',
         borderBottom: '1px solid #E8EEF4',
       }}>
-        <OrvalyaLogo height={28} />
+        <OrvalyaLogo height={32} showText={false} />
         <button
           type="button"
           onClick={() => navigate('/auth')}

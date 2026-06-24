@@ -28,19 +28,21 @@ export function OrvalyaLogo({ height = 28, showText = true, color = NAVY }: Orva
   const [imgFailed, setImgFailed] = useState(false)
   const iconSize = height
 
+  if (!imgFailed) {
+    return (
+      <img
+        src="/orvalya_logo.png"
+        alt="Orvalya"
+        height={iconSize}
+        style={{ display: 'block', objectFit: 'contain', width: 'auto', maxHeight: iconSize }}
+        onError={() => setImgFailed(true)}
+      />
+    )
+  }
+
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-      {!imgFailed ? (
-        <img
-          src="/orvalya_logo.png"
-          alt=""
-          height={iconSize}
-          style={{ display: 'block', objectFit: 'contain' }}
-          onError={() => setImgFailed(true)}
-        />
-      ) : (
-        <InfinityMark size={iconSize} />
-      )}
+      <InfinityMark size={iconSize} />
       {showText && (
         <span style={{ fontSize: `${height * 0.85}px`, fontWeight: 700, color, letterSpacing: '-0.02em' }}>
           Orvalya

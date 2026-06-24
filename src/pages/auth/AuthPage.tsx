@@ -15,7 +15,7 @@ export default function AuthPage() {
       <div style={s.card}>
         <div style={s.logo}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
-            <OrvalyaLogo height={32} />
+            <OrvalyaLogo height={36} showText={false} />
           </div>
           <div style={s.logoSub}>Servicios verificados en Uruguay</div>
         </div>
