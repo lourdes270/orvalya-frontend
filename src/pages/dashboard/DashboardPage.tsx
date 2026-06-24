@@ -7,6 +7,7 @@ import type { Perfil } from '../../contexts/AuthContextType'
 import { supabase } from '../../lib/supabase'
 import DocumentosPrestador from './documentos/DocumentosPrestador'
 import PerfilPrestador from './PerfilPrestador'
+import AvatarIncentiveCard from './AvatarIncentiveCard'
 import { statsGridStyle } from './dashboardLayout'
 
 export { formatZonaDisplay } from './formatZona'
@@ -170,6 +171,7 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
         <Tarjeta titulo="Documentos" valor={`${docsCount} / 3`} desc="Certificados cargados" />
         <Tarjeta titulo="Contratos activos" valor="0" desc="Órdenes de servicio" />
       </div>
+      <AvatarIncentiveCard perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
       <PerfilPrestador perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
       <DocumentosPrestador perfil={perfil} />
       <Seccion titulo="Mis contratos">

@@ -4,7 +4,7 @@ import {
   runRegistrationGuard,
 } from '../../../lib/botProtection/runRegistrationGuard'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
-import { uploadAvatar } from '../../../lib/uploadAvatar'
+import { buildPrestadorPerfilUpdate, esWhatsappValido } from '../../../lib/registroHelpers'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal, PasoOnboarding } from '../types'
 
 const DRAFT_KEY = 'orvalya_onboarding_draft'
@@ -50,32 +50,13 @@ export async function guardarPerfil(
     return
   }
   try {
-    const zonaValue = typeof form.zona === 'string' ? form.zona.trim() : JSON.stringify(form.zona)
+    const payload = buildPrestadorPerfilUpdate(form, selecciones, estadoFiscal)
     const { error: updateError } = await supabase
       .from('perfiles')
-      .update({
-        tipo: 'prestador',
-        nombre: form.nombre.trim(),
-        email: form.email.trim(),
-        telefono: form.telefono.trim(),
-        zona: zonaValue,
-        whatsapp: form.whatsapp.trim(),
-        descripcion: JSON.stringify(selecciones),
-        rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
-      })
+      .update(payload)
       .eq('id', perfil.id)
     if (updateError) throw updateError
-    setPerfil({
-      ...perfil,
-      tipo: 'prestador',
-      nombre: form.nombre.trim(),
-      email: form.email.trim(),
-      telefono: form.telefono.trim(),
-      zona: zonaValue,
-      whatsapp: form.whatsapp.trim(),
-      descripcion: JSON.stringify(selecciones),
-      rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
-    })
+    setPerfil({ ...perfil, ...payload })
     localStorage.removeItem(DRAFT_KEY)
     navigate('/dashboard')
   } catch {
@@ -95,19 +76,18 @@ export function toggleSubrubro(rubroId: string, subrubroId: string, setSeleccion
 export function puedeAvanzar(paso: PasoOnboarding, form: OnboardingForm, selecciones: SeleccionCategorias, estadoFiscal: EstadoFiscal | null): boolean {
   switch (paso) {
     case 1:
-      return true
-    case 2:
       return Object.values(selecciones).some(arr => arr.length > 0) || form.otroTexto.trim().length > 0
-    case 3:
+    case 2:
       if (form.nombre.trim().length === 0) return false
       if (form.email.trim().length === 0) return false
       if (!form.email.includes('@')) return false
       if (form.telefono.trim().length === 0) return false
+      if (!esWhatsappValido(form.whatsapp)) return false
       if (typeof form.zona === 'string') {
         return form.zona.trim().length > 0
       }
       return form.zona.todoUruguay || form.zona.departamentos.length > 0
-    case 4:
+    case 3:
       return estadoFiscal !== null
     default:
       return true
@@ -121,7 +101,6 @@ export async function registrarUsuario(
   form: OnboardingForm,
   selecciones: SeleccionCategorias,
   estadoFiscal: EstadoFiscal | null,
-  avatarDataUrl: string | null,
   setPerfil: (p: any) => void,
   navigate: (to: string) => void,
   setError: (e: string) => void,
@@ -145,31 +124,15 @@ export async function registrarUsuario(
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
     if (signInError) throw signInError
 
-    // Esperamos que el trigger cree el perfil
     await new Promise(resolve => setTimeout(resolve, 1500))
 
-    const zonaValue = typeof form.zona === 'string' ? form.zona.trim() : JSON.stringify(form.zona)
-
+    const payload = buildPrestadorPerfilUpdate(form, selecciones, estadoFiscal)
     const { error: updateError } = await supabase
       .from('perfiles')
-      .update({
-        tipo: 'prestador',
-        nombre: form.nombre.trim(),
-        telefono: form.telefono.trim(),
-        zona: zonaValue,
-        whatsapp: form.whatsapp?.trim() || null,
-        descripcion: JSON.stringify(selecciones),
-        rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
-        rango_edad: form.rango_edad?.trim() || null,
-      })
+      .update(payload)
       .eq('id', user.id)
 
     if (updateError) throw updateError
-
-    if (avatarDataUrl) {
-      const blob = await fetch(avatarDataUrl).then(r => r.blob())
-      await uploadAvatar(user.id, blob)
-    }
 
     const { data: perfilResult } = await supabase
       .from('perfiles')

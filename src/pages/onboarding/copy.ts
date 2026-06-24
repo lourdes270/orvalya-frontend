@@ -32,9 +32,10 @@ export const COPY = {
         error: 'Indicá en qué zona podés trabajar.'
       },
       whatsapp: {
-        label: 'WhatsApp (opcional)',
+        label: 'WhatsApp (para recibir avisos de trabajo)',
         placeholder: 'Ej: 099 123 456',
-        ayuda: 'Los contratantes van a poder contactarte por acá.'
+        errorRequerido: 'El WhatsApp es obligatorio.',
+        errorFormato: 'Ingresá al menos 8 dígitos, solo números.',
       },
       rangoEdad: {
         label: 'Rango de edad (opcional)',

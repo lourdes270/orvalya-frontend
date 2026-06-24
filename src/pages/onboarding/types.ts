@@ -1,4 +1,4 @@
-export type PasoOnboarding = 0 | 1 | 2 | 3 | 4 | 5
+export type PasoOnboarding = 0 | 1 | 2 | 3 | 4
 export type TipoPerfil = 'prestador' | 'contratante'
 export type EstadoFiscal = 'activo' | 'tramite' | 'sin_rut'
 
@@ -26,6 +26,7 @@ export interface OnboardingForm {
   email: string
   telefono: string
   zona: string | ZonasSeleccion
+  /** Obligatorio: mínimo 8 dígitos numéricos */
   whatsapp: string
   otroTexto: string
   rango_edad: string

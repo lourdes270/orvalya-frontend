@@ -1,7 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/useAuth'
-import { cropImageSquare } from '../../../lib/cropImageSquare'
 import type {
   PasoOnboarding,
   OnboardingForm,
@@ -18,7 +17,6 @@ interface DraftData {
   form: OnboardingForm
   selecciones: SeleccionCategorias
   estadoFiscal: EstadoFiscal | null
-  avatarDataUrl: string | null
 }
 
 const defaultForm: OnboardingForm = {
@@ -35,7 +33,13 @@ function loadDraft(): DraftData | null {
   try {
     const saved = localStorage.getItem(DRAFT_KEY)
     if (!saved) return null
-    return JSON.parse(saved) as DraftData
+    const parsed = JSON.parse(saved) as DraftData & { avatarDataUrl?: unknown }
+    return {
+      paso: parsed.paso,
+      form: { ...defaultForm, ...parsed.form, rango_edad: parsed.form?.rango_edad ?? '' },
+      selecciones: parsed.selecciones ?? {},
+      estadoFiscal: parsed.estadoFiscal ?? null,
+    }
   } catch {
     localStorage.removeItem(DRAFT_KEY)
     return null
@@ -47,27 +51,19 @@ export function useOnboardingForm() {
   const navigate = useNavigate()
   const draft = loadDraft()
   const [paso, setPaso] = useState<PasoOnboarding>(draft?.paso ?? 0)
-  const [form, setForm] = useState<OnboardingForm>({ ...defaultForm, ...draft?.form, rango_edad: draft?.form?.rango_edad ?? '' })
+  const [form, setForm] = useState<OnboardingForm>(draft?.form ?? defaultForm)
   const [selecciones, setSelecciones] = useState<SeleccionCategorias>(draft?.selecciones ?? {})
   const [estadoFiscal, setEstadoFiscal] = useState<EstadoFiscal | null>(draft?.estadoFiscal ?? null)
-  const [avatarDataUrl, setAvatarDataUrl] = useState<string | null>(draft?.avatarDataUrl ?? null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [fakeSuccess, setFakeSuccess] = useState('')
 
   useEffect(() => {
-    const data: DraftData = { paso, form, selecciones, estadoFiscal, avatarDataUrl }
+    const data: DraftData = { paso, form, selecciones, estadoFiscal }
     localStorage.setItem(DRAFT_KEY, JSON.stringify(data))
-  }, [paso, form, selecciones, estadoFiscal, avatarDataUrl])
+  }, [paso, form, selecciones, estadoFiscal])
 
-  const guardarYFinalizar = () => navigate('/onboarding?paso=5')
-
-  const handleAvatarFile = useCallback(async (file: File) => {
-    const blob = await cropImageSquare(file)
-    const reader = new FileReader()
-    reader.onload = () => setAvatarDataUrl(reader.result as string)
-    reader.readAsDataURL(blob)
-  }, [])
+  const guardarYFinalizar = () => navigate('/onboarding?paso=4')
 
   const handleRegistro = async (email: string, password: string, bot: RegistrationBotPayload) => {
     setLoading(true)
@@ -80,7 +76,6 @@ export function useOnboardingForm() {
       form,
       selecciones,
       estadoFiscal,
-      avatarDataUrl,
       setPerfil,
       navigate,
       setError,
@@ -94,7 +89,6 @@ export function useOnboardingForm() {
     form,
     selecciones,
     estadoFiscal,
-    avatarDataUrl,
     loading,
     error,
     fakeSuccess,
@@ -102,7 +96,6 @@ export function useOnboardingForm() {
     setForm,
     setSelecciones,
     setEstadoFiscal,
-    handleAvatarFile,
     toggleSubrubro: (rubroId: string, subrubroId: string) => toggleSubrubro(rubroId, subrubroId, setSelecciones),
     puedeAvanzar: (p: PasoOnboarding) => puedeAvanzar(p, form, selecciones, estadoFiscal),
     guardarYFinalizar,

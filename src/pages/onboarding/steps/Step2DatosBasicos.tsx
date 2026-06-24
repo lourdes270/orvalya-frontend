@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { COPY } from '../copy'
 import { STYLES } from '../styles/onboarding.styles'
+import { esWhatsappValido, normalizarWhatsapp } from '../../../lib/registroHelpers'
 import type { OnboardingForm, ZonasSeleccion } from '../types'
 import { DEPARTAMENTOS, ZONAS_MONTEVIDEO } from '../data/zonas'
 
@@ -89,6 +90,23 @@ export default function Step2DatosBasicos({
         return rest
       })
     }
+  }
+
+  const validarWhatsapp = () => {
+    if (form.whatsapp.trim().length === 0) {
+      setErrores(prev => ({ ...prev, whatsapp: COPY.paso2.campos.whatsapp.errorRequerido }))
+    } else if (!esWhatsappValido(form.whatsapp)) {
+      setErrores(prev => ({ ...prev, whatsapp: COPY.paso2.campos.whatsapp.errorFormato }))
+    } else {
+      setErrores(prev => {
+        const { whatsapp, ...rest } = prev
+        return rest
+      })
+    }
+  }
+
+  const handleWhatsappChange = (valor: string) => {
+    handleChange('whatsapp', normalizarWhatsapp(valor))
   }
 
   const handleChange = (campo: keyof OnboardingForm, valor: string) => {
@@ -227,6 +245,24 @@ export default function Step2DatosBasicos({
           />
           {errores.telefono && <p style={STYLES.error()}>{errores.telefono}</p>}
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
+            {COPY.paso2.campos.whatsapp.label}
+          </label>
+          <input
+            type="tel"
+            inputMode="numeric"
+            style={{
+              ...STYLES.input(isMobile),
+              height: isMobile ? '52px' : undefined,
+              fontSize: isMobile ? '16px' : undefined,
+            }}
+            placeholder={COPY.paso2.campos.whatsapp.placeholder}
+            value={form.whatsapp}
+            onChange={(e) => handleWhatsappChange(e.target.value)}
+            onBlur={validarWhatsapp}
+            required
+          />
+          {errores.whatsapp && <p style={STYLES.error()}>{errores.whatsapp}</p>}
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
             Zonas de trabajo
           </label>
           
@@ -352,21 +388,6 @@ export default function Step2DatosBasicos({
           )}
 
           {errores.zona && <p style={STYLES.error()}>{errores.zona}</p>}
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
-            {COPY.paso2.campos.whatsapp.label}
-          </label>
-          <input
-            type="text"
-            style={{
-              ...STYLES.input(isMobile),
-              height: isMobile ? '52px' : undefined,
-              fontSize: isMobile ? '16px' : undefined,
-            }}
-            placeholder={COPY.paso2.campos.whatsapp.placeholder}
-            value={form.whatsapp}
-            onChange={(e) => handleChange('whatsapp', e.target.value)}
-          />
-          <p style={STYLES.ayuda()}>{COPY.paso2.campos.whatsapp.ayuda}</p>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
             {COPY.paso2.campos.rangoEdad.label}
           </label>
