@@ -19,6 +19,12 @@ export type Perfil = {
   contratos_activos_count?: number | null
   whatsapp?: string | null
   rango_edad?: string | null
+  tarifa_hora?: number | null
+  tarifa_modalidad?: string | null
+  acepta_viatico?: boolean | null
+  viatico_diario?: number | null
+  tiene_vehiculo?: boolean | null
+  tipo_vehiculo?: string | null
   updated_at?: string | null
   created_at?: string | null
 }
