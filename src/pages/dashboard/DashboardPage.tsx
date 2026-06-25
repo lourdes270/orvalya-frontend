@@ -149,10 +149,11 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
 
   useEffect(() => {
     const loadData = async () => {
-      const { count } = await supabase
+      const { count, error } = await supabase
         .from('documentos').select('*', { count: 'exact', head: true })
         .eq('prestador_id', perfil.id)
         .in('estado', ['vigente', 'pendiente', 'aprobado'])
+      if (error) console.error('Error semaforo:', error)
       const total = count ?? 0
       setDocsCount(total)
       setSemaforo(total >= 3 ? 'verde' : total >= 1 ? 'amarillo' : 'rojo')
