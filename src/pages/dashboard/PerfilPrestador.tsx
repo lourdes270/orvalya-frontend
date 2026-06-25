@@ -15,6 +15,7 @@ interface PerfilPrestadorProps {
 type FormState = {
   nombre: string
   telefono: string
+  whatsapp: string
   zona: string
   rut: string
   descripcion: string
@@ -67,6 +68,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
   const [form, setForm] = useState<FormState>({
     nombre: '',
     telefono: '',
+    whatsapp: '',
     zona: '',
     rut: '',
     descripcion: '',
@@ -87,6 +89,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
     setForm({
       nombre: perfil.nombre ?? '',
       telefono: perfil.telefono ?? '',
+      whatsapp: perfil.whatsapp ?? '',
       zona: formatZonaDisplay(perfil.zona),
       rut: perfil.rut ?? '',
       descripcion: perfil.descripcion ?? '',
@@ -114,6 +117,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
       const payload: Record<string, string | number | boolean | null> = {
         nombre: form.nombre,
         telefono: form.telefono,
+        whatsapp: form.whatsapp,
         rut: form.rut,
         rango_edad: form.rango_edad || null,
         tarifa_hora,
@@ -130,6 +134,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         ...perfil,
         nombre: form.nombre,
         telefono: form.telefono,
+        whatsapp: form.whatsapp,
         rut: form.rut,
         descripcion: form.descripcion,
         rango_edad: form.rango_edad || null,
@@ -149,7 +154,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
     }
   }
 
-  const campo = (label: string, key: 'nombre' | 'rut' | 'telefono' | 'zona', placeholder: string) => (
+  const campo = (label: string, key: 'nombre' | 'rut' | 'telefono' | 'whatsapp' | 'zona', placeholder: string) => (
     <div style={{ marginBottom: '16px' }}>
       <label style={labelStyle}>{label}</label>
       <input
@@ -218,6 +223,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
       {campo('Nombre de la empresa o persona', 'nombre', 'Ej: Limpieza Industrial García')}
       {campo('RUT', 'rut', 'Ej: 21234567-8')}
       {campo('Teléfono', 'telefono', 'Ej: 099 123 456')}
+      {campo('WhatsApp', 'whatsapp', '099 123 456')}
 
       <div style={{ marginBottom: '20px', paddingTop: '4px', borderTop: '1px solid #F1F3F5' }}>
         <h3 style={{ color: '#1F3864', fontSize: '14px', fontWeight: 600, margin: '16px 0 16px' }}>
