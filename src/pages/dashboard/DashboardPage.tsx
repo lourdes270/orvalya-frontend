@@ -152,7 +152,7 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
       const { count, error } = await supabase
         .from('documentos').select('*', { count: 'exact', head: true })
         .eq('prestador_id', perfil.id)
-        .in('estado', ['vigente', 'pendiente', 'aprobado'])
+        .eq('estado', 'vigente')
       if (error) console.error('Error semaforo:', error)
       const total = count ?? 0
       setDocsCount(total)
