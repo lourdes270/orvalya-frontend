@@ -9,6 +9,7 @@ import {
 } from '../../lib/botProtection/runRegistrationGuard'
 import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
 import { activarPerfilContratante } from '../../lib/registroHelpers'
+import { mensajeErrorAuth, validarContrasena, validarEmail } from '../../lib/validaciones'
 import { s } from './styles'
 
 export function RegisterForm() {
@@ -25,8 +26,10 @@ export function RegisterForm() {
 
   const validate = () => {
     const e: Record<string, string> = {}
-    if (!email.includes('@')) e.email = 'Ingresá un email válido.'
-    if (password.length < 8) e.password = 'Mínimo 8 caracteres.'
+    const emailErr = validarEmail(email)
+    if (emailErr) e.email = emailErr
+    const passErr = validarContrasena(password)
+    if (passErr) e.password = passErr
     if (password !== confirm) e.confirm = 'Las contraseñas no coinciden.'
     return e
   }
@@ -64,8 +67,7 @@ export function RegisterForm() {
 
       navigate('/aceptar-terminos')
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error al crear la cuenta.'
-      setErrors({ general: msg })
+      setErrors({ general: mensajeErrorAuth(err, 'Error al crear la cuenta.') })
     } finally {
       setLoading(false)
     }
@@ -81,7 +83,7 @@ export function RegisterForm() {
       </div>
       <div style={s.field}>
         <label style={s.label}>Contraseña</label>
-        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 8 caracteres" style={{ ...s.input, ...(errors.password ? s.inputError : {}) }} />
+        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número" style={{ ...s.input, ...(errors.password ? s.inputError : {}) }} />
         {errors.password && <p style={s.error}>{errors.password}</p>}
       </div>
       <div style={s.field}>

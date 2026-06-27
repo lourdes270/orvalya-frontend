@@ -1,9 +1,17 @@
 import { useState } from 'react'
 import { COPY } from '../copy'
 import { STYLES } from '../styles/onboarding.styles'
-import { esWhatsappValido, normalizarWhatsapp } from '../../../lib/registroHelpers'
+import { normalizarWhatsapp } from '../../../lib/registroHelpers'
+import { normalizarTelefono, validarEmail, validarTelefono } from '../../../lib/validaciones'
 import type { OnboardingForm, ZonasSeleccion } from '../types'
 import { DEPARTAMENTOS, ZONAS_MONTEVIDEO } from '../data/zonas'
+
+const CARACTERES_NO_NOMBRE = /[^\p{L}\s]/gu
+
+function filtrarNombre(valor: string): string {
+  const limpio = valor.replace(CARACTERES_NO_NOMBRE, '')
+  return limpio.replace(/(^|\s)(\p{L})/gu, (_, espacio, letra) => espacio + letra.toUpperCase())
+}
 
 interface Step2DatosBasicosProps {
   form: OnboardingForm
@@ -45,9 +53,9 @@ export default function Step2DatosBasicos({
 
   const zonas = getZonas(form.zona)
 
-  const validarNombre = () => {
+  const validarNombreCampo = () => {
     if (form.nombre.trim().length === 0) {
-      setErrores(prev => ({ ...prev, nombre: 'El nombre es obligatorio' }))
+      setErrores(prev => ({ ...prev, nombre: COPY.paso2.campos.nombre.error }))
     } else {
       setErrores(prev => {
         const { nombre, ...rest } = prev
@@ -56,11 +64,21 @@ export default function Step2DatosBasicos({
     }
   }
 
-  const validarEmail = () => {
-    if (form.email.trim().length === 0) {
-      setErrores(prev => ({ ...prev, email: 'El email es obligatorio' }))
-    } else if (!form.email.includes('@')) {
-      setErrores(prev => ({ ...prev, email: 'El email debe contener @' }))
+  const validarApellidoCampo = () => {
+    if (form.apellido.trim().length === 0) {
+      setErrores(prev => ({ ...prev, apellido: COPY.paso2.campos.apellido.error }))
+    } else {
+      setErrores(prev => {
+        const { apellido, ...rest } = prev
+        return rest
+      })
+    }
+  }
+
+  const validarEmailCampo = () => {
+    const error = validarEmail(form.email)
+    if (error) {
+      setErrores(prev => ({ ...prev, email: error }))
     } else {
       setErrores(prev => {
         const { email, ...rest } = prev
@@ -69,9 +87,10 @@ export default function Step2DatosBasicos({
     }
   }
 
-  const validarTelefono = () => {
-    if (form.telefono.trim().length === 0) {
-      setErrores(prev => ({ ...prev, telefono: 'El teléfono es obligatorio' }))
+  const validarTelefonoCampo = () => {
+    const error = validarTelefono(form.telefono, { requerido: true })
+    if (error) {
+      setErrores(prev => ({ ...prev, telefono: error }))
     } else {
       setErrores(prev => {
         const { telefono, ...rest } = prev
@@ -93,16 +112,27 @@ export default function Step2DatosBasicos({
   }
 
   const validarWhatsapp = () => {
-    if (form.whatsapp.trim().length === 0) {
-      setErrores(prev => ({ ...prev, whatsapp: COPY.paso2.campos.whatsapp.errorRequerido }))
-    } else if (!esWhatsappValido(form.whatsapp)) {
-      setErrores(prev => ({ ...prev, whatsapp: COPY.paso2.campos.whatsapp.errorFormato }))
+    const error = validarTelefono(form.whatsapp, { requerido: true, etiqueta: 'WhatsApp' })
+    if (error) {
+      setErrores(prev => ({ ...prev, whatsapp: error }))
     } else {
       setErrores(prev => {
         const { whatsapp, ...rest } = prev
         return rest
       })
     }
+  }
+
+  const handleNombreChange = (campo: 'nombre' | 'apellido', valor: string) => {
+    handleChange(campo, filtrarNombre(valor))
+  }
+
+  const handleEmailChange = (valor: string) => {
+    handleChange('email', valor.toLowerCase())
+  }
+
+  const handleTelefonoChange = (valor: string) => {
+    handleChange('telefono', normalizarTelefono(valor))
   }
 
   const handleWhatsappChange = (valor: string) => {
@@ -208,10 +238,26 @@ export default function Step2DatosBasicos({
             }}
             placeholder={COPY.paso2.campos.nombre.placeholder}
             value={form.nombre}
-            onChange={(e) => handleChange('nombre', e.target.value)}
-            onBlur={validarNombre}
+            onChange={(e) => handleNombreChange('nombre', e.target.value)}
+            onBlur={validarNombreCampo}
           />
           {errores.nombre && <p style={STYLES.error()}>{errores.nombre}</p>}
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
+            {COPY.paso2.campos.apellido.label}
+          </label>
+          <input
+            type="text"
+            style={{
+              ...STYLES.input(isMobile),
+              height: isMobile ? '52px' : undefined,
+              fontSize: isMobile ? '16px' : undefined,
+            }}
+            placeholder={COPY.paso2.campos.apellido.placeholder}
+            value={form.apellido}
+            onChange={(e) => handleNombreChange('apellido', e.target.value)}
+            onBlur={validarApellidoCampo}
+          />
+          {errores.apellido && <p style={STYLES.error()}>{errores.apellido}</p>}
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
             Email
           </label>
@@ -224,8 +270,8 @@ export default function Step2DatosBasicos({
             }}
             placeholder="tu@email.com"
             value={form.email}
-            onChange={(e) => handleChange('email', e.target.value)}
-            onBlur={validarEmail}
+            onChange={(e) => handleEmailChange(e.target.value)}
+            onBlur={validarEmailCampo}
           />
           {errores.email && <p style={STYLES.error()}>{errores.email}</p>}
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
@@ -238,10 +284,11 @@ export default function Step2DatosBasicos({
               height: isMobile ? '52px' : undefined,
               fontSize: isMobile ? '16px' : undefined,
             }}
-            placeholder="099 123 456"
+            placeholder="099123456"
+            inputMode="numeric"
             value={form.telefono}
-            onChange={(e) => handleChange('telefono', e.target.value)}
-            onBlur={validarTelefono}
+            onChange={(e) => handleTelefonoChange(e.target.value)}
+            onBlur={validarTelefonoCampo}
           />
           {errores.telefono && <p style={STYLES.error()}>{errores.telefono}</p>}
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>

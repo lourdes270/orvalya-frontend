@@ -23,6 +23,7 @@ export interface ZonasSeleccion {
 
 export interface OnboardingForm {
   nombre: string
+  apellido: string
   email: string
   telefono: string
   zona: string | ZonasSeleccion

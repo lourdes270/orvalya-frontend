@@ -21,6 +21,7 @@ interface DraftData {
 
 const defaultForm: OnboardingForm = {
   nombre: '',
+  apellido: '',
   email: '',
   telefono: '',
   zona: '',

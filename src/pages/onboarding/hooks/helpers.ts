@@ -5,6 +5,7 @@ import {
 } from '../../../lib/botProtection/runRegistrationGuard'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 import { buildPrestadorPerfilUpdate, esWhatsappValido } from '../../../lib/registroHelpers'
+import { mensajeErrorAuth, validarEmail, validarTelefono } from '../../../lib/validaciones'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal, PasoOnboarding } from '../types'
 
 const DRAFT_KEY = 'orvalya_onboarding_draft'
@@ -78,10 +79,9 @@ export function puedeAvanzar(paso: PasoOnboarding, form: OnboardingForm, selecci
     case 1:
       return Object.values(selecciones).some(arr => arr.length > 0) || form.otroTexto.trim().length > 0
     case 2:
-      if (form.nombre.trim().length === 0) return false
-      if (form.email.trim().length === 0) return false
-      if (!form.email.includes('@')) return false
-      if (form.telefono.trim().length === 0) return false
+      if (form.nombre.trim().length === 0 || form.apellido.trim().length === 0) return false
+      if (validarEmail(form.email)) return false
+      if (validarTelefono(form.telefono, { requerido: true })) return false
       if (!esWhatsappValido(form.whatsapp)) return false
       if (typeof form.zona === 'string') {
         return form.zona.trim().length > 0
@@ -143,11 +143,7 @@ export async function registrarUsuario(
     setPerfil(perfilResult)
     localStorage.removeItem(DRAFT_KEY)
     navigate('/aceptar-terminos')
-  } catch (err: any) {
-    if (err.message === 'User already registered') {
-      setError('Este email ya tiene una cuenta. ¿Querés iniciar sesión?')
-    } else {
-      setError(err.message || 'No pudimos crear tu cuenta. Por favor intentá de nuevo.')
-    }
+  } catch (err: unknown) {
+    setError(mensajeErrorAuth(err, 'No pudimos crear tu cuenta. Por favor intentá de nuevo.'))
   }
 }

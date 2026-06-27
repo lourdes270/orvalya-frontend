@@ -3,6 +3,7 @@ import { Eye, EyeSlash, CheckCircle } from '@phosphor-icons/react'
 import { HoneypotField } from '../../../components/botProtection/HoneypotField'
 import { RegistrationCaptcha } from '../../../components/botProtection/RegistrationCaptcha'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
+import { validarContrasena, validarEmail } from '../../../lib/validaciones'
 
 interface Step4RegistroProps {
   isMobile: boolean
@@ -39,11 +40,11 @@ export default function Step4Registro({
   const validateField = (field: string, value: string) => {
     switch (field) {
       case 'email':
-        return value.includes('@') ? '' : 'El email debe contener @'
+        return validarEmail(value) ?? ''
       case 'password':
-        return value.length >= 6 ? '' : 'La contraseña debe tener al menos 6 caracteres'
+        return validarContrasena(value) ?? ''
       case 'confirm':
-        return value === password ? '' : 'Las contraseñas no coinciden'
+        return value === password ? '' : 'Las contraseñas no coinciden.'
       default:
         return ''
     }
@@ -79,7 +80,14 @@ export default function Step4Registro({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!isFormValid || !captchaToken) return
+    const nextErrors = {
+      email: validateField('email', email),
+      password: validateField('password', password),
+      confirm: validateField('confirm', confirmPassword),
+    }
+    setTouched({ email: true, password: true, confirm: true })
+    setFieldErrors(nextErrors)
+    if (Object.values(nextErrors).some(err => err !== '') || !captchaToken) return
     await onRegistrar(email, password, { captchaToken, honeypot })
   }
 
@@ -189,7 +197,7 @@ export default function Step4Registro({
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => handleChange('password', e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número"
                 style={{
                   width: '100%',
                   height: '52px',

@@ -6,6 +6,7 @@ import { RANGOS_EDAD, selectRangoEdadStyle } from '../../lib/rangoEdad'
 import { formatZonaDisplay } from './formatZona'
 import PerfilPublicoCard from './PerfilPublicoCard'
 import { DescripcionServicioField } from './DescripcionServicioField'
+import { normalizarTelefono, validarTelefono } from '../../lib/validaciones'
 
 interface PerfilPrestadorProps {
   perfil: Perfil
@@ -83,6 +84,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
   const [guardando, setGuardando] = useState(false)
   const [guardado, setGuardado] = useState(false)
   const [error, setError] = useState('')
+  const [erroresCampo, setErroresCampo] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (!perfil) return
@@ -105,10 +107,23 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
 
   const guardar = async () => {
     if (!perfil) return
-    if (!form.nombre.trim()) { setError('El nombre es obligatorio.'); return }
+    const nextErrores: Record<string, string> = {}
+    if (!form.nombre.trim()) nextErrores.nombre = 'El nombre es obligatorio.'
+    const telErr = validarTelefono(form.telefono, { etiqueta: 'teléfono' })
+    if (telErr) nextErrores.telefono = telErr
+    const waErr = validarTelefono(form.whatsapp, { etiqueta: 'WhatsApp' })
+    if (waErr) nextErrores.whatsapp = waErr
+    if (Object.keys(nextErrores).length > 0) {
+      setErroresCampo(nextErrores)
+      setError('')
+      return
+    }
+    setErroresCampo({})
     setGuardando(true)
     setError('')
     try {
+      const telefono = form.telefono.trim() ? normalizarTelefono(form.telefono) : ''
+      const whatsapp = form.whatsapp.trim() ? normalizarTelefono(form.whatsapp) : ''
       const tarifa_hora = form.tarifa_hora.trim() ? parseNumero(form.tarifa_hora) : null
       const viatico_diario = form.acepta_viatico && form.viatico_diario.trim()
         ? parseNumero(form.viatico_diario)
@@ -116,8 +131,8 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
 
       const payload: Record<string, string | number | boolean | null> = {
         nombre: form.nombre,
-        telefono: form.telefono,
-        whatsapp: form.whatsapp,
+        telefono,
+        whatsapp,
         rut: form.rut,
         rango_edad: form.rango_edad || null,
         tarifa_hora,
@@ -133,8 +148,8 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
       onPerfilUpdate({
         ...perfil,
         nombre: form.nombre,
-        telefono: form.telefono,
-        whatsapp: form.whatsapp,
+        telefono,
+        whatsapp,
         rut: form.rut,
         descripcion: form.descripcion,
         rango_edad: form.rango_edad || null,
@@ -154,16 +169,37 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
     }
   }
 
-  const campo = (label: string, key: 'nombre' | 'rut' | 'telefono' | 'whatsapp' | 'zona', placeholder: string) => (
+  const campo = (
+    label: string,
+    key: 'nombre' | 'rut' | 'telefono' | 'whatsapp' | 'zona',
+    placeholder: string,
+    opciones?: { inputMode?: 'numeric'; normalizar?: boolean },
+  ) => (
     <div style={{ marginBottom: '16px' }}>
       <label style={labelStyle}>{label}</label>
       <input
         type="text"
+        inputMode={opciones?.inputMode}
         value={form[key]}
-        onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value }))}
+        onChange={e => {
+          const valor = opciones?.normalizar ? normalizarTelefono(e.target.value) : e.target.value
+          setForm(prev => ({ ...prev, [key]: valor }))
+          if (erroresCampo[key]) {
+            setErroresCampo(prev => {
+              const { [key]: _, ...rest } = prev
+              return rest
+            })
+          }
+        }}
         placeholder={placeholder}
-        style={inputStyle}
+        style={{
+          ...inputStyle,
+          ...(erroresCampo[key] ? { borderColor: '#dc2626' } : {}),
+        }}
       />
+      {erroresCampo[key] && (
+        <p style={{ color: '#dc2626', fontSize: '13px', margin: '4px 0 0' }}>{erroresCampo[key]}</p>
+      )}
     </div>
   )
 
@@ -222,8 +258,8 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
       <PerfilPublicoCard perfil={{ ...perfil, nombre: form.nombre, rango_edad: form.rango_edad || null }} />
       {campo('Nombre de la empresa o persona', 'nombre', 'Ej: Limpieza Industrial García')}
       {campo('RUT', 'rut', 'Ej: 21234567-8')}
-      {campo('Teléfono', 'telefono', 'Ej: 099 123 456')}
-      {campo('WhatsApp', 'whatsapp', '099 123 456')}
+      {campo('Teléfono', 'telefono', 'Ej: 099123456', { inputMode: 'numeric', normalizar: true })}
+      {campo('WhatsApp', 'whatsapp', '099123456', { inputMode: 'numeric', normalizar: true })}
 
       <div style={{ marginBottom: '20px', paddingTop: '4px', borderTop: '1px solid #F1F3F5' }}>
         <h3 style={{ color: '#1F3864', fontSize: '14px', fontWeight: 600, margin: '16px 0 16px' }}>

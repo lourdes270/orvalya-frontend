@@ -1,15 +1,16 @@
 import { supabase } from './supabase'
 import type { Perfil } from '../contexts/AuthContextType'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal } from '../pages/onboarding/types'
+import { normalizarTelefono, validarTelefono } from './validaciones'
 
 const TRIGGER_WAIT_MS = 1500
 
 export function normalizarWhatsapp(valor: string): string {
-  return valor.replace(/\D/g, '')
+  return normalizarTelefono(valor)
 }
 
 export function esWhatsappValido(valor: string): boolean {
-  return normalizarWhatsapp(valor).length >= 8
+  return validarTelefono(valor, { requerido: true, etiqueta: 'WhatsApp' }) === null
 }
 
 export function buildPrestadorPerfilUpdate(
@@ -20,9 +21,9 @@ export function buildPrestadorPerfilUpdate(
   const zonaValue = typeof form.zona === 'string' ? form.zona.trim() : JSON.stringify(form.zona)
   return {
     tipo: 'prestador' as const,
-    nombre: form.nombre.trim(),
-    email: form.email.trim(),
-    telefono: form.telefono.trim(),
+    nombre: `${form.nombre.trim()} ${form.apellido.trim()}`.trim(),
+    email: form.email.trim().toLowerCase(),
+    telefono: normalizarTelefono(form.telefono),
     zona: zonaValue,
     whatsapp: normalizarWhatsapp(form.whatsapp),
     descripcion: JSON.stringify(selecciones),

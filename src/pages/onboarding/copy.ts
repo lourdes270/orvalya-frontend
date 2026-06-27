@@ -21,9 +21,14 @@ export const COPY = {
     subtitulo: 'Esta info aparece en tu perfil. Podés cambiarla después.',
     campos: {
       nombre: {
-        label: 'Tu nombre o el nombre de tu emprendimiento',
-        placeholder: 'Ej: María García / Limpieza García',
-        error: 'Tu nombre es obligatorio.'
+        label: 'Nombre',
+        placeholder: 'Ej: María',
+        error: 'El nombre es obligatorio.',
+      },
+      apellido: {
+        label: 'Apellido',
+        placeholder: 'Ej: García',
+        error: 'El apellido es obligatorio.',
       },
       zona: {
         label: '¿En qué zona podés trabajar?',
@@ -33,9 +38,9 @@ export const COPY = {
       },
       whatsapp: {
         label: 'WhatsApp (para recibir avisos de trabajo)',
-        placeholder: 'Ej: 099 123 456',
+        placeholder: 'Ej: 099123456',
         errorRequerido: 'El WhatsApp es obligatorio.',
-        errorFormato: 'Ingresá al menos 8 dígitos, solo números.',
+        errorFormato: 'Ingresá entre 8 y 15 dígitos, solo números.',
       },
       rangoEdad: {
         label: 'Rango de edad (opcional)',
