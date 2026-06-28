@@ -102,10 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async (options?: { fromOnboarding?: boolean }) => {
     const fromOnboarding = options?.fromOnboarding === true
-    if (fromOnboarding) {
-      const { prepararBorradorParaOAuthOnboarding } = await import('../pages/onboarding/hooks/helpers')
-      prepararBorradorParaOAuthOnboarding()
-    }
+    if (fromOnboarding) prepararBorradorParaOAuthOnboarding()
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: urlRedirectoPostOAuth(fromOnboarding) },
