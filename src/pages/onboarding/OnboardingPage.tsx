@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Step0TipoPerfil from './steps/Step0TipoPerfil'
 import Step1Categorias from './steps/Step1Categorias'
@@ -10,14 +10,22 @@ import { useOnboardingForm } from './hooks/useOnboardingForm'
 import { useAuth } from '../../contexts/useAuth'
 import { intentarCompletarOnboardingPendiente } from './hooks/helpers'
 
+function PantallaCarga({ texto }: { texto: string }) {
+  return (
+    <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', color: '#6b7280', fontSize: '15px' }}>
+      {texto}
+    </div>
+  )
+}
+
 export default function OnboardingPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { session, perfil, setPerfil } = useAuth()
+  const { session, perfil, setPerfil, loading: authLoading } = useAuth()
   const pasoParam = searchParams.get('paso')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [completandoPendiente, setCompletandoPendiente] = useState(false)
-  const intentoCompletarRef = useRef(false)
+  const [sinDatosPrevios, setSinDatosPrevios] = useState(false)
   const {
     form, selecciones, estadoFiscal, loading, error, fakeSuccess,
     setForm, setEstadoFiscal, toggleSubrubro, puedeAvanzar, guardarYFinalizar, handleRegistro,
@@ -30,28 +38,54 @@ export default function OnboardingPage() {
   }, [])
 
   useEffect(() => {
-    if (!session) intentoCompletarRef.current = false
-  }, [session])
+    if (!session?.user || perfil?.tipo !== 'pendiente') return
 
-  useEffect(() => {
-    if (!session?.user || perfil?.tipo !== 'pendiente' || intentoCompletarRef.current) return
-    intentoCompletarRef.current = true
+    let activo = true
     setCompletandoPendiente(true)
-    intentarCompletarOnboardingPendiente(session.user.id, setPerfil, navigate)
-      .finally(() => setCompletandoPendiente(false))
-  }, [session?.user, perfil?.tipo, setPerfil, navigate])
+    setSinDatosPrevios(false)
 
-  if (completandoPendiente) {
+    intentarCompletarOnboardingPendiente(session.user, setPerfil, navigate)
+      .then(result => {
+        if (activo && result === 'sin_datos') setSinDatosPrevios(true)
+      })
+      .finally(() => {
+        if (activo) setCompletandoPendiente(false)
+      })
+
+    return () => { activo = false }
+  }, [session?.user?.id, perfil?.tipo, setPerfil, navigate])
+
+  const esperandoPerfil = !!session && perfil === null
+
+  if (authLoading || esperandoPerfil || completandoPendiente) {
+    return <PantallaCarga texto={completandoPendiente ? 'Finalizando tu perfil...' : 'Cargando...'} />
+  }
+
+  if (!pasoParam || pasoParam === '0') {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>
-        Finalizando tu perfil...
-      </div>
+      <>
+        {sinDatosPrevios && session && perfil?.tipo === 'pendiente' && (
+          <div style={{
+            maxWidth: '520px',
+            margin: '16px auto 0',
+            padding: '12px 16px',
+            background: '#fff3cd',
+            border: '1px solid #ffc107',
+            borderRadius: '8px',
+            color: '#856404',
+            fontSize: '14px',
+            lineHeight: 1.5,
+          }}>
+            No encontramos los datos que cargaste antes. Elegí <strong>Ofrezco servicios</strong> y completá el formulario una vez más.
+          </div>
+        )}
+        <Step0TipoPerfil isMobile={isMobile} />
+      </>
     )
   }
 
-  if (!pasoParam || pasoParam === '0') return <Step0TipoPerfil isMobile={isMobile} />
-
   const pasoNum = parseInt(pasoParam)
+  const yaTieneCuenta = !!session && perfil?.tipo === 'pendiente'
   const nav = (dir: number) => { window.location.href = `/onboarding?paso=${pasoNum + dir}` }
 
   return (
@@ -68,8 +102,11 @@ export default function OnboardingPage() {
       {pasoNum === 3 && (
         <Step3Fiscalizacion estadoFiscal={estadoFiscal} setEstadoFiscal={setEstadoFiscal} isMobile={isMobile} onVolver={() => nav(-1)} onFinalizar={guardarYFinalizar} loading={loading} />
       )}
-      {pasoNum === 4 && (
+      {pasoNum === 4 && !yaTieneCuenta && (
         <Step4Registro isMobile={isMobile} onRegistrar={handleRegistro} loading={loading} error={error} fakeSuccess={fakeSuccess} email={form.email} />
+      )}
+      {pasoNum === 4 && yaTieneCuenta && (
+        <PantallaCarga texto="Finalizando tu perfil..." />
       )}
       {error && pasoNum !== 4 && (
         <div style={{ position: 'fixed', bottom: '100px', left: '20px', right: '20px', padding: '12px', background: '#fee2e2', borderRadius: '8px', color: '#dc2626', fontSize: '14px' }}>{error}</div>

@@ -8,16 +8,7 @@ import type {
   EstadoFiscal,
 } from '../types'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
-import { toggleSubrubro, puedeAvanzar, registrarUsuario } from './helpers'
-
-const DRAFT_KEY = 'orvalya_onboarding_draft'
-
-interface DraftData {
-  paso: PasoOnboarding
-  form: OnboardingForm
-  selecciones: SeleccionCategorias
-  estadoFiscal: EstadoFiscal | null
-}
+import { toggleSubrubro, puedeAvanzar, registrarUsuario, DRAFT_KEY } from './helpers'
 
 const defaultForm: OnboardingForm = {
   nombre: '',
@@ -30,13 +21,13 @@ const defaultForm: OnboardingForm = {
   rango_edad: '',
 }
 
-function loadDraft(): DraftData | null {
+function loadDraft(): { paso: PasoOnboarding; form: OnboardingForm; selecciones: SeleccionCategorias; estadoFiscal: EstadoFiscal | null } | null {
   try {
     const saved = localStorage.getItem(DRAFT_KEY)
     if (!saved) return null
-    const parsed = JSON.parse(saved) as DraftData & { avatarDataUrl?: unknown }
+    const parsed = JSON.parse(saved) as { paso?: PasoOnboarding; form?: OnboardingForm; selecciones?: SeleccionCategorias; estadoFiscal?: EstadoFiscal | null; avatarDataUrl?: unknown }
     return {
-      paso: parsed.paso,
+      paso: parsed.paso ?? 0,
       form: { ...defaultForm, ...parsed.form, rango_edad: parsed.form?.rango_edad ?? '' },
       selecciones: parsed.selecciones ?? {},
       estadoFiscal: parsed.estadoFiscal ?? null,
@@ -60,7 +51,7 @@ export function useOnboardingForm() {
   const [fakeSuccess, setFakeSuccess] = useState('')
 
   useEffect(() => {
-    const data: DraftData = { paso, form, selecciones, estadoFiscal }
+    const data = { paso, form, selecciones, estadoFiscal }
     localStorage.setItem(DRAFT_KEY, JSON.stringify(data))
   }, [paso, form, selecciones, estadoFiscal])
 

@@ -5,55 +5,115 @@ import {
 } from '../../../lib/botProtection/runRegistrationGuard'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 import { buildPrestadorPerfilUpdate, esWhatsappValido } from '../../../lib/registroHelpers'
-import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, mensajeErrorAuth, MENSAJE_CONFIRMACION_EMAIL, validarEmail, validarTelefono, urlRedirectoAuth } from '../../../lib/validaciones'
+import type { User } from '@supabase/supabase-js'
+import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, mensajeErrorAuth, MENSAJE_CONFIRMACION_EMAIL, validarEmail, validarTelefono, urlRedirectoOnboardingCompletar } from '../../../lib/validaciones'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal, PasoOnboarding } from '../types'
 
-const DRAFT_KEY = 'orvalya_onboarding_draft'
+export const DRAFT_KEY = 'orvalya_onboarding_draft'
+const METADATA_BORRADOR_KEY = 'onboarding_borrador'
 
-interface OnboardingDraft {
+export interface OnboardingDraft {
   paso: PasoOnboarding
   form: OnboardingForm
   selecciones: SeleccionCategorias
   estadoFiscal: EstadoFiscal | null
 }
 
-function cargarBorradorOnboarding(): OnboardingDraft | null {
+const defaultForm: OnboardingForm = {
+  nombre: '',
+  apellido: '',
+  email: '',
+  telefono: '',
+  zona: '',
+  whatsapp: '',
+  otroTexto: '',
+  rango_edad: '',
+}
+
+function normalizarBorrador(raw: unknown): OnboardingDraft | null {
+  if (!raw || typeof raw !== 'object') return null
+  const data = raw as Partial<OnboardingDraft>
+  if (!data.form || typeof data.form !== 'object') return null
+  return {
+    paso: (data.paso ?? 0) as PasoOnboarding,
+    form: { ...defaultForm, ...data.form, rango_edad: data.form.rango_edad ?? '' },
+    selecciones: data.selecciones ?? {},
+    estadoFiscal: data.estadoFiscal ?? null,
+  }
+}
+
+export function cargarBorradorOnboarding(): OnboardingDraft | null {
   try {
     const saved = localStorage.getItem(DRAFT_KEY)
     if (!saved) return null
-    return JSON.parse(saved) as OnboardingDraft
+    return normalizarBorrador(JSON.parse(saved))
   } catch {
     return null
   }
 }
 
+function borradorDesdeMetadata(user: User | null | undefined): OnboardingDraft | null {
+  if (!user?.user_metadata) return null
+  return normalizarBorrador(user.user_metadata[METADATA_BORRADOR_KEY])
+}
+
+export function obtenerBorradorOnboarding(user: User | null | undefined): OnboardingDraft | null {
+  return cargarBorradorOnboarding() ?? borradorDesdeMetadata(user)
+}
+
+export function inferirPasoOnboarding(draft: OnboardingDraft): PasoOnboarding {
+  if (puedeAvanzar(3, draft.form, draft.selecciones, draft.estadoFiscal)) return 4
+  if (puedeAvanzar(2, draft.form, draft.selecciones, draft.estadoFiscal)) return 3
+  if (puedeAvanzar(1, draft.form, draft.selecciones, draft.estadoFiscal)) return 2
+  return 1
+}
+
+export function crearBorradorParaGuardar(
+  form: OnboardingForm,
+  selecciones: SeleccionCategorias,
+  estadoFiscal: EstadoFiscal | null,
+): Omit<OnboardingDraft, 'paso'> {
+  return { form, selecciones, estadoFiscal }
+}
+
 export async function intentarCompletarOnboardingPendiente(
-  userId: string,
+  user: User,
   setPerfil: (p: any) => void,
-  navigate: (to: string) => void,
-): Promise<boolean> {
-  const draft = cargarBorradorOnboarding()
+  navigate: (to: string, options?: { replace?: boolean }) => void,
+): Promise<'completado' | 'reanudado' | 'sin_datos'> {
+  const draft = obtenerBorradorOnboarding(user)
   if (!draft || !puedeAvanzar(3, draft.form, draft.selecciones, draft.estadoFiscal)) {
-    return false
+    if (draft) {
+      const paso = inferirPasoOnboarding(draft)
+      if (paso > 0) {
+        navigate(`/onboarding?paso=${paso}`, { replace: true })
+        return 'reanudado'
+      }
+    }
+    return 'sin_datos'
   }
 
   const payload = buildPrestadorPerfilUpdate(draft.form, draft.selecciones, draft.estadoFiscal)
   const { error: updateError } = await supabase
     .from('perfiles')
     .update(payload)
-    .eq('id', userId)
-  if (updateError) return false
+    .eq('id', user.id)
+  if (updateError) {
+    console.error('intentarCompletarOnboardingPendiente update error:', updateError)
+    navigate(`/onboarding?paso=4`, { replace: true })
+    return 'reanudado'
+  }
 
   const { data: perfilResult } = await supabase
     .from('perfiles')
     .select('*')
-    .eq('id', userId)
+    .eq('id', user.id)
     .single()
 
   if (perfilResult) setPerfil(perfilResult)
   localStorage.removeItem(DRAFT_KEY)
-  navigate('/aceptar-terminos')
-  return true
+  navigate('/aceptar-terminos', { replace: true })
+  return 'completado'
 }
 
 export async function fetchPerfilFromSupabase(setPerfil: (p: any) => void, setError: (e: string) => void, setIsLoading: (l: boolean) => void) {
@@ -164,10 +224,14 @@ export async function registrarUsuario(
     }
 
     const emailNorm = email.trim().toLowerCase()
+    const borrador = crearBorradorParaGuardar(form, selecciones, estadoFiscal)
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: emailNorm,
       password,
-      options: { emailRedirectTo: urlRedirectoAuth() },
+      options: {
+        emailRedirectTo: urlRedirectoOnboardingCompletar(),
+        data: { [METADATA_BORRADOR_KEY]: borrador },
+      },
     })
     if (signUpError) throw signUpError
     if (esUsuarioDuplicadoSinError(signUpData.user)) lanzarErrorEmailDuplicado()
