@@ -37,6 +37,11 @@ export function urlRedirectoAuth(): string {
   return `${window.location.origin}/auth`
 }
 
+/** Tras OAuth (Google): ProtectedRoute envía a /aceptar-terminos o muestra /dashboard. */
+export function urlRedirectoPostOAuth(): string {
+  return `${window.location.origin}/dashboard`
+}
+
 export function validarEmail(valor: string): string | null {
   const trimmed = valor.trim()
   if (!trimmed) return 'El email es obligatorio.'

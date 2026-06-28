@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Eye, EyeSlash, CheckCircle } from '@phosphor-icons/react'
 import { HoneypotField } from '../../../components/botProtection/HoneypotField'
 import { RegistrationCaptcha } from '../../../components/botProtection/RegistrationCaptcha'
+import { GoogleAuthButton } from '../../../components/auth/GoogleAuthButton'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 import { validarContrasena, validarEmail, esMensajeEmailDuplicado, esMensajeConfirmacionEmail } from '../../../lib/validaciones'
 import { ConfirmacionEmailPanel } from '../components/ConfirmacionEmailPanel'
@@ -151,17 +152,23 @@ export default function Step4Registro({
           fontSize: '16px',
           color: '#6b7280',
           textAlign: 'center',
-          marginBottom: '32px',
+          marginBottom: '24px',
         }}>
           Guardalo gratis para aparecer en búsquedas
         </p>
 
-        {/* Divider */}
+        <GoogleAuthButton />
+
         <div style={{
-          height: '1px',
-          backgroundColor: '#DEE2E6',
-          marginBottom: '32px',
-        }} />
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px',
+        }}>
+          <span style={{ flex: 1, height: '1px', background: '#E9ECEF' }} />
+          <span style={{ fontSize: '12px', color: '#8C96A3' }}>o</span>
+          <span style={{ flex: 1, height: '1px', background: '#E9ECEF' }} />
+        </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>

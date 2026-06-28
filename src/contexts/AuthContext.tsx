@@ -5,7 +5,7 @@ import {
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { AuthContext, type AuthContextValue, type Perfil } from './AuthContextType'
-import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, urlRedirectoAuth } from '../lib/validaciones'
+import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, urlRedirectoAuth, urlRedirectoPostOAuth } from '../lib/validaciones'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
@@ -100,10 +100,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [])
 
   const signInWithGoogle = useCallback(async () => {
-    const redirectTo = `${window.location.origin}/dashboard`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo },
+      options: { redirectTo: urlRedirectoPostOAuth() },
     })
     if (error) throw error
   }, [])
