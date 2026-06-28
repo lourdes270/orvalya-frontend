@@ -37,9 +37,11 @@ export function urlRedirectoAuth(): string {
   return `${window.location.origin}/auth`
 }
 
-/** Tras OAuth (Google): ProtectedRoute envía a /aceptar-terminos o muestra /dashboard. */
-export function urlRedirectoPostOAuth(): string {
-  return `${window.location.origin}/dashboard`
+/** Tras OAuth (Google): onboarding retoma paso 4; login normal va a /dashboard. */
+export function urlRedirectoPostOAuth(fromOnboarding = false): string {
+  const origin = window.location.origin
+  if (fromOnboarding) return `${origin}/onboarding?paso=4`
+  return `${origin}/dashboard`
 }
 
 export function validarEmail(valor: string): string | null {

@@ -157,7 +157,7 @@ export default function Step4Registro({
           Guardalo gratis para aparecer en búsquedas
         </p>
 
-        <GoogleAuthButton />
+        <GoogleAuthButton fromOnboarding />
 
         <div style={{
           display: 'flex',

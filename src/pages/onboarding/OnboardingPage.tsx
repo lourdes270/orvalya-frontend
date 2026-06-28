@@ -8,7 +8,7 @@ import Step4Registro from './steps/Step4Registro'
 import ProgressBar from './components/ProgressBar'
 import { useOnboardingForm } from './hooks/useOnboardingForm'
 import { useAuth } from '../../contexts/useAuth'
-import { intentarCompletarOnboardingPendiente } from './hooks/helpers'
+import { intentarCompletarOnboardingPendiente, restaurarBorradorOnboardingSiFalta } from './hooks/helpers'
 
 function PantallaCarga({ texto }: { texto: string }) {
   return (
@@ -30,6 +30,10 @@ export default function OnboardingPage() {
     form, selecciones, estadoFiscal, loading, error, fakeSuccess,
     setForm, setEstadoFiscal, toggleSubrubro, puedeAvanzar, guardarYFinalizar, handleRegistro,
   } = useOnboardingForm()
+
+  useEffect(() => {
+    restaurarBorradorOnboardingSiFalta()
+  }, [])
 
   useEffect(() => {
     const handle = () => setIsMobile(window.innerWidth < 768)

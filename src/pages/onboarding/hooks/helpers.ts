@@ -44,11 +44,42 @@ function normalizarBorrador(raw: unknown): OnboardingDraft | null {
 
 export function cargarBorradorOnboarding(): OnboardingDraft | null {
   try {
-    const saved = localStorage.getItem(DRAFT_KEY)
+    const saved = localStorage.getItem(DRAFT_KEY) ?? sessionStorage.getItem(DRAFT_KEY)
     if (!saved) return null
     return normalizarBorrador(JSON.parse(saved))
   } catch {
     return null
+  }
+}
+
+/** Tras OAuth, localStorage a veces queda vacío; restauramos desde sessionStorage. */
+export function restaurarBorradorOnboardingSiFalta(): void {
+  if (localStorage.getItem(DRAFT_KEY)) return
+  const backup = sessionStorage.getItem(DRAFT_KEY)
+  if (backup) localStorage.setItem(DRAFT_KEY, backup)
+}
+
+export function getOnboardingResumePath(): string {
+  const draft = cargarBorradorOnboarding()
+  if (!draft) return '/onboarding'
+  if (puedeAvanzar(3, draft.form, draft.selecciones, draft.estadoFiscal)) {
+    return '/onboarding?paso=4'
+  }
+  const paso = inferirPasoOnboarding(draft)
+  return paso > 0 ? `/onboarding?paso=${paso}` : '/onboarding'
+}
+
+export function prepararBorradorParaOAuthOnboarding(): void {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY) ?? sessionStorage.getItem(DRAFT_KEY)
+    if (!raw) return
+    const parsed = JSON.parse(raw) as Record<string, unknown>
+    parsed.paso = 4
+    const serialized = JSON.stringify(parsed)
+    localStorage.setItem(DRAFT_KEY, serialized)
+    sessionStorage.setItem(DRAFT_KEY, serialized)
+  } catch {
+    /* ignore */
   }
 }
 
@@ -112,6 +143,7 @@ export async function intentarCompletarOnboardingPendiente(
 
   if (perfilResult) setPerfil(perfilResult)
   localStorage.removeItem(DRAFT_KEY)
+  sessionStorage.removeItem(DRAFT_KEY)
   navigate('/aceptar-terminos', { replace: true })
   return 'completado'
 }

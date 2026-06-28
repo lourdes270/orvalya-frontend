@@ -28,7 +28,11 @@ function GoogleIcon() {
   )
 }
 
-export function GoogleAuthButton() {
+type GoogleAuthButtonProps = {
+  fromOnboarding?: boolean
+}
+
+export function GoogleAuthButton({ fromOnboarding = false }: GoogleAuthButtonProps) {
   const { signInWithGoogle } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -37,7 +41,7 @@ export function GoogleAuthButton() {
     setError('')
     setLoading(true)
     try {
-      await signInWithGoogle()
+      await signInWithGoogle({ fromOnboarding })
     } catch {
       setError('No pudimos conectar con Google. Intentá de nuevo.')
       setLoading(false)

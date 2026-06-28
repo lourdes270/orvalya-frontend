@@ -6,6 +6,7 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { AuthContext, type AuthContextValue, type Perfil } from './AuthContextType'
 import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, urlRedirectoAuth, urlRedirectoPostOAuth } from '../lib/validaciones'
+import { prepararBorradorParaOAuthOnboarding } from '../pages/onboarding/hooks/helpers'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
@@ -99,16 +100,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { session: data.session, user: data.user }
     }, [])
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (options?: { fromOnboarding?: boolean }) => {
+    const fromOnboarding = options?.fromOnboarding === true
+    if (fromOnboarding) {
+      const { prepararBorradorParaOAuthOnboarding } = await import('../pages/onboarding/hooks/helpers')
+      prepararBorradorParaOAuthOnboarding()
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: urlRedirectoPostOAuth() },
+      options: { redirectTo: urlRedirectoPostOAuth(fromOnboarding) },
     })
     if (error) throw error
   }, [])
 
   const signOut = useCallback(async () => {
     localStorage.removeItem('orvalya_onboarding_draft')
+    sessionStorage.removeItem('orvalya_onboarding_draft')
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }, [])
