@@ -6,6 +6,12 @@ export type SignUpResult = {
   user: User | null
 }
 
+export type DocumentacionAdicional = {
+  carne_salud?: boolean
+  libreta_conducir?: boolean
+  habilitacion_municipal?: boolean
+}
+
 export type Perfil = {
   id: string
   email: string
@@ -30,6 +36,10 @@ export type Perfil = {
   viatico_diario?: number | null
   tiene_vehiculo?: boolean | null
   tipo_vehiculo?: string | null
+  sobre_mi?: string | null
+  experiencia?: string | null
+  cursos?: string | null
+  documentacion_adicional?: DocumentacionAdicional | null
   updated_at?: string | null
   created_at?: string | null
 }

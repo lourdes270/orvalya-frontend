@@ -1,6 +1,6 @@
 import { useState, useEffect, type CSSProperties } from 'react'
 import { supabase } from '../../lib/supabase'
-import type { Perfil } from '../../contexts/AuthContextType'
+import type { DocumentacionAdicional, Perfil } from '../../contexts/AuthContextType'
 import { isDescripcionJson } from '../../lib/formatDescripcionServicio'
 import { RANGOS_EDAD, selectRangoEdadStyle } from '../../lib/rangoEdad'
 import { formatZonaDisplay } from './formatZona'
@@ -27,6 +27,32 @@ type FormState = {
   viatico_diario: string
   tiene_vehiculo: boolean
   tipo_vehiculo: string
+  sobre_mi: string
+  experiencia: string
+  cursos: string
+  documentacion_adicional: DocumentacionAdicional
+}
+
+const DOCUMENTACION_OPCIONES = [
+  { key: 'carne_salud', label: 'Carné de salud vigente' },
+  { key: 'libreta_conducir', label: 'Libreta de conducir' },
+  { key: 'habilitacion_municipal', label: 'Habilitación municipal' },
+] as const satisfies ReadonlyArray<{ key: keyof DocumentacionAdicional; label: string }>
+
+const DOCUMENTACION_VACIA: DocumentacionAdicional = {
+  carne_salud: false,
+  libreta_conducir: false,
+  habilitacion_municipal: false,
+}
+
+function parseDocumentacionAdicional(valor: unknown): DocumentacionAdicional {
+  if (!valor || typeof valor !== 'object') return { ...DOCUMENTACION_VACIA }
+  const data = valor as Record<string, unknown>
+  return {
+    carne_salud: data.carne_salud === true,
+    libreta_conducir: data.libreta_conducir === true,
+    habilitacion_municipal: data.habilitacion_municipal === true,
+  }
 }
 
 const inputStyle: CSSProperties = {
@@ -80,6 +106,10 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
     viatico_diario: '',
     tiene_vehiculo: false,
     tipo_vehiculo: '',
+    sobre_mi: '',
+    experiencia: '',
+    cursos: '',
+    documentacion_adicional: { ...DOCUMENTACION_VACIA },
   })
   const [guardando, setGuardando] = useState(false)
   const [guardado, setGuardado] = useState(false)
@@ -102,6 +132,10 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
       viatico_diario: perfil.viatico_diario != null ? String(perfil.viatico_diario) : '',
       tiene_vehiculo: perfil.tiene_vehiculo ?? false,
       tipo_vehiculo: perfil.tipo_vehiculo ?? '',
+      sobre_mi: perfil.sobre_mi ?? '',
+      experiencia: perfil.experiencia ?? '',
+      cursos: perfil.cursos ?? '',
+      documentacion_adicional: parseDocumentacionAdicional(perfil.documentacion_adicional),
     })
   }, [perfil])
 
@@ -129,7 +163,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         ? parseNumero(form.viatico_diario)
         : null
 
-      const payload: Record<string, string | number | boolean | null> = {
+      const payload: Record<string, string | number | boolean | null | DocumentacionAdicional> = {
         nombre: form.nombre,
         telefono,
         whatsapp,
@@ -141,6 +175,10 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         viatico_diario,
         tiene_vehiculo: form.tiene_vehiculo,
         tipo_vehiculo: form.tiene_vehiculo && form.tipo_vehiculo ? form.tipo_vehiculo : null,
+        sobre_mi: form.sobre_mi.trim() || null,
+        experiencia: form.experiencia.trim() || null,
+        cursos: form.cursos.trim() || null,
+        documentacion_adicional: form.documentacion_adicional,
       }
       if (!isDescripcionJson(form.descripcion)) payload.descripcion = form.descripcion
       const { error } = await supabase.from('perfiles').update(payload).eq('id', perfil.id)
@@ -159,6 +197,10 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         viatico_diario,
         tiene_vehiculo: form.tiene_vehiculo,
         tipo_vehiculo: form.tiene_vehiculo && form.tipo_vehiculo ? form.tipo_vehiculo : null,
+        sobre_mi: form.sobre_mi.trim() || null,
+        experiencia: form.experiencia.trim() || null,
+        cursos: form.cursos.trim() || null,
+        documentacion_adicional: form.documentacion_adicional,
       })
       setGuardado(true)
       setTimeout(() => setGuardado(false), 3000)
@@ -252,6 +294,43 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
     </label>
   )
 
+  const textareaConLimite = (
+    titulo: string,
+    key: 'sobre_mi' | 'experiencia' | 'cursos',
+    maximo: number,
+    placeholder: string,
+  ) => (
+    <div style={{ marginBottom: '20px' }}>
+      <label style={labelStyle}>{titulo}</label>
+      <textarea
+        value={form[key]}
+        onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value.slice(0, maximo) }))}
+        placeholder={placeholder}
+        maxLength={maximo}
+        rows={4}
+        style={{
+          ...inputStyle,
+          resize: 'vertical',
+          minHeight: '96px',
+          lineHeight: 1.5,
+        }}
+      />
+      <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#8C96A3', textAlign: 'right' }}>
+        {form[key].length}/{maximo}
+      </p>
+    </div>
+  )
+
+  const toggleDocumentacion = (key: keyof DocumentacionAdicional) => {
+    setForm(prev => ({
+      ...prev,
+      documentacion_adicional: {
+        ...prev.documentacion_adicional,
+        [key]: !prev.documentacion_adicional[key],
+      },
+    }))
+  }
+
   return (
     <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: '16px' }}>
       <h2 style={{ color: '#1F3864', fontSize: '16px', fontWeight: 600, margin: '0 0 20px' }}>Mi perfil</h2>
@@ -308,6 +387,56 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         </select>
       </div>
       <DescripcionServicioField raw={form.descripcion} />
+
+      <div style={{ marginBottom: '20px', paddingTop: '4px', borderTop: '1px solid #F1F3F5' }}>
+        <h3 style={{ color: '#1F3864', fontSize: '14px', fontWeight: 600, margin: '16px 0 16px' }}>
+          Presentación profesional
+        </h3>
+        {textareaConLimite(
+          'Sobre mí',
+          'sobre_mi',
+          300,
+          'Ej: Tengo 10 años de experiencia en limpieza de hogares y oficinas. Soy puntual, responsable y cuido cada detalle.',
+        )}
+        {textareaConLimite(
+          'Mi experiencia',
+          'experiencia',
+          400,
+          'Ej: Trabajé 5 años en empresa de limpieza industrial. También atendí clientes particulares en Montevideo y Canelones.',
+        )}
+        {textareaConLimite(
+          'Cursos y estudios',
+          'cursos',
+          300,
+          'Ej: Curso de manipulación de alimentos (2022). Primeros auxilios básicos (2023). Secundaria completa.',
+        )}
+        <div style={{ marginBottom: '8px' }}>
+          <label style={labelStyle}>Documentación adicional (opcional)</label>
+          {DOCUMENTACION_OPCIONES.map(opcion => (
+            <label
+              key={opcion.key}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginBottom: '10px',
+                fontSize: '13px',
+                color: '#495057',
+                cursor: 'pointer',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={!!form.documentacion_adicional[opcion.key]}
+                onChange={() => toggleDocumentacion(opcion.key)}
+                style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+              />
+              <span>{opcion.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       {error && <p style={{ color: '#dc2626', fontSize: '13px', margin: '0 0 12px' }}>{error}</p>}
       <button onClick={guardar} disabled={guardando} style={{ padding: '10px 24px', background: guardado ? '#40C057' : '#1F3864', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
         {guardando ? 'Guardando...' : guardado ? 'Guardado ✓' : 'Guardar perfil'}
