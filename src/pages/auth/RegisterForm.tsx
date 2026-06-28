@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { HoneypotField } from '../../components/botProtection/HoneypotField'
@@ -10,6 +10,7 @@ import {
 import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
 import { activarPerfilContratante } from '../../lib/registroHelpers'
 import { mensajeErrorAuth, validarContrasena, validarEmail, MENSAJE_CONFIRMACION_EMAIL } from '../../lib/validaciones'
+import { ConfirmacionEmailPanel } from '../onboarding/components/ConfirmacionEmailPanel'
 import { s } from './styles'
 
 export function RegisterForm() {
@@ -20,9 +21,17 @@ export function RegisterForm() {
   const [confirm, setConfirm] = useState('')
   const [honeypot, setHoneypot] = useState('')
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaResetKey, setCaptchaResetKey] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [successMsg, setSuccessMsg] = useState('')
+  const [emailConfirmado, setEmailConfirmado] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!errors.general) return
+    setCaptchaToken(null)
+    setCaptchaResetKey(k => k + 1)
+  }, [errors.general])
 
   const validate = () => {
     const e: Record<string, string> = {}
@@ -59,6 +68,7 @@ export function RegisterForm() {
       const { session } = await signUp({ email: emailNorm, password })
 
       if (!session) {
+        setEmailConfirmado(emailNorm)
         setSuccessMsg(MENSAJE_CONFIRMACION_EMAIL)
         return
       }
@@ -76,6 +86,10 @@ export function RegisterForm() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (successMsg === MENSAJE_CONFIRMACION_EMAIL && emailConfirmado) {
+    return <ConfirmacionEmailPanel email={emailConfirmado} isMobile={false} />
   }
 
   return (
@@ -96,7 +110,11 @@ export function RegisterForm() {
         <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repetí tu contraseña" style={{ ...s.input, ...(errors.confirm ? s.inputError : {}) }} />
         {errors.confirm && <p style={s.error}>{errors.confirm}</p>}
       </div>
-      <RegistrationCaptcha onVerify={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
+      <RegistrationCaptcha
+        resetKey={captchaResetKey}
+        onVerify={setCaptchaToken}
+        onExpire={() => setCaptchaToken(null)}
+      />
       {errors.general && <p style={s.error}>{errors.general}</p>}
       {successMsg && <p style={{ ...s.error, color: '#059669' }}>{successMsg}</p>}
       <button type="submit" style={s.btn} disabled={loading || !captchaToken}>

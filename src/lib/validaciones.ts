@@ -4,7 +4,7 @@ export const MENSAJE_CONTRASENA =
   'La contraseña debe tener al menos 8 caracteres, incluir una mayúscula y un número.'
 
 export const MENSAJE_CONFIRMACION_EMAIL =
-  'Te enviamos un correo para confirmar tu cuenta. Revisá tu bandeja de entrada (y spam). Cuando confirmes, iniciá sesión para terminar tu perfil.'
+  '¡Listo! Te enviamos un email para confirmar tu cuenta.'
 
 export const MENSAJE_EMAIL_DUPLICADO =
   'Este email ya está registrado. ¿Querés iniciar sesión?'

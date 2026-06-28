@@ -1,11 +1,13 @@
 import { supabase } from '../supabase'
 
-const RATE_LIMIT_MSG = 'Demasiados intentos, esperá unos minutos'
+const RATE_LIMIT_MSG = 'Demasiados intentos. Esperá 15 minutos e intentá de nuevo.'
+export const CAPTCHA_VENCIDO_MSG = 'El captcha venció. Marcá la casilla otra vez y tocá Crear perfil.'
 
 function extractErrorMessage(data: unknown, fallback: string): string {
   if (data && typeof data === 'object' && 'error' in data) {
     const err = (data as { error?: string }).error
     if (err === RATE_LIMIT_MSG) return RATE_LIMIT_MSG
+    if (err === CAPTCHA_VENCIDO_MSG) return CAPTCHA_VENCIDO_MSG
     if (err) return err
   }
   return fallback

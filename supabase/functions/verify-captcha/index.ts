@@ -5,9 +5,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const RATE_LIMIT_MSG = 'Demasiados intentos, esperá unos minutos'
+const RATE_LIMIT_MSG = 'Demasiados intentos. Esperá 15 minutos e intentá de nuevo.'
+const CAPTCHA_VENCIDO_MSG = 'El captcha venció. Marcá la casilla otra vez y tocá Crear perfil.'
 const WINDOW_MS = 15 * 60 * 1000
-const MAX_ATTEMPTS = 5
+const MAX_ATTEMPTS = 12
+
+function esCaptchaVencido(codes: unknown): boolean {
+  if (!Array.isArray(codes)) return false
+  return codes.some((code) =>
+    code === 'expired-input-response'
+    || code === 'invalid-input-response'
+    || code === 'timeout-or-duplicate'
+  )
+}
 
 function json(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -79,12 +89,6 @@ Deno.serve(async (req) => {
       return json({ success: false, error: RATE_LIMIT_MSG }, 429)
     }
 
-    const { error: insertError } = await admin.from('rate_limit_attempts').insert({ ip_address: ip, endpoint })
-    if (insertError) {
-      console.error('rate_limit insert error:', insertError)
-      return json({ success: false, error: 'Error interno' }, 500)
-    }
-
     const verifyRes = await fetch('https://hcaptcha.com/siteverify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -93,8 +97,19 @@ Deno.serve(async (req) => {
 
     const verifyData = await verifyRes.json()
     if (!verifyData.success) {
-      console.warn('hcaptcha verify failed:', verifyData['error-codes'])
-      return json({ success: false, error: 'Verificación captcha fallida' }, 400)
+      const codes = verifyData['error-codes']
+      if (esCaptchaVencido(codes)) {
+        return json({ success: false, error: CAPTCHA_VENCIDO_MSG }, 400)
+      }
+      console.warn('hcaptcha verify failed:', codes)
+      const { error: insertError } = await admin.from('rate_limit_attempts').insert({ ip_address: ip, endpoint })
+      if (insertError) console.error('rate_limit insert error:', insertError)
+      return json({ success: false, error: 'No pudimos verificar el captcha. Intentá de nuevo.' }, 400)
+    }
+
+    const { error: insertError } = await admin.from('rate_limit_attempts').insert({ ip_address: ip, endpoint })
+    if (insertError) {
+      console.error('rate_limit insert error:', insertError)
     }
 
     return json({ success: true })

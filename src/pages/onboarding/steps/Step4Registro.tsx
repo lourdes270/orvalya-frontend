@@ -4,6 +4,7 @@ import { HoneypotField } from '../../../components/botProtection/HoneypotField'
 import { RegistrationCaptcha } from '../../../components/botProtection/RegistrationCaptcha'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 import { validarContrasena, validarEmail, esMensajeEmailDuplicado, esMensajeConfirmacionEmail } from '../../../lib/validaciones'
+import { ConfirmacionEmailPanel } from '../components/ConfirmacionEmailPanel'
 
 interface Step4RegistroProps {
   isMobile: boolean
@@ -34,8 +35,19 @@ export default function Step4Registro({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [honeypot, setHoneypot] = useState('')
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  const [captchaResetKey, setCaptchaResetKey] = useState(0)
   const [touched, setTouched] = useState({ email: false, password: false, confirm: false })
   const [fieldErrors, setFieldErrors] = useState({ email: '', password: '', confirm: '' })
+
+  useEffect(() => {
+    if (!error) return
+    setCaptchaToken(null)
+    setCaptchaResetKey(k => k + 1)
+  }, [error])
+
+  if (fakeSuccess && esMensajeConfirmacionEmail(fakeSuccess)) {
+    return <ConfirmacionEmailPanel email={email} isMobile={isMobile} />
+  }
 
   const validateField = (field: string, value: string) => {
     switch (field) {
@@ -302,7 +314,11 @@ export default function Step4Registro({
             )}
           </div>
 
-          <RegistrationCaptcha onVerify={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
+          <RegistrationCaptcha
+            resetKey={captchaResetKey}
+            onVerify={setCaptchaToken}
+            onExpire={() => setCaptchaToken(null)}
+          />
 
           {/* Submit Button */}
           <button
@@ -357,18 +373,11 @@ export default function Step4Registro({
               )}
             </div>
           )}
-          {fakeSuccess && (
+          {fakeSuccess && !esMensajeConfirmacionEmail(fakeSuccess) && (
             <div style={{ textAlign: 'center', margin: '4px 0 0 0' }}>
               <p style={{ color: '#059669', fontSize: '14px', margin: 0 }}>
                 {fakeSuccess}
               </p>
-              {esMensajeConfirmacionEmail(fakeSuccess) && (
-                <p style={{ fontSize: '14px', margin: '8px 0 0 0' }}>
-                  <a href="/auth" style={{ color: '#1F3864', fontWeight: 600, textDecoration: 'none' }}>
-                    Ir a iniciar sesión →
-                  </a>
-                </p>
-              )}
             </div>
           )}
         </form>
