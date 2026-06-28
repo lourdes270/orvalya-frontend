@@ -146,6 +146,7 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
   const isMobile = useIsMobile(640)
   const [semaforo, setSemaforo] = useState<string>('rojo')
   const [docsCount, setDocsCount] = useState(0)
+  const [generandoPdf, setGenerandoPdf] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
@@ -164,8 +165,40 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
   const semaforoIcon = semaforo === 'verde' ? '🟢' : semaforo === 'amarillo' ? '🟡' : '🔴'
   const semaforoLabel = semaforo === 'verde' ? 'Completo' : semaforo === 'amarillo' ? 'En progreso' : 'Incompleto'
 
+  const handleDescargarPdf = async () => {
+    setGenerandoPdf(true)
+    try {
+      const { descargarPerfilPdf } = await import('./generatePerfilPdf')
+      await descargarPerfilPdf(perfil)
+    } catch (err) {
+      console.error('Error generando PDF:', err)
+    } finally {
+      setGenerandoPdf(false)
+    }
+  }
+
   return (
     <div>
+      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+        <button
+          type="button"
+          onClick={handleDescargarPdf}
+          disabled={generandoPdf}
+          style={{
+            padding: '10px 18px',
+            background: '#1F3864',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: generandoPdf ? 'not-allowed' : 'pointer',
+            opacity: generandoPdf ? 0.7 : 1,
+          }}
+        >
+          {generandoPdf ? 'Generando PDF...' : 'Descargar perfil como PDF'}
+        </button>
+      </div>
       <div style={statsGridStyle(isMobile)}>
         <Tarjeta titulo="Semáforo" valor={`${semaforoIcon} ${semaforoLabel}`} desc="Estado de documentación" />
         <Tarjeta titulo="Documentos" valor={`${docsCount} / 3`} desc="Certificados cargados" />
@@ -175,7 +208,7 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
       <PerfilPrestador perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
       <DocumentosPrestador perfil={perfil} />
       <Seccion titulo="Mis contratos">
-        <ItemVacio texto="No tenés contratos activos. Cuando una empresa te contrate, aparecerán acá." />
+        <ItemVacio texto="Todavía no tenés contratos. Las empresas que te encuentren en Orvalya podrán contratarte desde acá." />
       </Seccion>
     </div>
   )

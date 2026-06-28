@@ -336,7 +336,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
       <h2 style={{ color: '#1F3864', fontSize: '16px', fontWeight: 600, margin: '0 0 20px' }}>Mi perfil</h2>
       <PerfilPublicoCard perfil={{ ...perfil, nombre: form.nombre, rango_edad: form.rango_edad || null }} />
       {campo('Nombre de la empresa o persona', 'nombre', 'Ej: Limpieza Industrial García')}
-      {campo('RUT', 'rut', 'Ej: 21234567-8')}
+      {campo('RUT', 'rut', 'Ej: 21234567890')}
       {campo('Teléfono', 'telefono', 'Ej: 099123456', { inputMode: 'numeric', normalizar: true })}
       {campo('WhatsApp', 'whatsapp', '099123456', { inputMode: 'numeric', normalizar: true })}
 
@@ -396,19 +396,19 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
           'Sobre mí',
           'sobre_mi',
           300,
-          'Ej: Tengo 10 años de experiencia en limpieza de hogares y oficinas. Soy puntual, responsable y cuido cada detalle.',
+          'Ej: Albañil con 8 años de experiencia en construcción residencial e industrial. Especializado en revoque, mampostería y terminaciones. Puntual, responsable y con referencias verificables.',
         )}
         {textareaConLimite(
           'Mi experiencia',
           'experiencia',
           400,
-          'Ej: Trabajé 5 años en empresa de limpieza industrial. También atendí clientes particulares en Montevideo y Canelones.',
+          'Ej: 2018-2024 — Empresa Constructora del Este, Montevideo. Tareas de mampostería, revoques y colocación de cerámicos. 2015-2018 — Trabajos independientes en Canelones y Maldonado.',
         )}
         {textareaConLimite(
           'Cursos y estudios',
           'cursos',
           300,
-          'Ej: Curso de manipulación de alimentos (2022). Primeros auxilios básicos (2023). Secundaria completa.',
+          'Ej: Curso de Seguridad e Higiene Laboral (MTSS, 2022). Bachillerato completo (UTU, 2014). Curso de Instalaciones Sanitarias Básicas (CECAP, 2020).',
         )}
         <div style={{ marginBottom: '8px' }}>
           <label style={labelStyle}>Documentación adicional (opcional)</label>

@@ -39,6 +39,7 @@ export default function FilaDocumento({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
         <input type="date" value={estado.fecha_vencimiento}
+          title="Fecha de vencimiento del certificado"
           onChange={e => onChange({ fecha_vencimiento: e.target.value })}
           style={{ padding: '6px 10px', border: '1px solid #DEE2E6', borderRadius: '6px', fontSize: '13px' }} />
         <input ref={inputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: 'none' }}
