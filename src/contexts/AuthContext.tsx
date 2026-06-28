@@ -5,6 +5,7 @@ import {
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { AuthContext, type AuthContextValue, type Perfil } from './AuthContextType'
+import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, urlRedirectoAuth } from '../lib/validaciones'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
@@ -87,8 +88,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = useCallback(
     async ({ email, password }: { email: string; password: string }) => {
-      const { error } = await supabase.auth.signUp({ email, password })
+      const emailNorm = email.trim().toLowerCase()
+      const { data, error } = await supabase.auth.signUp({
+        email: emailNorm,
+        password,
+        options: { emailRedirectTo: urlRedirectoAuth() },
+      })
       if (error) throw error
+      if (esUsuarioDuplicadoSinError(data.user)) lanzarErrorEmailDuplicado()
+      return { session: data.session, user: data.user }
     }, [])
 
   const signInWithGoogle = useCallback(async () => {

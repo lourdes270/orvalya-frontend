@@ -9,11 +9,11 @@ import {
 } from '../../lib/botProtection/runRegistrationGuard'
 import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
 import { activarPerfilContratante } from '../../lib/registroHelpers'
-import { mensajeErrorAuth, validarContrasena, validarEmail } from '../../lib/validaciones'
+import { mensajeErrorAuth, validarContrasena, validarEmail, MENSAJE_CONFIRMACION_EMAIL } from '../../lib/validaciones'
 import { s } from './styles'
 
 export function RegisterForm() {
-  const { signUp, signInWithPassword, setPerfil } = useAuth()
+  const { signUp, setPerfil } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -55,12 +55,17 @@ export function RegisterForm() {
         return
       }
 
-      await signUp({ email, password })
-      await signInWithPassword({ email, password })
+      const emailNorm = email.trim().toLowerCase()
+      const { session } = await signUp({ email: emailNorm, password })
+
+      if (!session) {
+        setSuccessMsg(MENSAJE_CONFIRMACION_EMAIL)
+        return
+      }
 
       const tipoRegistro = sessionStorage.getItem(REGISTRO_TIPO_KEY)
       if (tipoRegistro === 'contratante') {
-        const perfil = await activarPerfilContratante(email)
+        const perfil = await activarPerfilContratante(emailNorm)
         setPerfil(perfil)
         sessionStorage.removeItem(REGISTRO_TIPO_KEY)
       }

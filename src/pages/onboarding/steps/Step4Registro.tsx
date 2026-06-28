@@ -3,7 +3,7 @@ import { Eye, EyeSlash, CheckCircle } from '@phosphor-icons/react'
 import { HoneypotField } from '../../../components/botProtection/HoneypotField'
 import { RegistrationCaptcha } from '../../../components/botProtection/RegistrationCaptcha'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
-import { validarContrasena, validarEmail } from '../../../lib/validaciones'
+import { validarContrasena, validarEmail, esMensajeEmailDuplicado, esMensajeConfirmacionEmail } from '../../../lib/validaciones'
 
 interface Step4RegistroProps {
   isMobile: boolean
@@ -58,7 +58,7 @@ export default function Step4Registro({
   const handleChange = (field: string, value: string) => {
     switch (field) {
       case 'email':
-        setEmail(value)
+        setEmail(value.toLowerCase())
         break
       case 'password':
         setPassword(value)
@@ -344,14 +344,32 @@ export default function Step4Registro({
 
           {/* Error message */}
           {error && (
-            <p style={{ color: '#dc2626', fontSize: '14px', textAlign: 'center', margin: '4px 0 0 0' }}>
-              {error}
-            </p>
+            <div style={{ textAlign: 'center', margin: '4px 0 0 0' }}>
+              <p style={{ color: '#dc2626', fontSize: '14px', margin: 0 }}>
+                {error}
+              </p>
+              {esMensajeEmailDuplicado(error) && (
+                <p style={{ fontSize: '14px', margin: '8px 0 0 0' }}>
+                  <a href="/auth" style={{ color: '#1F3864', fontWeight: 600, textDecoration: 'none' }}>
+                    Ir a iniciar sesión →
+                  </a>
+                </p>
+              )}
+            </div>
           )}
           {fakeSuccess && (
-            <p style={{ color: '#059669', fontSize: '14px', textAlign: 'center', margin: '4px 0 0 0' }}>
-              {fakeSuccess}
-            </p>
+            <div style={{ textAlign: 'center', margin: '4px 0 0 0' }}>
+              <p style={{ color: '#059669', fontSize: '14px', margin: 0 }}>
+                {fakeSuccess}
+              </p>
+              {esMensajeConfirmacionEmail(fakeSuccess) && (
+                <p style={{ fontSize: '14px', margin: '8px 0 0 0' }}>
+                  <a href="/auth" style={{ color: '#1F3864', fontWeight: 600, textDecoration: 'none' }}>
+                    Ir a iniciar sesión →
+                  </a>
+                </p>
+              )}
+            </div>
           )}
         </form>
 

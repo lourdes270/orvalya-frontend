@@ -1,6 +1,11 @@
 import type { Session, User } from '@supabase/supabase-js'
 import { createContext } from 'react'
 
+export type SignUpResult = {
+  session: Session | null
+  user: User | null
+}
+
 export type Perfil = {
   id: string
   email: string
@@ -36,7 +41,7 @@ export type AuthContextValue = {
   perfil: Perfil | null
   setPerfil: (perfil: Perfil) => void
   signInWithPassword: (args: { email: string; password: string }) => Promise<void>
-  signUp: (args: { email: string; password: string }) => Promise<void>
+  signUp: (args: { email: string; password: string }) => Promise<SignUpResult>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
 }

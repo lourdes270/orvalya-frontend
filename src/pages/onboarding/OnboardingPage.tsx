@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Step0TipoPerfil from './steps/Step0TipoPerfil'
 import Step1Categorias from './steps/Step1Categorias'
 import Step2DatosBasicos from './steps/Step2DatosBasicos'
@@ -7,11 +7,17 @@ import Step3Fiscalizacion from './steps/Step3Fiscalizacion'
 import Step4Registro from './steps/Step4Registro'
 import ProgressBar from './components/ProgressBar'
 import { useOnboardingForm } from './hooks/useOnboardingForm'
+import { useAuth } from '../../contexts/useAuth'
+import { intentarCompletarOnboardingPendiente } from './hooks/helpers'
 
 export default function OnboardingPage() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const { session, perfil, setPerfil } = useAuth()
   const pasoParam = searchParams.get('paso')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const [completandoPendiente, setCompletandoPendiente] = useState(false)
+  const intentoCompletarRef = useRef(false)
   const {
     form, selecciones, estadoFiscal, loading, error, fakeSuccess,
     setForm, setEstadoFiscal, toggleSubrubro, puedeAvanzar, guardarYFinalizar, handleRegistro,
@@ -22,6 +28,26 @@ export default function OnboardingPage() {
     window.addEventListener('resize', handle)
     return () => window.removeEventListener('resize', handle)
   }, [])
+
+  useEffect(() => {
+    if (!session) intentoCompletarRef.current = false
+  }, [session])
+
+  useEffect(() => {
+    if (!session?.user || perfil?.tipo !== 'pendiente' || intentoCompletarRef.current) return
+    intentoCompletarRef.current = true
+    setCompletandoPendiente(true)
+    intentarCompletarOnboardingPendiente(session.user.id, setPerfil, navigate)
+      .finally(() => setCompletandoPendiente(false))
+  }, [session?.user, perfil?.tipo, setPerfil, navigate])
+
+  if (completandoPendiente) {
+    return (
+      <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>
+        Finalizando tu perfil...
+      </div>
+    )
+  }
 
   if (!pasoParam || pasoParam === '0') return <Step0TipoPerfil isMobile={isMobile} />
 

@@ -5,10 +5,56 @@ import {
 } from '../../../lib/botProtection/runRegistrationGuard'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 import { buildPrestadorPerfilUpdate, esWhatsappValido } from '../../../lib/registroHelpers'
-import { mensajeErrorAuth, validarEmail, validarTelefono } from '../../../lib/validaciones'
+import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, mensajeErrorAuth, MENSAJE_CONFIRMACION_EMAIL, validarEmail, validarTelefono, urlRedirectoAuth } from '../../../lib/validaciones'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal, PasoOnboarding } from '../types'
 
 const DRAFT_KEY = 'orvalya_onboarding_draft'
+
+interface OnboardingDraft {
+  paso: PasoOnboarding
+  form: OnboardingForm
+  selecciones: SeleccionCategorias
+  estadoFiscal: EstadoFiscal | null
+}
+
+function cargarBorradorOnboarding(): OnboardingDraft | null {
+  try {
+    const saved = localStorage.getItem(DRAFT_KEY)
+    if (!saved) return null
+    return JSON.parse(saved) as OnboardingDraft
+  } catch {
+    return null
+  }
+}
+
+export async function intentarCompletarOnboardingPendiente(
+  userId: string,
+  setPerfil: (p: any) => void,
+  navigate: (to: string) => void,
+): Promise<boolean> {
+  const draft = cargarBorradorOnboarding()
+  if (!draft || !puedeAvanzar(3, draft.form, draft.selecciones, draft.estadoFiscal)) {
+    return false
+  }
+
+  const payload = buildPrestadorPerfilUpdate(draft.form, draft.selecciones, draft.estadoFiscal)
+  const { error: updateError } = await supabase
+    .from('perfiles')
+    .update(payload)
+    .eq('id', userId)
+  if (updateError) return false
+
+  const { data: perfilResult } = await supabase
+    .from('perfiles')
+    .select('*')
+    .eq('id', userId)
+    .single()
+
+  if (perfilResult) setPerfil(perfilResult)
+  localStorage.removeItem(DRAFT_KEY)
+  navigate('/aceptar-terminos')
+  return true
+}
 
 export async function fetchPerfilFromSupabase(setPerfil: (p: any) => void, setError: (e: string) => void, setIsLoading: (l: boolean) => void) {
   try {
@@ -117,12 +163,21 @@ export async function registrarUsuario(
       return
     }
 
-    const { data: { user }, error: signUpError } = await supabase.auth.signUp({ email, password })
+    const emailNorm = email.trim().toLowerCase()
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: emailNorm,
+      password,
+      options: { emailRedirectTo: urlRedirectoAuth() },
+    })
     if (signUpError) throw signUpError
+    if (esUsuarioDuplicadoSinError(signUpData.user)) lanzarErrorEmailDuplicado()
+    const user = signUpData.user
     if (!user) throw new Error('No se pudo crear el usuario')
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
-    if (signInError) throw signInError
+    if (!signUpData.session) {
+      setFakeSuccess?.(MENSAJE_CONFIRMACION_EMAIL)
+      return
+    }
 
     await new Promise(resolve => setTimeout(resolve, 1500))
 
