@@ -97,17 +97,17 @@ export function RegisterForm() {
       <HoneypotField value={honeypot} onChange={setHoneypot} />
       <div style={s.field}>
         <label style={s.label}>Email</label>
-        <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" style={{ ...s.input, ...(errors.email ? s.inputError : {}) }} />
+        <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" style={{ ...s.input, ...(errors.email ? s.inputError : {}) }} />
         {errors.email && <p style={s.error}>{errors.email}</p>}
       </div>
       <div style={s.field}>
         <label style={s.label}>Contraseña</label>
-        <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número" style={{ ...s.input, ...(errors.password ? s.inputError : {}) }} />
+        <input type="password" autoComplete="new-password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número" style={{ ...s.input, ...(errors.password ? s.inputError : {}) }} />
         {errors.password && <p style={s.error}>{errors.password}</p>}
       </div>
       <div style={s.field}>
         <label style={s.label}>Confirmar contraseña</label>
-        <input type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repetí tu contraseña" style={{ ...s.input, ...(errors.confirm ? s.inputError : {}) }} />
+        <input type="password" autoComplete="new-password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repetí tu contraseña" style={{ ...s.input, ...(errors.confirm ? s.inputError : {}) }} />
         {errors.confirm && <p style={s.error}>{errors.confirm}</p>}
       </div>
       <RegistrationCaptcha

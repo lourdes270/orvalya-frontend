@@ -177,6 +177,7 @@ export default function Step4Registro({
           <div>
             <input
               type="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => handleChange('email', e.target.value)}
               placeholder="tu@email.com"
@@ -214,6 +215,7 @@ export default function Step4Registro({
             <div style={{ position: 'relative' }}>
               <input
                 type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => handleChange('password', e.target.value)}
                 placeholder="Mín. 8 caracteres, 1 mayúscula y 1 número"
@@ -270,6 +272,7 @@ export default function Step4Registro({
             <div style={{ position: 'relative' }}>
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(e) => handleChange('confirm', e.target.value)}
                 placeholder="Repetí tu contraseña"

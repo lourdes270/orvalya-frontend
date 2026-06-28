@@ -46,6 +46,7 @@ export type Perfil = {
 
 export type AuthContextValue = {
   loading: boolean
+  postAuthPending: boolean
   session: Session | null
   user: User | null
   perfil: Perfil | null

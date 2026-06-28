@@ -231,6 +231,7 @@ export default function Step2DatosBasicos({
           </label>
           <input
             type="text"
+            autoComplete="given-name"
             style={{
               ...STYLES.input(isMobile),
               height: isMobile ? '52px' : undefined,
@@ -247,6 +248,7 @@ export default function Step2DatosBasicos({
           </label>
           <input
             type="text"
+            autoComplete="family-name"
             style={{
               ...STYLES.input(isMobile),
               height: isMobile ? '52px' : undefined,
@@ -263,6 +265,7 @@ export default function Step2DatosBasicos({
           </label>
           <input
             type="email"
+            autoComplete="email"
             style={{
               ...STYLES.input(isMobile),
               height: isMobile ? '52px' : undefined,
@@ -279,6 +282,7 @@ export default function Step2DatosBasicos({
           </label>
           <input
             type="tel"
+            autoComplete="tel"
             style={{
               ...STYLES.input(isMobile),
               height: isMobile ? '52px' : undefined,
@@ -296,6 +300,7 @@ export default function Step2DatosBasicos({
           </label>
           <input
             type="tel"
+            autoComplete="tel"
             inputMode="numeric"
             style={{
               ...STYLES.input(isMobile),

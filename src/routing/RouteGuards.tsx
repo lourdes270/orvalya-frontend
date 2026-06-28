@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/useAuth'
 import { useLegalGate } from '../hooks/useLegalGate'
-import { getOnboardingResumePath } from '../pages/onboarding/hooks/helpers'
+import { esCallbackOAuth, getOnboardingResumePath } from '../pages/onboarding/hooks/helpers'
 
 function LoadingScreen({ text }: { text: string }) {
   return (
@@ -12,51 +11,61 @@ function LoadingScreen({ text }: { text: string }) {
   )
 }
 
-function NavigateOnboardingPendiente() {
-  const [path, setPath] = useState<string | null>(null)
-
-  useEffect(() => {
-    setPath(getOnboardingResumePath())
-  }, [])
-
-  if (!path) return <LoadingScreen text="Cargando..." />
-  return <Navigate to={path} replace />
-}
-
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { session, perfil, loading } = useAuth()
+  const { session, perfil, loading, postAuthPending } = useAuth()
   const { checking, accepted } = useLegalGate(session?.user?.id)
 
-  if (loading || checking) return <LoadingScreen text="Cargando..." />
-  if (!session) return <Navigate to="/" replace />
+  if (loading || postAuthPending || checking || esCallbackOAuth()) {
+    return <LoadingScreen text="Cargando..." />
+  }
+  if (!session) return <Navigate to="/auth" replace />
   if (!perfil) return <LoadingScreen text="Cargando perfil..." />
-  if (perfil.tipo === 'pendiente') return <NavigateOnboardingPendiente />
+  if (perfil.tipo === 'pendiente') {
+    return <Navigate to={getOnboardingResumePath()} replace />
+  }
   if (!accepted) return <Navigate to="/aceptar-terminos" replace />
   return <>{children}</>
 }
 
 export function SessionRoute({ children }: { children: React.ReactNode }) {
-  const { session, perfil, loading } = useAuth()
-  if (loading) return <LoadingScreen text="Cargando..." />
+  const { session, perfil, loading, postAuthPending } = useAuth()
+  if (loading || postAuthPending || esCallbackOAuth()) return <LoadingScreen text="Cargando..." />
   if (!session) return <Navigate to="/auth" replace />
-  if (perfil?.tipo === 'pendiente') return <NavigateOnboardingPendiente />
+  if (perfil?.tipo === 'pendiente') {
+    return <Navigate to={getOnboardingResumePath()} replace />
+  }
   return <>{children}</>
 }
 
 export function LegalAcceptanceRoute({ children }: { children: React.ReactNode }) {
-  const { session, perfil, loading } = useAuth()
+  const { session, perfil, loading, postAuthPending } = useAuth()
   const { checking, accepted } = useLegalGate(session?.user?.id)
 
-  if (loading || checking) return <LoadingScreen text="Cargando..." />
+  if (loading || postAuthPending || checking || esCallbackOAuth()) {
+    return <LoadingScreen text="Cargando..." />
+  }
   if (!session) return <Navigate to="/auth" replace />
-  if (perfil?.tipo === 'pendiente') return <NavigateOnboardingPendiente />
+  if (perfil?.tipo === 'pendiente') {
+    return <Navigate to={getOnboardingResumePath()} replace />
+  }
   if (accepted) return <Navigate to="/dashboard" replace />
   return <>{children}</>
 }
 
 export function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { session, loading } = useAuth()
-  if (loading) return null
-  if (session) return <Navigate to="/dashboard" replace />
+  const { session, perfil, loading, postAuthPending } = useAuth()
+
+  if (loading || postAuthPending || esCallbackOAuth()) {
+    return <LoadingScreen text="Ingresando..." />
+  }
+  if (session && perfil === null) {
+    return <LoadingScreen text="Cargando perfil..." />
+  }
+  if (session && perfil) {
+    if (perfil.tipo === 'pendiente') {
+      return <Navigate to={getOnboardingResumePath()} replace />
+    }
+    return <Navigate to="/dashboard" replace />
+  }
   return <>{children}</>
 }

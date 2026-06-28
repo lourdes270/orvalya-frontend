@@ -37,11 +37,11 @@ export function urlRedirectoAuth(): string {
   return `${window.location.origin}/auth`
 }
 
-/** Tras OAuth (Google): onboarding retoma paso 4; login normal va a /dashboard. */
+/** Tras OAuth (Google): onboarding retoma paso 4; login normal vuelve a /auth para enrutar según perfil. */
 export function urlRedirectoPostOAuth(fromOnboarding = false): string {
   const origin = window.location.origin
   if (fromOnboarding) return `${origin}/onboarding?paso=4`
-  return `${origin}/dashboard`
+  return `${origin}/auth`
 }
 
 export function validarEmail(valor: string): string | null {

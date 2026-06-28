@@ -61,12 +61,28 @@ export function restaurarBorradorOnboardingSiFalta(): void {
 
 export function getOnboardingResumePath(): string {
   const draft = cargarBorradorOnboarding()
-  if (!draft) return '/onboarding'
+  if (!draft) return '/onboarding?paso=0'
   if (puedeAvanzar(3, draft.form, draft.selecciones, draft.estadoFiscal)) {
     return '/onboarding?paso=4'
   }
   const paso = inferirPasoOnboarding(draft)
-  return paso > 0 ? `/onboarding?paso=${paso}` : '/onboarding'
+  return paso > 0 ? `/onboarding?paso=${paso}` : '/onboarding?paso=0'
+}
+
+export function esCallbackOAuth(): boolean {
+  const hash = window.location.hash
+  const params = new URLSearchParams(window.location.search)
+  return hash.includes('access_token') || hash.includes('error=') || params.has('code')
+}
+
+export function limpiarUrlOAuth(): void {
+  const url = new URL(window.location.href)
+  const tieneHash = url.hash.length > 1
+  const tieneCode = url.searchParams.has('code')
+  if (!tieneHash && !tieneCode) return
+  url.hash = ''
+  url.searchParams.delete('code')
+  window.history.replaceState({}, '', `${url.pathname}${url.search}`)
 }
 
 export function prepararBorradorParaOAuthOnboarding(): void {

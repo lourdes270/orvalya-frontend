@@ -43,6 +43,7 @@ export function LoginForm() {
         <label style={s.label}>Email</label>
         <input
           type="email"
+          autoComplete="email"
           value={email}
           onChange={e => { setEmail(e.target.value); if (errors.email) setErrors(prev => ({ ...prev, email: '' })) }}
           placeholder="tu@email.com"
@@ -54,6 +55,7 @@ export function LoginForm() {
         <label style={s.label}>Contraseña</label>
         <input
           type="password"
+          autoComplete="current-password"
           value={password}
           onChange={e => { setPassword(e.target.value); if (errors.password) setErrors(prev => ({ ...prev, password: '' })) }}
           placeholder="••••••••"
