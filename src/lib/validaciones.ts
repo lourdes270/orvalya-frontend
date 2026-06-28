@@ -37,11 +37,6 @@ export function urlRedirectoAuth(): string {
   return `${window.location.origin}/auth`
 }
 
-/** Tras confirmar email, retoma el onboarding y guarda el perfil automáticamente. */
-export function urlRedirectoOnboardingCompletar(): string {
-  return `${window.location.origin}/onboarding?completar=1`
-}
-
 export function validarEmail(valor: string): string | null {
   const trimmed = valor.trim()
   if (!trimmed) return 'El email es obligatorio.'

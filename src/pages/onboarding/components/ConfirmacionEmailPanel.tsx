@@ -80,11 +80,11 @@ export function ConfirmacionEmailPanel({ email, isMobile }: ConfirmacionEmailPan
           <li>Abrí Gmail (o tu correo).</li>
           <li>Buscá un mail de Orvalya. Si no está, mirá <strong>Spam</strong> o <strong>Promociones</strong>.</li>
           <li>Tocá el botón <strong>Confirmar mi cuenta</strong>.</li>
-          <li>Te vamos a llevar solo a aceptar los términos. <strong>No tenés que cargar todo de nuevo.</strong></li>
+          <li>Te vamos a llevar a iniciar sesión y terminamos tu perfil. <strong>No tenés que cargar todo de nuevo.</strong></li>
         </ol>
 
         <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 16px', lineHeight: 1.5 }}>
-          Si el botón del mail no abre la página, iniciá sesión acá con tu email y contraseña.
+          Si el botón del mail no abre la página, usá el botón de abajo con tu email y contraseña.
         </p>
 
         <a

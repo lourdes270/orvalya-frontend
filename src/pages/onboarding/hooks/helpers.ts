@@ -6,7 +6,7 @@ import {
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 import { buildPrestadorPerfilUpdate, esWhatsappValido } from '../../../lib/registroHelpers'
 import type { User } from '@supabase/supabase-js'
-import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, mensajeErrorAuth, MENSAJE_CONFIRMACION_EMAIL, validarEmail, validarTelefono, urlRedirectoOnboardingCompletar } from '../../../lib/validaciones'
+import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, mensajeErrorAuth, MENSAJE_CONFIRMACION_EMAIL, validarEmail, validarTelefono, urlRedirectoAuth } from '../../../lib/validaciones'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal, PasoOnboarding } from '../types'
 
 export const DRAFT_KEY = 'orvalya_onboarding_draft'
@@ -229,7 +229,7 @@ export async function registrarUsuario(
       email: emailNorm,
       password,
       options: {
-        emailRedirectTo: urlRedirectoOnboardingCompletar(),
+        emailRedirectTo: urlRedirectoAuth(),
         data: { [METADATA_BORRADOR_KEY]: borrador },
       },
     })
