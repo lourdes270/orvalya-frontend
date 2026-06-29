@@ -9,6 +9,7 @@ import DocumentosPrestador from './documentos/DocumentosPrestador'
 import PerfilPrestador from './PerfilPrestador'
 import AvatarIncentiveCard from './AvatarIncentiveCard'
 import { statsGridStyle } from './dashboardLayout'
+import { DISCLAIMER_PLATAFORMA } from '../legal/legalCopy'
 
 export { formatZonaDisplay } from './formatZona'
 
@@ -215,6 +216,9 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
       <Seccion titulo="Mis contratos">
         <ItemVacio texto="Todavía no tenés contratos. Las empresas que te encuentren en Orvalya podrán contratarte desde acá." />
       </Seccion>
+      <p style={{ margin: '8px 0 0', fontSize: '11px', color: '#ADB5BD', lineHeight: 1.5 }}>
+        {DISCLAIMER_PLATAFORMA}
+      </p>
     </div>
   )
 }

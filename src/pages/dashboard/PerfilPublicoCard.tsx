@@ -20,9 +20,10 @@ export default function PerfilPublicoCard({ perfil, serviciosTexto }: PerfilPubl
       border: '1px solid #E0EAF2',
       textAlign: 'center',
     }}>
-      <p style={{ margin: '0 0 12px', fontSize: '11px', color: '#8C96A3', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-        Así te ven las empresas
+      <p style={{ margin: '0 0 8px', fontSize: '11px', color: '#8C96A3', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        Así te ven quienes te contratan
       </p>
+      <p style={{ margin: '0 0 8px', fontSize: '12px', color: '#8C96A3' }}>Imagen de empresa</p>
       <div style={{
         width: '96px',
         height: '96px',
@@ -34,7 +35,7 @@ export default function PerfilPublicoCard({ perfil, serviciosTexto }: PerfilPubl
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
       }}>
         {perfil.avatar_url ? (
-          <img src={perfil.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={perfil.avatar_url} alt="Imagen de empresa" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '36px' }}>👤</div>
         )}

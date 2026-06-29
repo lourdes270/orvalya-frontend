@@ -6,9 +6,10 @@ import { legalMarkdownComponents, legalPageLayout } from './legalPageStyles'
 interface LegalPageProps {
   markdownContent: string
   versionLabel: string
+  preContent?: React.ReactNode
 }
 
-export default function LegalPage({ markdownContent, versionLabel }: LegalPageProps) {
+export default function LegalPage({ markdownContent, versionLabel, preContent }: LegalPageProps) {
   return (
     <div style={legalPageLayout.page}>
       <header style={legalPageLayout.stickyHeader}>
@@ -16,6 +17,7 @@ export default function LegalPage({ markdownContent, versionLabel }: LegalPagePr
       </header>
       <article style={legalPageLayout.article}>
         <div style={legalPageLayout.markdown}>
+          {preContent}
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={legalMarkdownComponents}>
             {markdownContent}
           </ReactMarkdown>

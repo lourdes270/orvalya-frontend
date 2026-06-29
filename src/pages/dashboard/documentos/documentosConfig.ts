@@ -8,3 +8,6 @@ export type TipoDocumento = typeof DOCUMENTOS_CONFIG[number]['key']
 
 export const DECLARACION_JURADA =
   'Declaro que este documento es auténtico, está vigente y no ha sido editado ni alterado.'
+
+export const DISCLAIMER_DOCUMENTO =
+  'Documento declarado por el prestador. Orvalya no verifica su autenticidad.'

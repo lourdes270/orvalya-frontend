@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { DECLARACION_JURADA } from './documentosConfig'
+import { DECLARACION_JURADA, DISCLAIMER_DOCUMENTO } from './documentosConfig'
 import type { DocEstado } from './documentosTypes'
 import DocumentHistory from './DocumentHistory'
 
@@ -26,8 +26,11 @@ export default function FilaDocumento({
           <span style={{ fontSize: '18px' }}>{estado.subido ? '✅' : '⬜'}</span>
           <div>
             <span style={{ fontWeight: 500, color: '#1F3864', fontSize: '14px' }}>{nombre}</span>
+            <span style={{ display: 'block', fontSize: '11px', color: '#ADB5BD', lineHeight: 1.4, marginTop: '2px' }}>
+              {DISCLAIMER_DOCUMENTO}
+            </span>
             {estado.versionActual != null && (
-              <span style={{ display: 'block', fontSize: '11px', color: '#8C96A3' }}>v{estado.versionActual} vigente</span>
+              <span style={{ display: 'block', fontSize: '11px', color: '#8C96A3', marginTop: '2px' }}>v{estado.versionActual} vigente</span>
             )}
           </div>
         </div>

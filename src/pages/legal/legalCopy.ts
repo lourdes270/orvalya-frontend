@@ -3,7 +3,12 @@ export const LEGAL_SUMMARY_BULLETS = [
   'Guardamos historial de versiones de tus documentos.',
   'No compartimos tus datos con otras empresas.',
   'Orvalya no certifica cumplimiento legal; solo organiza vencimientos.',
+  'Orvalya es una plataforma intermediaria. No es empleadora ni parte de la relación laboral entre prestadores y contratantes.',
+  'El registro para prestadores es actualmente gratuito. Las empresas contratantes acceden mediante suscripción.',
 ]
+
+export const DISCLAIMER_PLATAFORMA =
+  'Orvalya es una plataforma tecnológica de gestión documental e intermediación comercial B2B. No reviste carácter de empleador, agencia de empleo, ni certificadora de cumplimiento normativo. Los documentos cargados en la plataforma son declarados por los propios prestadores bajo su exclusiva responsabilidad. Las relaciones que se establezcan entre prestadores y contratantes a través de Orvalya son de naturaleza estrictamente comercial entre partes independientes. Orvalya no asume responsabilidad por incumplimientos contractuales, reclamos laborales, o cualquier conflicto derivado de dichas relaciones. El uso de la plataforma implica la aceptación de estos términos.'
 
 export const legalStyles = {
   page: {
