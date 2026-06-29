@@ -2,13 +2,13 @@ __POLÍTICA DE PRIVACIDAD__
 
 *Plataforma Orvalya — Última actualización: junio de 2026*
 
-Esta Política de Privacidad \(en adelante, “la Política”\) describe cómo Orvalya \(en adelante, “la Plataforma”, operada en esta etapa por su titular como persona física en la República Oriental del Uruguay, en proceso de constitución de una entidad legal definitiva\) recopila, utiliza, almacena y protege los datos personales de sus Usuarios, en cumplimiento de la Ley N° 18\.331 de Protección de Datos Personales de Uruguay y, en lo aplicable, de la Ley N° 25\.326 de Protección de los Datos Personales de la República Argentina\.
+Esta Política de Privacidad \(en adelante, “la Política”\) describe cómo Orvalya \(en adelante, “la Plataforma”, operada bajo la marca registrada Orvalya, en proceso de constitución de entidad legal definitiva\) recopila, utiliza, almacena y protege los datos personales de sus Usuarios, en cumplimiento de la Ley N° 18\.331 de Protección de Datos Personales de Uruguay y, en lo aplicable, de la Ley N° 25\.326 de Protección de los Datos Personales de la República Argentina\.
 
 Esta Política forma parte indivisible de los Términos y Condiciones de Uso de la Plataforma\. Al registrarse y utilizar Orvalya, el Usuario acepta el tratamiento de sus datos conforme a lo aquí descripto\.
 
 # __1\. Responsable del Tratamiento de Datos__
 
-El responsable del tratamiento de los datos personales recopilados a través de la Plataforma es el titular de Orvalya, identificado ante los organismos uruguayos correspondientes con su Registro Único Tributario \(RUT\) personal mientras dure la etapa de pre\-incorporación societaria\. Cualquier consulta vinculada al tratamiento de datos puede dirigirse a los canales de contacto oficiales publicados en orvalya\.com\.
+El responsable del tratamiento de los datos personales recopilados a través de la Plataforma es el titular de Orvalya, identificable y contactable a través de los canales oficiales publicados en orvalya\.com\.
 
 # __2\. Datos que Recopilamos__
 
@@ -32,7 +32,7 @@ El responsable del tratamiento de los datos personales recopilados a través de 
 Los datos recopilados se utilizan exclusivamente para las siguientes finalidades:
 
 1. Crear y administrar la Cuenta del Usuario\.
-2. Permitir el funcionamiento central de la Plataforma: conectar Prestadores con Empresas Contratantes y organizar el seguimiento documental\.
+2. Permitir el funcionamiento central de la Plataforma: permitir la gestión y seguimiento documental de Prestadores independientes\.
 3. Calcular y mostrar el estado de vigencia \(semáforo\) de la documentación cargada\.
 4. Mantener un historial de versiones de la documentación, conforme a lo descripto en los Términos y Condiciones\.
 5. Enviar comunicaciones operativas vinculadas al Servicio \(alertas de vencimiento, confirmaciones de cuenta, cambios en los Términos\)\.
