@@ -33,12 +33,13 @@ type GoogleAuthButtonProps = {
 }
 
 export function GoogleAuthButton({ fromOnboarding = false }: GoogleAuthButtonProps) {
-  const { signInWithGoogle } = useAuth()
+  const { signInWithGoogle, authOAuthError, clearAuthOAuthError } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
   const handleClick = async () => {
     setError('')
+    clearAuthOAuthError()
     setLoading(true)
     try {
       await signInWithGoogle({ fromOnboarding })
@@ -55,6 +56,9 @@ export function GoogleAuthButton({ fromOnboarding = false }: GoogleAuthButtonPro
         {loading ? 'Conectando...' : 'Continuar con Google'}
       </button>
       {error && <p style={{ fontSize: '12px', color: '#DC3545', margin: '8px 0 0' }}>{error}</p>}
+      {authOAuthError && !error && (
+        <p style={{ fontSize: '13px', color: '#DC3545', margin: '8px 0 0', lineHeight: 1.5 }}>{authOAuthError}</p>
+      )}
     </div>
   )
 }

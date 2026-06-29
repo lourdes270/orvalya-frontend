@@ -12,6 +12,7 @@ import {
   getOnboardingResumePath,
   intentarCompletarOnboardingPendiente,
   limpiarUrlOAuth,
+  obtenerMensajeErrorCallbackAuth,
   prepararBorradorParaOAuthOnboarding,
   restaurarBorradorOnboardingSiFalta,
 } from '../pages/onboarding/hooks/helpers'
@@ -31,11 +32,12 @@ async function fetchPerfilData(userId: string): Promise<Perfil | null> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
-  const [postAuthPending, setPostAuthPending] = useState(() => esCallbackAuth())
+  const [postAuthPending, setPostAuthPending] = useState(() => esCallbackAuth() && !obtenerMensajeErrorCallbackAuth())
+  const [authOAuthError, setAuthOAuthError] = useState<string | null>(() => obtenerMensajeErrorCallbackAuth())
   const [session, setSession] = useState<Session | null>(null)
   const [perfil, setPerfil] = useState<Perfil | null>(null)
-  const callbackHandled = useRef(false)
-  const esperandoCallback = useRef(esCallbackAuth())
+  const callbackHandled = useRef(!!obtenerMensajeErrorCallbackAuth())
+  const esperandoCallback = useRef(esCallbackAuth() && !obtenerMensajeErrorCallbackAuth())
 
   const fetchPerfil = useCallback(async (userId: string) => {
     try {
@@ -46,6 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setPerfil(null)
     }
   }, [])
+
+  const clearAuthOAuthError = useCallback(() => setAuthOAuthError(null), [])
 
   const finalizarCallback = useCallback(() => {
     limpiarUrlOAuth()
@@ -109,6 +113,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const initSession = async () => {
+      const errorCallback = obtenerMensajeErrorCallbackAuth()
+      if (errorCallback) {
+        setAuthOAuthError(errorCallback)
+        callbackHandled.current = true
+        finalizarCallback()
+        if (mounted) setLoading(false)
+        return
+      }
+
       try {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession()
         if (!mounted) return
@@ -198,6 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = useCallback(async (options?: { fromOnboarding?: boolean }) => {
     const fromOnboarding = options?.fromOnboarding === true
     if (fromOnboarding) prepararBorradorParaOAuthOnboarding()
+    setAuthOAuthError(null)
     callbackHandled.current = false
     esperandoCallback.current = true
     setPostAuthPending(true)
@@ -222,8 +236,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo<AuthContextValue>(
-    () => ({ loading, postAuthPending, session, user, perfil, setPerfil, signInWithPassword, signUp, signInWithGoogle, signOut }),
-    [loading, postAuthPending, session, user, perfil, setPerfil, signInWithPassword, signUp, signInWithGoogle, signOut],
+    () => ({ loading, postAuthPending, authOAuthError, clearAuthOAuthError, session, user, perfil, setPerfil, signInWithPassword, signUp, signInWithGoogle, signOut }),
+    [loading, postAuthPending, authOAuthError, clearAuthOAuthError, session, user, perfil, setPerfil, signInWithPassword, signUp, signInWithGoogle, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

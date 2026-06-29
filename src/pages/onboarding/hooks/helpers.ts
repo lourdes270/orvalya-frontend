@@ -78,19 +78,41 @@ export function esCallbackAuth(): boolean {
     || hash.includes('error=')
     || hash.includes('type=')
     || params.has('code')
+    || params.has('error')
   )
 }
 
 /** @deprecated Usar esCallbackAuth */
 export const esCallbackOAuth = esCallbackAuth
 
+export function obtenerMensajeErrorCallbackAuth(): string | null {
+  const params = new URLSearchParams(window.location.search)
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  const error = params.get('error') ?? hashParams.get('error')
+  if (!error) return null
+
+  const desc = params.get('error_description') ?? hashParams.get('error_description') ?? ''
+  const normalizado = decodeURIComponent(desc.replace(/\+/g, ' ')).toLowerCase()
+
+  if (normalizado.includes('unable to exchange external code')) {
+    return 'Google autorizó tu cuenta, pero Supabase no pudo conectar. En Supabase → Google: pegá de nuevo el Client Secret que acabás de crear en Google Cloud (empieza con GOCSPX-).'
+  }
+
+  if (desc.trim()) return decodeURIComponent(desc.replace(/\+/g, ' '))
+  return 'No pudimos completar el inicio de sesión con Google. Intentá de nuevo.'
+}
+
 export function limpiarUrlOAuth(): void {
   const url = new URL(window.location.href)
   const tieneHash = url.hash.length > 1
   const tieneCode = url.searchParams.has('code')
-  if (!tieneHash && !tieneCode) return
+  const tieneError = url.searchParams.has('error')
+  if (!tieneHash && !tieneCode && !tieneError) return
   url.hash = ''
   url.searchParams.delete('code')
+  url.searchParams.delete('error')
+  url.searchParams.delete('error_code')
+  url.searchParams.delete('error_description')
   window.history.replaceState({}, '', `${url.pathname}${url.search}`)
 }
 
