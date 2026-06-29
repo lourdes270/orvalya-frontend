@@ -200,7 +200,12 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
         </button>
       </div>
       <div style={statsGridStyle(isMobile)}>
-        <Tarjeta titulo="Semáforo" valor={`${semaforoIcon} ${semaforoLabel}`} desc="Estado de documentación" />
+        <Tarjeta
+          titulo="Semáforo"
+          valor={`${semaforoIcon} ${semaforoLabel}`}
+          desc="Estado de documentación"
+          disclaimer="El semáforo indica el estado de tu documentación según lo que declaraste. No constituye verificación legal ni certificación de cumplimiento."
+        />
         <Tarjeta titulo="Documentos" valor={`${docsCount} / 3`} desc="Certificados cargados" />
         <Tarjeta titulo="Contratos activos" valor="0" desc="Órdenes de servicio" />
       </div>
@@ -233,12 +238,15 @@ function DashboardContratante() {
   )
 }
 
-function Tarjeta({ titulo, valor, desc }: { titulo: string; valor: string; desc: string }) {
+function Tarjeta({ titulo, valor, desc, disclaimer }: { titulo: string; valor: string; desc: string; disclaimer?: string }) {
   return (
     <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
       <p style={{ color: '#8C96A3', fontSize: '13px', margin: '0 0 8px' }}>{titulo}</p>
       <p style={{ color: '#1F3864', fontSize: '22px', fontWeight: 700, margin: '0 0 4px' }}>{valor}</p>
-      <p style={{ color: '#ADB5BD', fontSize: '12px', margin: 0 }}>{desc}</p>
+      <p style={{ color: '#ADB5BD', fontSize: '12px', margin: disclaimer ? '0 0 8px' : 0 }}>{desc}</p>
+      {disclaimer && (
+        <p style={{ color: '#ADB5BD', fontSize: '11px', lineHeight: 1.4, margin: 0 }}>{disclaimer}</p>
+      )}
     </div>
   )
 }
