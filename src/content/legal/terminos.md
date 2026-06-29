@@ -2,21 +2,21 @@ __TÉRMINOS Y CONDICIONES DE USO__
 
 *Plataforma Orvalya — Última actualización: junio de 2026*
 
-Los presentes Términos y Condiciones de Uso \(en adelante, los “Términos”\) regulan el acceso y uso de la plataforma digital Orvalya \(en adelante, “la Plataforma”, “Orvalya” o “el Servicio”\), accesible a través del sitio web orvalya\.com y sus aplicaciones asociadas, operada en esta etapa por su titular como persona física en la República Oriental del Uruguay, en proceso de constitución de una entidad legal definitiva\.
+Los presentes Términos y Condiciones de Uso \(en adelante, los “Términos”\) regulan el acceso y uso de la plataforma digital Orvalya \(en adelante, “la Plataforma”, “Orvalya” o “el Servicio”\), accesible a través del sitio web orvalya\.com y sus aplicaciones asociadas, operada bajo la marca registrada Orvalya, en proceso de constitución de entidad legal definitiva\.
 
 Al registrarse, acceder o utilizar la Plataforma de cualquier forma, el Usuario \(sea Prestador de servicios o Empresa Contratante\) declara haber leído, comprendido y aceptado íntegramente estos Términos, así como la Política de Privacidad que forma parte indivisible de este acuerdo\. Si el Usuario no está de acuerdo con alguna de estas condiciones, deberá abstenerse de utilizar la Plataforma\.
 
 # __1\. Definiciones__
 
 - Plataforma: el sitio web, aplicación y/o cualquier sistema digital operado bajo la marca Orvalya\.
-- Prestador: persona física o jurídica que ofrece servicios independientes a través de la Plataforma\.
-- Empresa Contratante: persona jurídica que utiliza la Plataforma para identificar, evaluar y/o gestionar la documentación de Prestadores\.
+- Prestador: persona física o jurídica que presta servicios de forma independiente y autónoma, bajo modalidad B2B, sin relación de dependencia laboral con la Empresa Contratante ni con Orvalya\.
+- Empresa Contratante: persona física o jurídica que utiliza la Plataforma para identificar, evaluar y/o gestionar la documentación de Prestadores independientes con quienes mantiene o pretende mantener una relación comercial de carácter civil o mercantil\.
 - Documentación: todo archivo, certificado, constancia, formulario o dato que el Usuario suba, cargue o registre en la Plataforma\.
 - Cuenta: el perfil de usuario creado mediante el proceso de registro\.
 
 # __2\. Naturaleza del Servicio__
 
-Orvalya es una plataforma tecnológica de intermediación e información cuya función es facilitar el encuentro entre Prestadores de servicios independientes y Empresas Contratantes, así como organizar, centralizar y dar seguimiento al estado de vigencia de la documentación que estos voluntariamente cargan en el sistema\.
+Orvalya es una plataforma tecnológica de gestión documental cuya función es permitir a Prestadores independientes organizar, centralizar y mantener actualizado el estado de vigencia de su documentación fiscal y previsional, facilitando su presentación ante cualquier persona física o jurídica que requiera contratarlos bajo modalidad B2B\. Orvalya no intermedia trabajo ni actúa como bolsa de empleo\.
 
 Orvalya NO es: \(a\) una agencia de empleo; \(b\) una empleadora de los Prestadores; \(c\) un estudio jurídico, contable o de asesoramiento legal; \(d\) un organismo certificador, validador o garante del cumplimiento normativo de ninguna de las partes; ni \(e\) parte de la relación comercial, civil o laboral que eventualmente se establezca entre Prestador y Empresa Contratante\.
 
