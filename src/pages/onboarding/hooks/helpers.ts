@@ -59,8 +59,8 @@ export function restaurarBorradorOnboardingSiFalta(): void {
   if (backup) localStorage.setItem(DRAFT_KEY, backup)
 }
 
-export function getOnboardingResumePath(): string {
-  const draft = cargarBorradorOnboarding()
+export function getOnboardingResumePath(user?: User | null): string {
+  const draft = user ? obtenerBorradorOnboarding(user) : cargarBorradorOnboarding()
   if (!draft) return '/onboarding?paso=0'
   if (puedeAvanzar(3, draft.form, draft.selecciones, draft.estadoFiscal)) {
     return '/onboarding?paso=4'
@@ -69,11 +69,20 @@ export function getOnboardingResumePath(): string {
   return paso > 0 ? `/onboarding?paso=${paso}` : '/onboarding?paso=0'
 }
 
-export function esCallbackOAuth(): boolean {
+/** Hash o query de retorno tras OAuth, confirmación de email o magic link. */
+export function esCallbackAuth(): boolean {
   const hash = window.location.hash
   const params = new URLSearchParams(window.location.search)
-  return hash.includes('access_token') || hash.includes('error=') || params.has('code')
+  return (
+    hash.includes('access_token')
+    || hash.includes('error=')
+    || hash.includes('type=')
+    || params.has('code')
+  )
 }
+
+/** @deprecated Usar esCallbackAuth */
+export const esCallbackOAuth = esCallbackAuth
 
 export function limpiarUrlOAuth(): void {
   const url = new URL(window.location.href)

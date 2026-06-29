@@ -8,12 +8,15 @@ import { supabase } from '../lib/supabase'
 import { AuthContext, type AuthContextValue, type Perfil } from './AuthContextType'
 import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, urlRedirectoAuth, urlRedirectoPostOAuth } from '../lib/validaciones'
 import {
-  esCallbackOAuth,
+  esCallbackAuth,
   getOnboardingResumePath,
+  intentarCompletarOnboardingPendiente,
   limpiarUrlOAuth,
   prepararBorradorParaOAuthOnboarding,
   restaurarBorradorOnboardingSiFalta,
 } from '../pages/onboarding/hooks/helpers'
+
+const CALLBACK_TIMEOUT_MS = 12_000
 
 async function fetchPerfilData(userId: string): Promise<Perfil | null> {
   const { data, error } = await supabase
@@ -28,10 +31,11 @@ async function fetchPerfilData(userId: string): Promise<Perfil | null> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
-  const [postAuthPending, setPostAuthPending] = useState(() => esCallbackOAuth())
+  const [postAuthPending, setPostAuthPending] = useState(() => esCallbackAuth())
   const [session, setSession] = useState<Session | null>(null)
   const [perfil, setPerfil] = useState<Perfil | null>(null)
-  const oauthHandled = useRef(false)
+  const callbackHandled = useRef(false)
+  const esperandoCallback = useRef(esCallbackAuth())
 
   const fetchPerfil = useCallback(async (userId: string) => {
     try {
@@ -43,60 +47,91 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const redirigirTrasGoogle = useCallback(async (userId: string) => {
-    if (oauthHandled.current) return
-    oauthHandled.current = true
+  const finalizarCallback = useCallback(() => {
+    limpiarUrlOAuth()
+    esperandoCallback.current = false
+    setPostAuthPending(false)
+  }, [])
+
+  const enrutarTrasAutenticacion = useCallback(async (activeSession: Session) => {
+    const user = activeSession.user
+    restaurarBorradorOnboardingSiFalta()
+
+    let perfilData = await fetchPerfilData(user.id)
+    if (!perfilData) {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      perfilData = await fetchPerfilData(user.id)
+    }
+    if (perfilData) setPerfil(perfilData)
+
+    if (window.location.pathname.startsWith('/onboarding')) return
+
+    if (perfilData && perfilData.tipo !== 'pendiente') {
+      navigate('/dashboard', { replace: true })
+      return
+    }
+
+    const result = await intentarCompletarOnboardingPendiente(user, setPerfil, navigate)
+    if (result !== 'sin_datos') return
+
+    navigate(getOnboardingResumePath(user), { replace: true })
+  }, [navigate])
+
+  const procesarCallbackAuth = useCallback(async (activeSession: Session | null) => {
+    if (!esperandoCallback.current && !esCallbackAuth()) return
+    if (callbackHandled.current) return
+    if (!activeSession?.user) return
+
+    callbackHandled.current = true
     setPostAuthPending(true)
 
     try {
-      restaurarBorradorOnboardingSiFalta()
-
-      let perfilData = await fetchPerfilData(userId)
-      if (!perfilData) {
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        perfilData = await fetchPerfilData(userId)
-      }
-      if (perfilData) setPerfil(perfilData)
-
-      const enOnboarding = window.location.pathname.startsWith('/onboarding')
-      if (enOnboarding) return
-
-      if (perfilData && perfilData.tipo !== 'pendiente') {
-        navigate('/dashboard', { replace: true })
-        return
-      }
-
-      navigate(getOnboardingResumePath(), { replace: true })
+      await enrutarTrasAutenticacion(activeSession)
+    } catch (err) {
+      console.error('procesarCallbackAuth error:', err)
     } finally {
-      limpiarUrlOAuth()
-      setPostAuthPending(false)
+      finalizarCallback()
     }
-  }, [navigate])
+  }, [enrutarTrasAutenticacion, finalizarCallback])
 
   useEffect(() => {
     let mounted = true
+    let callbackTimeout: ReturnType<typeof setTimeout> | undefined
+
+    const liberarSiCallbackFallido = () => {
+      if (!mounted || !esperandoCallback.current || callbackHandled.current) return
+      console.warn('Callback de auth sin sesión; liberando pantalla de carga.')
+      finalizarCallback()
+    }
+
+    if (esperandoCallback.current) {
+      callbackTimeout = setTimeout(liberarSiCallbackFallido, CALLBACK_TIMEOUT_MS)
+    }
 
     const initSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession()
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession()
+        if (!mounted) return
+
         if (error) {
           console.error('Error getting session:', error)
-          if (mounted) setSession(null)
+          setSession(null)
           return
         }
 
-        if (mounted) {
-          setSession(session)
-          if (session?.user) {
-            if (esCallbackOAuth()) {
-              await redirigirTrasGoogle(session.user.id)
-            } else {
-              fetchPerfil(session.user.id).catch(err => console.error('BG fetch error:', err))
-            }
-          } else if (esCallbackOAuth()) {
-            setPostAuthPending(false)
-            limpiarUrlOAuth()
+        setSession(initialSession)
+
+        if (initialSession?.user) {
+          if (esperandoCallback.current || esCallbackAuth()) {
+            await procesarCallbackAuth(initialSession)
+          } else {
+            fetchPerfil(initialSession.user.id).catch(err => console.error('BG fetch error:', err))
           }
+        } else if (esCallbackAuth()) {
+          // Hash presente pero sesión aún no lista: onAuthStateChange la procesará.
+          setPostAuthPending(true)
+        } else {
+          setPostAuthPending(false)
         }
       } catch (err) {
         console.error('Session error:', err)
@@ -110,25 +145,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, nextSession) => {
       if (!mounted) return
+
       setSession(nextSession)
+
       if (nextSession?.user) {
-        if (event === 'SIGNED_IN' && esCallbackOAuth()) {
-          await redirigirTrasGoogle(nextSession.user.id)
-        } else {
+        const esRetornoAuth = esperandoCallback.current || esCallbackAuth()
+        if (esRetornoAuth && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
+          await procesarCallbackAuth(nextSession)
+        } else if (!callbackHandled.current) {
           fetchPerfil(nextSession.user.id).catch(err => console.error('BG fetch error:', err))
         }
       } else {
         setPerfil(null)
-        oauthHandled.current = false
+        callbackHandled.current = false
+        if (!esCallbackAuth()) {
+          setPostAuthPending(false)
+          esperandoCallback.current = false
+        }
       }
+
       setLoading(false)
     })
 
     return () => {
       mounted = false
+      if (callbackTimeout) clearTimeout(callbackTimeout)
       subscription?.unsubscribe()
     }
-  }, [fetchPerfil, redirigirTrasGoogle])
+  }, [fetchPerfil, finalizarCallback, procesarCallbackAuth])
 
   const user = session?.user ?? null
 
@@ -154,13 +198,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithGoogle = useCallback(async (options?: { fromOnboarding?: boolean }) => {
     const fromOnboarding = options?.fromOnboarding === true
     if (fromOnboarding) prepararBorradorParaOAuthOnboarding()
-    oauthHandled.current = false
+    callbackHandled.current = false
+    esperandoCallback.current = true
     setPostAuthPending(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: urlRedirectoPostOAuth(fromOnboarding) },
     })
     if (error) {
+      esperandoCallback.current = false
       setPostAuthPending(false)
       throw error
     }
@@ -169,7 +215,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     localStorage.removeItem('orvalya_onboarding_draft')
     sessionStorage.removeItem('orvalya_onboarding_draft')
-    oauthHandled.current = false
+    callbackHandled.current = false
+    esperandoCallback.current = false
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }, [])
