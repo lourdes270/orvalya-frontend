@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { useContratanteProfile } from '../../hooks/useContratanteProfile'
 import { crearContratante } from '../../lib/contratanteHelpers'
-import { validarEmail, validarTelefono } from '../../lib/validaciones'
+import { normalizarRutContratante, normalizarTelefono, validarEmail, validarRutContratante, validarTelefono } from '../../lib/validaciones'
 import { RUBROS } from '../onboarding/data/rubros'
 import { DEPARTAMENTOS } from '../onboarding/data/zonas'
 import type { ContratantePerfilForm, TipoContratante } from '../../types/contratante'
@@ -47,12 +47,13 @@ export default function ContratantePerfilPage() {
   const validar = () => {
     const e: Record<string, string> = {}
     if (!form.nombre_empresa.trim()) e.nombre_empresa = 'El nombre es obligatorio.'
-    if (!form.rut.trim()) e.rut = 'El RUT es obligatorio.'
+    const rutErr = validarRutContratante(form.rut)
+    if (rutErr) e.rut = rutErr
     const emailErr = validarEmail(form.email)
     if (emailErr) e.email = emailErr
     if (!form.rubro_principal) e.rubro_principal = 'Elegí un rubro principal.'
     if (!form.zona) e.zona = 'Elegí una zona.'
-    const telErr = validarTelefono(form.telefono, { requerido: false, etiqueta: 'teléfono' })
+    const telErr = validarTelefono(form.telefono, { requerido: true, etiqueta: 'WhatsApp' })
     if (telErr) e.telefono = telErr
     return e
   }
@@ -70,7 +71,11 @@ export default function ContratantePerfilPage() {
     setGeneral('')
     setGuardando(true)
     try {
-      await crearContratante(user.id, form)
+      await crearContratante(user.id, {
+        ...form,
+        rut: normalizarRutContratante(form.rut),
+        telefono: normalizarTelefono(form.telefono),
+      })
       navigate('/dashboard', { replace: true })
     } catch (err) {
       console.error(err)
@@ -121,14 +126,17 @@ export default function ContratantePerfilPage() {
             value={form.nombre_empresa}
             onChange={v => setForm(f => ({ ...f, nombre_empresa: v }))}
             error={errores.nombre_empresa}
+            autoCapitalize={form.tipo_contratante === 'empresa' ? 'words' : undefined}
+            capitalize={form.tipo_contratante === 'empresa'}
           />
 
           <Campo
             label="RUT"
             value={form.rut}
-            onChange={v => setForm(f => ({ ...f, rut: v }))}
+            onChange={v => setForm(f => ({ ...f, rut: normalizarRutContratante(v).slice(0, 12) }))}
             error={errores.rut}
-            placeholder="12.345.678-9"
+            placeholder="12345678"
+            inputMode="numeric"
           />
 
           <div style={{ marginBottom: '16px' }}>
@@ -170,11 +178,13 @@ export default function ContratantePerfilPage() {
           />
 
           <Campo
-            label="Teléfono (opcional)"
+            label="WhatsApp"
             value={form.telefono}
             onChange={v => setForm(f => ({ ...f, telefono: v }))}
             error={errores.telefono}
-            placeholder="099 123 456"
+            placeholder="099123456"
+            inputMode="tel"
+            required
           />
 
           {general && <p style={{ color: '#dc3545', fontSize: '14px', margin: '0 0 16px' }}>{general}</p>}
@@ -195,6 +205,10 @@ function Campo({
   error,
   type = 'text',
   placeholder,
+  inputMode,
+  autoCapitalize,
+  capitalize = false,
+  required = false,
 }: {
   label: string
   value: string
@@ -202,6 +216,10 @@ function Campo({
   error?: string
   type?: string
   placeholder?: string
+  inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']
+  autoCapitalize?: React.HTMLAttributes<HTMLInputElement>['autoCapitalize']
+  capitalize?: boolean
+  required?: boolean
 }) {
   return (
     <div style={{ marginBottom: '16px' }}>
@@ -210,8 +228,14 @@ function Campo({
         type={type}
         value={value}
         placeholder={placeholder}
+        inputMode={inputMode}
+        autoCapitalize={autoCapitalize}
+        required={required}
         onChange={e => onChange(e.target.value)}
-        style={inputStyle}
+        style={{
+          ...inputStyle,
+          ...(capitalize ? { textTransform: 'capitalize' as const } : {}),
+        }}
       />
       {error && <p style={{ color: '#dc3545', fontSize: '13px', margin: '6px 0 0' }}>{error}</p>}
     </div>

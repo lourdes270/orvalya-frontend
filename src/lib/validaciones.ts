@@ -65,6 +65,18 @@ export function normalizarTelefono(valor: string): string {
   return valor.replace(/\D/g, '')
 }
 
+export function normalizarRutContratante(valor: string): string {
+  return valor.replace(/\D/g, '')
+}
+
+export function validarRutContratante(valor: string): string | null {
+  const digitos = normalizarRutContratante(valor)
+  if (!digitos) return 'El RUT es obligatorio.'
+  if (digitos.length < 8) return 'El RUT debe tener al menos 8 dígitos.'
+  if (digitos.length > 12) return 'El RUT no puede superar los 12 dígitos.'
+  return null
+}
+
 export function validarTelefono(
   valor: string,
   opciones?: { requerido?: boolean; etiqueta?: string },
