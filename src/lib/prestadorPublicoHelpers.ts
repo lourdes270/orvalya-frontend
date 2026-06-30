@@ -36,3 +36,7 @@ export function truncarMeta(texto: string | null | undefined, max = 160): string
   if (t.length <= max) return t
   return `${t.slice(0, max - 1).trimEnd()}…`
 }
+
+export function urlPerfilPublicoPrestador(prestadorId: string): string {
+  return `${window.location.origin}/prestadores/${prestadorId}`
+}
