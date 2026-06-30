@@ -10,6 +10,7 @@ import OnboardingPage from './pages/onboarding/OnboardingPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ContratantePerfilPage from './pages/contratante/ContratantePerfilPage'
 import AdminModeracionPage from './pages/admin/AdminModeracionPage'
+import PrestadorPublicoPage from './pages/prestador/PrestadorPublicoPage'
 import ContactoContratante from './pages/contacto/ContactoContratante'
 import LegalAcceptancePage from './pages/legal/LegalAcceptancePage'
 import TerminosPage from './pages/legal/TerminosPage'
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/terminos" element={<TerminosPage />} />
           <Route path="/privacidad" element={<PrivacidadPage />} />
           <Route path="/aceptar-terminos" element={<LegalAcceptanceRoute><LegalAcceptancePage /></LegalAcceptanceRoute>} />
+          <Route path="/prestadores/:id" element={<PrestadorPublicoPage />} />
           <Route path="/contratante/perfil" element={<ProtectedRoute><ContratantePerfilPage /></ProtectedRoute>} />
           <Route path="/admin/moderacion" element={<ProtectedRoute><AdminModeracionPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
