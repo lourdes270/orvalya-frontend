@@ -12,12 +12,13 @@ import {
   touchButtonBase,
 } from './landingStyles'
 
-const PRESTADORES_IMAGE_SRC = '/hero-servicios.webp'
+const PRESTADORES_IMAGE_SRC = '/hero-prestadores.png'
 const EMPRESAS_IMAGE_SRC = '/hero-empresas.png'
 
 type AudienceCardProps = {
   imageSrc?: string
   imageAlt: string
+  imagePosition?: string
   placeholderIcon: typeof Wrench
   placeholderLabel: string
   label: string
@@ -32,9 +33,10 @@ type AudienceCardProps = {
 function AudienceCardImage({
   imageSrc,
   imageAlt,
+  imagePosition = 'center',
   placeholderIcon: PlaceholderIcon,
   placeholderLabel,
-}: Pick<AudienceCardProps, 'imageSrc' | 'imageAlt' | 'placeholderIcon' | 'placeholderLabel'>) {
+}: Pick<AudienceCardProps, 'imageSrc' | 'imageAlt' | 'imagePosition' | 'placeholderIcon' | 'placeholderLabel'>) {
   const [failed, setFailed] = useState(!imageSrc)
 
   return (
@@ -59,6 +61,7 @@ function AudienceCardImage({
             width: '100%',
             height: '100%',
             objectFit: 'cover',
+            objectPosition: imagePosition,
           }}
         />
       ) : (
@@ -103,6 +106,7 @@ function AudienceCardImage({
 function AudienceCard({
   imageSrc,
   imageAlt,
+  imagePosition,
   placeholderIcon,
   placeholderLabel,
   label,
@@ -129,6 +133,7 @@ function AudienceCard({
       <AudienceCardImage
         imageSrc={imageSrc}
         imageAlt={imageAlt}
+        imagePosition={imagePosition}
         placeholderIcon={placeholderIcon}
         placeholderLabel={placeholderLabel}
       />
@@ -251,7 +256,8 @@ export default function AudienceSplitSection() {
         }}>
           <AudienceCard
             imageSrc={PRESTADORES_IMAGE_SRC}
-            imageAlt="Prestador de servicios en Uruguay"
+            imageAlt="Prestadora de servicios en Uruguay"
+            imagePosition="left 62%"
             placeholderIcon={Wrench}
             placeholderLabel="Ilustración de prestador de servicios"
             label="Para prestadores · Uruguay"
@@ -270,7 +276,8 @@ export default function AudienceSplitSection() {
 
           <AudienceCard
             imageSrc={EMPRESAS_IMAGE_SRC}
-            imageAlt="Empresa contratando servicios en Uruguay"
+            imageAlt="Contratante verificando prestadores en Uruguay"
+            imagePosition="center 22%"
             placeholderIcon={Buildings}
             placeholderLabel="Ilustración de empresa contratante"
             label="Para empresas · Uruguay"
