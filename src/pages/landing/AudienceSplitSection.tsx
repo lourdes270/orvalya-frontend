@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
+import { marcarRegistroContratante } from '../../lib/registroConstants'
 import { Buildings, Check, Wrench } from '@phosphor-icons/react'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import {
@@ -315,7 +315,7 @@ export default function AudienceSplitSection() {
             ]}
             ctaLabel="Quiero buscar prestadores"
             onCta={() => {
-              sessionStorage.setItem(REGISTRO_TIPO_KEY, 'contratante')
+              marcarRegistroContratante()
               navigate('/auth')
             }}
             ctaVariant="outline"

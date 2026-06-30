@@ -1,3 +1,4 @@
+import { REGISTRO_TIPO_KEY } from '../../../lib/registroConstants'
 import { supabase } from '../../../lib/supabase'
 import {
   FAKE_REGISTRATION_SUCCESS_MSG,
@@ -60,6 +61,9 @@ export function restaurarBorradorOnboardingSiFalta(): void {
 }
 
 export function getOnboardingResumePath(user?: User | null): string {
+  if (sessionStorage.getItem(REGISTRO_TIPO_KEY) === 'contratante') {
+    return '/auth'
+  }
   const draft = user ? obtenerBorradorOnboarding(user) : cargarBorradorOnboarding()
   if (!draft) return '/onboarding?paso=0'
   if (puedeAvanzar(3, draft.form, draft.selecciones, draft.estadoFiscal)) {

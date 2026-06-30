@@ -7,7 +7,7 @@ import {
   FAKE_REGISTRATION_SUCCESS_MSG,
   runRegistrationGuard,
 } from '../../lib/botProtection/runRegistrationGuard'
-import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
+import { REGISTRO_TIPO_KEY, limpiarRegistroContratante } from '../../lib/registroConstants'
 import { activarPerfilContratante } from '../../lib/registroHelpers'
 import { mensajeErrorAuth, validarContrasena, validarEmail, MENSAJE_CONFIRMACION_EMAIL } from '../../lib/validaciones'
 import { ConfirmacionEmailPanel } from '../onboarding/components/ConfirmacionEmailPanel'
@@ -77,7 +77,9 @@ export function RegisterForm() {
       if (tipoRegistro === 'contratante') {
         const perfil = await activarPerfilContratante(emailNorm)
         setPerfil(perfil)
-        sessionStorage.removeItem(REGISTRO_TIPO_KEY)
+        limpiarRegistroContratante()
+        localStorage.removeItem('orvalya_onboarding_draft')
+        sessionStorage.removeItem('orvalya_onboarding_draft')
       }
 
       navigate('/aceptar-terminos')

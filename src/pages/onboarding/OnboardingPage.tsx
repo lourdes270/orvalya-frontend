@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { esRegistroContratante } from '../../lib/registroConstants'
 import Step0TipoPerfil from './steps/Step0TipoPerfil'
 import Step1Categorias from './steps/Step1Categorias'
 import Step2DatosBasicos from './steps/Step2DatosBasicos'
@@ -61,6 +62,10 @@ export default function OnboardingPage() {
 
   const esperandoPerfil = !!session && perfil === null
 
+  if (esRegistroContratante()) {
+    return <Navigate to="/auth" replace />
+  }
+
   if (authLoading || esperandoPerfil || completandoPendiente) {
     return <PantallaCarga texto={completandoPendiente ? 'Finalizando tu perfil...' : 'Cargando...'} />
   }
@@ -80,7 +85,7 @@ export default function OnboardingPage() {
             fontSize: '14px',
             lineHeight: 1.5,
           }}>
-            No encontramos los datos que cargaste antes. Elegí <strong>Ofrezco servicios</strong> y completá el formulario una vez más.
+            No encontramos los datos que cargaste antes. Elegí <strong>Necesito contratar servicios</strong> si sos empresa, o <strong>Ofrezco servicios</strong> si querés registrarte como prestador.
           </div>
         )}
         <Step0TipoPerfil isMobile={isMobile} />
@@ -109,8 +114,11 @@ export default function OnboardingPage() {
       {pasoNum === 4 && !yaTieneCuenta && (
         <Step4Registro isMobile={isMobile} onRegistrar={handleRegistro} loading={loading} error={error} fakeSuccess={fakeSuccess} email={form.email} />
       )}
-      {pasoNum === 4 && yaTieneCuenta && (
+      {pasoNum === 4 && yaTieneCuenta && !sinDatosPrevios && (
         <PantallaCarga texto="Finalizando tu perfil..." />
+      )}
+      {pasoNum === 4 && yaTieneCuenta && sinDatosPrevios && (
+        <Navigate to="/onboarding?paso=0" replace />
       )}
       {error && pasoNum !== 4 && (
         <div style={{ position: 'fixed', bottom: '100px', left: '20px', right: '20px', padding: '12px', background: '#fee2e2', borderRadius: '8px', color: '#dc2626', fontSize: '14px' }}>{error}</div>

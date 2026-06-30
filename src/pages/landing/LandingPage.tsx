@@ -2,6 +2,7 @@ import { useState, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MagnifyingGlass, FileText, Buildings, Image as ImageIcon } from '@phosphor-icons/react'
 import { useIsMobile } from '../../hooks/useIsMobile'
+import { marcarRegistroContratante } from '../../lib/registroConstants'
 import LandingCtaSection from './LandingCtaSection'
 import LandingLayout from './LandingLayout'
 import AudienceSplitSection from './AudienceSplitSection'
@@ -264,6 +265,25 @@ export default function LandingPage() {
               }}>
                 Gratis
               </p>
+              <button
+                type="button"
+                onClick={() => {
+                  marcarRegistroContratante()
+                  navigate('/auth')
+                }}
+                style={{
+                  ...touchButtonBase,
+                  width: '100%',
+                  marginTop: '12px',
+                  padding: '12px 20px',
+                  backgroundColor: 'transparent',
+                  color: NAVY,
+                  border: `1.5px solid ${BORDER}`,
+                  fontSize: '15px',
+                } as CSSProperties}
+              >
+                Soy empresa, busco prestadores
+              </button>
             </div>
           </div>
         </div>

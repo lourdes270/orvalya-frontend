@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
-import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
+import { REGISTRO_TIPO_KEY, limpiarRegistroContratante } from '../../lib/registroConstants'
 import { activarPerfilContratante } from '../../lib/registroHelpers'
 import { validarEmail } from '../../lib/validaciones'
 import { ForgotPasswordForm } from './ForgotPasswordForm'
@@ -43,7 +43,11 @@ export function LoginForm() {
       if (tipoRegistro === 'contratante') {
         const perfilActualizado = await activarPerfilContratante(emailNorm)
         setPerfil(perfilActualizado)
-        sessionStorage.removeItem(REGISTRO_TIPO_KEY)
+        limpiarRegistroContratante()
+        localStorage.removeItem('orvalya_onboarding_draft')
+        sessionStorage.removeItem('orvalya_onboarding_draft')
+        navigate('/contratante/perfil')
+        return
       }
 
       navigate('/dashboard')

@@ -77,12 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         perfilData = await activarPerfilContratante(user.email)
         setPerfil(perfilData)
         sessionStorage.removeItem(REGISTRO_TIPO_KEY)
+        localStorage.removeItem('orvalya_onboarding_draft')
+        sessionStorage.removeItem('orvalya_onboarding_draft')
+        navigate('/contratante/perfil', { replace: true })
+        return
       } catch (err) {
         console.error('activarPerfilContratante:', err)
       }
     }
-
-    if (window.location.pathname.startsWith('/onboarding')) return
 
     if (perfilData && perfilData.tipo !== 'pendiente') {
       navigate('/dashboard', { replace: true })
@@ -90,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const result = await intentarCompletarOnboardingPendiente(user, setPerfil, navigate)
-    if (result !== 'sin_datos') return
+    if (result === 'completado' || result === 'reanudado') return
 
     navigate(getOnboardingResumePath(user), { replace: true })
   }, [navigate])
