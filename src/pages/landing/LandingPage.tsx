@@ -15,8 +15,7 @@ import {
   touchButtonBase,
 } from './landingStyles'
 
-/** Colocar en public/hero-servicios.webp (WebP, máx. ~150 KB) */
-const HERO_IMAGE_SRC = '/hero-servicios.webp'
+const HERO_IMAGE_SRC = '/hero-servicios.jpg'
 
 const cards = [
   {
@@ -45,32 +44,85 @@ function HeroImage({ isMobile }: { isMobile: boolean }) {
     <div
       style={{
         width: '100%',
-        borderRadius: isMobile ? '12px' : '16px',
+        borderRadius: isMobile ? '14px' : '18px',
         overflow: 'hidden',
-        background: '#fff',
+        background: NAVY,
         border: `1px solid ${BORDER}`,
-        boxShadow: '0 8px 32px rgba(15, 45, 82, 0.08)',
-        aspectRatio: '4 / 3',
+        boxShadow: isMobile
+          ? '0 10px 28px rgba(15, 45, 82, 0.12)'
+          : '0 16px 40px rgba(15, 45, 82, 0.14)',
+        aspectRatio: isMobile ? '16 / 11' : '5 / 4',
+        minHeight: isMobile ? '220px' : undefined,
+        maxHeight: isMobile ? '320px' : '420px',
         position: 'relative',
+        isolation: 'isolate',
       }}
     >
       {!failed ? (
-        <img
-          src={HERO_IMAGE_SRC}
-          alt="Prestador de servicios en Uruguay"
-          width={840}
-          height={630}
-          decoding="async"
-          fetchPriority="high"
-          loading="eager"
-          onError={() => setFailed(true)}
-          style={{
-            display: 'block',
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-          }}
-        />
+        <>
+          <img
+            src={HERO_IMAGE_SRC}
+            alt="Prestador de servicios acordando trabajo con una empresa en Uruguay"
+            width={840}
+            height={630}
+            decoding="async"
+            fetchPriority="high"
+            loading="eager"
+            onError={() => setFailed(true)}
+            style={{
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: isMobile ? '58% 42%' : '52% 38%',
+              transform: isMobile ? 'scale(1.03)' : 'scale(1.02)',
+            }}
+          />
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: isMobile
+                ? `linear-gradient(180deg, rgba(15, 45, 82, 0.06) 0%, rgba(15, 45, 82, 0.28) 72%, rgba(15, 45, 82, 0.42) 100%),
+                   linear-gradient(90deg, rgba(15, 45, 82, 0.18) 0%, transparent 42%)`
+                : `linear-gradient(180deg, rgba(15, 45, 82, 0.04) 0%, rgba(15, 45, 82, 0.16) 100%),
+                   radial-gradient(ellipse at 85% 85%, rgba(0, 180, 166, 0.12) 0%, transparent 55%)`,
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff' fill-opacity='0.07' font-family='system-ui,sans-serif' font-size='22' font-weight='700' transform='rotate(-24 90 90)'%3EOrvalya%3C/text%3E%3C/svg%3E")`,
+              backgroundRepeat: 'repeat',
+              opacity: isMobile ? 0.55 : 0.45,
+              pointerEvents: 'none',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              left: isMobile ? '12px' : '16px',
+              bottom: isMobile ? '12px' : '16px',
+              padding: isMobile ? '8px 12px' : '10px 14px',
+              borderRadius: '999px',
+              background: 'rgba(255, 255, 255, 0.92)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.65)',
+              boxShadow: '0 4px 16px rgba(15, 45, 82, 0.12)',
+              fontSize: isMobile ? '11px' : '12px',
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              color: NAVY,
+            }}
+          >
+            Prestadores verificados · Uruguay
+          </div>
+        </>
       ) : (
         <div style={{
           height: '100%',
