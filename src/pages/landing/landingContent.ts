@@ -43,7 +43,7 @@ export const POR_QUE_ORVALYA: { icon: Icon; title: string; text: string }[] = [
 
 export const COMO_FUNCIONA_PASOS = [
   'Registrate gratis y subí tus documentos',
-  'Orvalya verifica y mantiene todo al día',
+  'Orvalya organiza tus vencimientos y te avisa cuando se acercan',
   'Las empresas te encuentran, vos seguís trabajando',
 ]
 

@@ -91,6 +91,17 @@ function parseNumero(valor: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+function rutValorVisible(rut: string): string {
+  const t = rut.trim()
+  if (!t || t === 'pendiente_verificacion') return ''
+  return rut
+}
+
+function rutSinInformar(rut: string): boolean {
+  const t = rut.trim()
+  return !t || t === 'pendiente_verificacion'
+}
+
 export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPrestadorProps) {
   const [form, setForm] = useState<FormState>({
     nombre: '',
@@ -336,7 +347,31 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
       <h2 style={{ color: '#1F3864', fontSize: '16px', fontWeight: 600, margin: '0 0 20px' }}>Mi perfil</h2>
       <PerfilPublicoCard perfil={{ ...perfil, nombre: form.nombre, rango_edad: form.rango_edad || null }} />
       {campo('Nombre de la empresa o persona', 'nombre', 'Ej: Limpieza Industrial García')}
-      {campo('RUT', 'rut', 'Ej: 21234567890')}
+      <div style={{ marginBottom: '16px' }}>
+        <label style={labelStyle}>RUT</label>
+        <input
+          type="text"
+          value={rutValorVisible(form.rut)}
+          onChange={e => {
+            setForm(prev => ({ ...prev, rut: e.target.value }))
+            if (erroresCampo.rut) {
+              setErroresCampo(prev => {
+                const { rut: _, ...rest } = prev
+                return rest
+              })
+            }
+          }}
+          placeholder="No informado"
+          style={{
+            ...inputStyle,
+            ...(rutSinInformar(form.rut) ? { color: '#ADB5BD' } : {}),
+            ...(erroresCampo.rut ? { borderColor: '#dc2626' } : {}),
+          }}
+        />
+        {erroresCampo.rut && (
+          <p style={{ color: '#dc2626', fontSize: '13px', margin: '4px 0 0' }}>{erroresCampo.rut}</p>
+        )}
+      </div>
       {campo('Teléfono', 'telefono', 'Ej: 099123456', { inputMode: 'numeric', normalizar: true })}
       {campo('WhatsApp', 'whatsapp', '099123456', { inputMode: 'numeric', normalizar: true })}
 
