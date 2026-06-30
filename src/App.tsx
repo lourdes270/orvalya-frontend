@@ -3,6 +3,8 @@ import { AuthProvider } from './contexts/AuthContext'
 import AuthPage from './pages/auth/AuthPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import LandingPage from './pages/landing/LandingPage'
+import QuienesSomosPage from './pages/landing/QuienesSomosPage'
+import ComoFuncionaPage from './pages/landing/ComoFuncionaPage'
 import OnboardingPage from './pages/onboarding/OnboardingPage'
 import NotFoundPage from './pages/NotFoundPage'
 import ContactoContratante from './pages/contacto/ContactoContratante'
@@ -19,6 +21,8 @@ export default function App() {
         <DocumentTitle />
         <Routes>
           <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+          <Route path="/quienes-somos" element={<PublicRoute><QuienesSomosPage /></PublicRoute>} />
+          <Route path="/como-funciona" element={<PublicRoute><ComoFuncionaPage /></PublicRoute>} />
           <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/contacto/contratante" element={<PublicRoute><ContactoContratante /></PublicRoute>} />
