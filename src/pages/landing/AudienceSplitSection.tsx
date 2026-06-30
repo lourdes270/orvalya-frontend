@@ -20,6 +20,7 @@ type AudienceCardProps = {
   imageSrc?: string
   imageAlt: string
   imagePosition?: string
+  imagePositionMobile?: string
   placeholderIcon: typeof Wrench
   placeholderLabel: string
   label: string
@@ -35,36 +36,54 @@ function AudienceCardImage({
   imageSrc,
   imageAlt,
   imagePosition = 'center',
+  imagePositionMobile,
   placeholderIcon: PlaceholderIcon,
   placeholderLabel,
-}: Pick<AudienceCardProps, 'imageSrc' | 'imageAlt' | 'imagePosition' | 'placeholderIcon' | 'placeholderLabel'>) {
+}: Pick<AudienceCardProps, 'imageSrc' | 'imageAlt' | 'imagePosition' | 'imagePositionMobile' | 'placeholderIcon' | 'placeholderLabel'>) {
   const [failed, setFailed] = useState(!imageSrc)
+  const isMobile = useIsMobile(768)
+  const position = isMobile && imagePositionMobile ? imagePositionMobile : imagePosition
 
   return (
     <div style={{
       width: '100%',
       aspectRatio: '16 / 10',
       overflow: 'hidden',
-      background: SURFACE,
+      background: NAVY,
       borderBottom: `1px solid ${BORDER}`,
+      position: 'relative',
+      isolation: 'isolate',
     }}>
       {!failed && imageSrc ? (
-        <img
-          src={imageSrc}
-          alt={imageAlt}
-          width={520}
-          height={325}
-          loading="lazy"
-          decoding="async"
-          onError={() => setFailed(true)}
-          style={{
-            display: 'block',
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: imagePosition,
-          }}
-        />
+        <>
+          <img
+            src={imageSrc}
+            alt={imageAlt}
+            width={520}
+            height={325}
+            loading="lazy"
+            decoding="async"
+            onError={() => setFailed(true)}
+            style={{
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: position,
+              transform: isMobile ? 'scale(1.04)' : 'scale(1.02)',
+            }}
+          />
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(180deg, rgba(15, 45, 82, 0.02) 0%, rgba(15, 45, 82, 0.22) 100%),
+                linear-gradient(90deg, rgba(15, 45, 82, 0.08) 0%, transparent 45%)`,
+              pointerEvents: 'none',
+            }}
+          />
+        </>
       ) : (
         <div style={{
           height: '100%',
@@ -108,6 +127,7 @@ function AudienceCard({
   imageSrc,
   imageAlt,
   imagePosition,
+  imagePositionMobile,
   placeholderIcon,
   placeholderLabel,
   label,
@@ -135,6 +155,7 @@ function AudienceCard({
         imageSrc={imageSrc}
         imageAlt={imageAlt}
         imagePosition={imagePosition}
+        imagePositionMobile={imagePositionMobile}
         placeholderIcon={placeholderIcon}
         placeholderLabel={placeholderLabel}
       />
@@ -277,8 +298,9 @@ export default function AudienceSplitSection() {
 
           <AudienceCard
             imageSrc={EMPRESAS_IMAGE_SRC}
-            imageAlt="Contratante verificando prestadores en Uruguay"
-            imagePosition="center 22%"
+            imageAlt="Empresa contratante usando Orvalya en Uruguay"
+            imagePosition="52% 38%"
+            imagePositionMobile="58% 42%"
             placeholderIcon={Buildings}
             placeholderLabel="Ilustración de empresa contratante"
             label="Para empresas · Uruguay"
