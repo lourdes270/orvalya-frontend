@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
+import { esAdminPlataforma } from '../../lib/adminHelpers'
 import {
   fetchLlamadosPendientes,
   labelEstadoLlamado,
@@ -13,32 +14,25 @@ import { btnOutline, btnPrimary, cardStyle, MUTED, NAVY, pageStyle } from '../co
 const rubroLabel = (id: string) => RUBROS.find(r => r.id === id)?.label ?? id
 
 export default function AdminModeracionPage() {
-  const { perfil, signOut } = useAuth()
+  const { user, perfil, signOut } = useAuth()
   const navigate = useNavigate()
   const [llamados, setLlamados] = useState<Llamado[]>([])
   const [loading, setLoading] = useState(true)
   const [procesando, setProcesando] = useState<string | null>(null)
   const [motivos, setMotivos] = useState<Record<string, string>>({})
 
+  const esAdmin = esAdminPlataforma(user?.email, perfil)
+
   useEffect(() => {
-    if (!perfil?.es_admin) return
+    if (!esAdmin) return
     fetchLlamadosPendientes()
       .then(setLlamados)
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [perfil?.es_admin])
+  }, [esAdmin])
 
-  if (!perfil?.es_admin) {
-    return (
-      <div style={{ ...pageStyle, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={cardStyle}>
-          <p style={{ margin: 0, color: MUTED }}>No tenés permisos de administrador.</p>
-          <button type="button" style={{ ...btnOutline, marginTop: '16px' }} onClick={() => navigate('/dashboard')}>
-            Volver al dashboard
-          </button>
-        </div>
-      </div>
-    )
+  if (!esAdmin) {
+    return <Navigate to="/dashboard" replace />
   }
 
   const handleModerar = async (id: string, estado: 'activo' | 'rechazado') => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
+import { esAdminPlataforma } from '../../lib/adminHelpers'
 import { useContratanteProfile } from '../../hooks/useContratanteProfile'
 import {
   crearLlamado,
@@ -32,7 +33,8 @@ const emptyLlamado: LlamadoForm = {
 
 export default function DashboardContratante() {
   const navigate = useNavigate()
-  const { perfil } = useAuth()
+  const { user, perfil } = useAuth()
+  const esAdmin = esAdminPlataforma(user?.email, perfil)
   const { contratante, loading, perfilCompleto } = useContratanteProfile()
   const isMobile = useIsMobile(640)
   const [llamados, setLlamados] = useState<Llamado[]>([])
@@ -120,6 +122,35 @@ export default function DashboardContratante() {
         <Stat titulo="Total publicados" valor={String(llamados.length)} desc="Todos los estados" />
       </div>
 
+      {esAdmin && (
+        <div style={{
+          ...cardStyle,
+          marginBottom: '16px',
+          borderColor: '#00B4A6',
+          background: '#F0FBFA',
+        }}>
+          <p style={{ margin: '0 0 10px', fontSize: '14px', color: NAVY, fontWeight: 600 }}>
+            Panel de moderación
+          </p>
+          <p style={{ margin: '0 0 12px', fontSize: '14px', color: MUTED, lineHeight: 1.5 }}>
+            {pendientes > 0
+              ? `Tenés ${pendientes} llamado${pendientes === 1 ? '' : 's'} esperando aprobación.`
+              : 'Revisá y aprobá llamados de empresas antes de que se publiquen.'}
+          </p>
+          <Link
+            to="/admin/moderacion"
+            style={{
+              ...btnPrimary,
+              display: 'inline-block',
+              textDecoration: 'none',
+              textAlign: 'center',
+            }}
+          >
+            Moderar llamados →
+          </Link>
+        </div>
+      )}
+
       <section style={cardStyle}>
         <h2 style={{ margin: '0 0 16px', fontSize: '16px', fontWeight: 600, color: NAVY }}>
           Publicar un llamado
@@ -179,12 +210,6 @@ export default function DashboardContratante() {
           </div>
         )}
       </section>
-
-      {perfil?.es_admin && (
-        <p style={{ marginTop: '8px' }}>
-          <Link to="/admin/moderacion" style={{ color: NAVY, fontWeight: 600 }}>Ir a moderación de llamados →</Link>
-        </p>
-      )}
     </div>
   )
 }
