@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import AuthPage from './pages/auth/AuthPage'
+import ResetPasswordPage from './pages/auth/ResetPasswordPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import LandingPage from './pages/landing/LandingPage'
 import QuienesSomosPage from './pages/landing/QuienesSomosPage'
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/quienes-somos" element={<PublicRoute><QuienesSomosPage /></PublicRoute>} />
           <Route path="/como-funciona" element={<PublicRoute><ComoFuncionaPage /></PublicRoute>} />
           <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
+          <Route path="/auth/restablecer-contrasena" element={<ResetPasswordPage />} />
           <Route path="/onboarding" element={<OnboardingPage />} />
           <Route path="/contacto/contratante" element={<PublicRoute><ContactoContratante /></PublicRoute>} />
           <Route path="/terminos" element={<TerminosPage />} />

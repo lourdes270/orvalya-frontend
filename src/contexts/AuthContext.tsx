@@ -16,6 +16,7 @@ import {
   prepararBorradorParaOAuthOnboarding,
   restaurarBorradorOnboardingSiFalta,
 } from '../pages/onboarding/hooks/helpers'
+import { urlRedirectoResetPassword } from '../lib/authHelpers'
 import { REGISTRO_TIPO_KEY } from '../lib/registroConstants'
 import { activarPerfilContratante } from '../lib/registroHelpers'
 
@@ -248,9 +249,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
   }, [])
 
+  const resetPasswordForEmail = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      redirectTo: urlRedirectoResetPassword(),
+    })
+    if (error) throw error
+  }, [])
+
+  const updatePassword = useCallback(async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw error
+  }, [])
+
   const value = useMemo<AuthContextValue>(
-    () => ({ loading, postAuthPending, authOAuthError, clearAuthOAuthError, session, user, perfil, setPerfil, signInWithPassword, signUp, signInWithGoogle, signOut }),
-    [loading, postAuthPending, authOAuthError, clearAuthOAuthError, session, user, perfil, setPerfil, signInWithPassword, signUp, signInWithGoogle, signOut],
+    () => ({
+      loading, postAuthPending, authOAuthError, clearAuthOAuthError, session, user, perfil, setPerfil,
+      signInWithPassword, signUp, signInWithGoogle, signOut, resetPasswordForEmail, updatePassword,
+    }),
+    [loading, postAuthPending, authOAuthError, clearAuthOAuthError, session, user, perfil, setPerfil, signInWithPassword, signUp, signInWithGoogle, signOut, resetPasswordForEmail, updatePassword],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

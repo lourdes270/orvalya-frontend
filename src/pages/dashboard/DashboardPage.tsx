@@ -10,6 +10,7 @@ import PerfilPrestador from './PerfilPrestador'
 import AvatarIncentiveCard from './AvatarIncentiveCard'
 import { statsGridStyle } from './dashboardLayout'
 import DashboardContratante from './DashboardContratante'
+import CuentaSeguridadPanel from './CuentaSeguridadPanel'
 import { useContratanteProfile } from '../../hooks/useContratanteProfile'
 import { Navigate } from 'react-router-dom'
 import { DISCLAIMER_PLATAFORMA } from '../legal/legalCopy'
@@ -145,6 +146,7 @@ export default function DashboardPage() {
             Cerrar sesión
           </button>
         </div>
+        <CuentaSeguridadPanel />
         {perfilActivo?.tipo === 'prestador'
           ? <DashboardPrestador perfil={perfilActivo} onPerfilUpdate={handlePerfilUpdate} />
           : <DashboardContratante />}

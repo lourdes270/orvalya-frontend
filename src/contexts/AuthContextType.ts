@@ -58,6 +58,8 @@ export type AuthContextValue = {
   signUp: (args: { email: string; password: string }) => Promise<SignUpResult>
   signInWithGoogle: (options?: { fromOnboarding?: boolean }) => Promise<void>
   signOut: () => Promise<void>
+  resetPasswordForEmail: (email: string) => Promise<void>
+  updatePassword: (password: string) => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

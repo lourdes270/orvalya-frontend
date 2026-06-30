@@ -4,6 +4,7 @@ import { useAuth } from '../../contexts/useAuth'
 import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
 import { activarPerfilContratante } from '../../lib/registroHelpers'
 import { validarEmail } from '../../lib/validaciones'
+import { ForgotPasswordForm } from './ForgotPasswordForm'
 import { s } from './styles'
 
 export function LoginForm() {
@@ -14,6 +15,11 @@ export function LoginForm() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [mostrarRecuperar, setMostrarRecuperar] = useState(false)
+
+  if (mostrarRecuperar) {
+    return <ForgotPasswordForm onBack={() => setMostrarRecuperar(false)} />
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,6 +79,13 @@ export function LoginForm() {
           style={{ ...s.input, ...(errors.password ? s.inputError : {}) }}
         />
         {errors.password && <p style={s.error}>{errors.password}</p>}
+        <button
+          type="button"
+          onClick={() => { setMostrarRecuperar(true); setError('') }}
+          style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: '#2E75B6', fontSize: '12px', cursor: 'pointer', padding: 0 }}
+        >
+          ¿Olvidaste tu contraseña?
+        </button>
       </div>
       {error && <p style={s.error}>{error}</p>}
       <button type="submit" style={s.btn} disabled={loading}>
