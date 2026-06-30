@@ -182,7 +182,7 @@ async function drawHeader(doc: jsPDF, perfil: Perfil): Promise<number> {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
   doc.setTextColor(200, 220, 235)
-  doc.text('Perfil profesional · Uruguay', MARGIN, HEADER_HEIGHT - 8)
+  doc.text('Presentación comercial de servicios · Uruguay', MARGIN, HEADER_HEIGHT - 8)
 
   return HEADER_HEIGHT + 14
 }
@@ -193,6 +193,10 @@ function contentWidth(doc: jsPDF): number {
 
 export async function descargarPerfilPdf(perfil: Perfil): Promise<void> {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+  const nombre = perfil.nombre?.trim() || 'Prestador Orvalya'
+  doc.setProperties({
+    title: `Presentación comercial — ${nombre} — Orvalya`,
+  })
   const width = contentWidth(doc)
   let y = await drawHeader(doc, perfil)
 
@@ -215,5 +219,5 @@ export async function descargarPerfilPdf(perfil: Perfil): Promise<void> {
   const footerY = ensureSpace(doc, y, 8)
   doc.text('Documento generado en Orvalya · orvalya.com', MARGIN, footerY)
 
-  doc.save(`perfil-orvalya-${slugifyNombre(perfil.nombre || 'prestador')}.pdf`)
+  doc.save(`presentacion-comercial-orvalya-${slugifyNombre(perfil.nombre || 'prestador')}.pdf`)
 }

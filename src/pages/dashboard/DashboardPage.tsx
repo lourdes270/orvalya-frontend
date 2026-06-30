@@ -197,7 +197,7 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
             opacity: generandoPdf ? 0.7 : 1,
           }}
         >
-          {generandoPdf ? 'Generando PDF...' : 'Descargar perfil como PDF'}
+          {generandoPdf ? 'Generando PDF...' : 'Descargar presentación comercial como PDF'}
         </button>
       </div>
       <div style={statsGridStyle(isMobile)}>
