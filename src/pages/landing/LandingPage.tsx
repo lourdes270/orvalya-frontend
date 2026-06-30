@@ -102,26 +102,6 @@ function HeroImage({ isMobile }: { isMobile: boolean }) {
               pointerEvents: 'none',
             }}
           />
-          <div
-            style={{
-              position: 'absolute',
-              left: isMobile ? '12px' : '16px',
-              bottom: isMobile ? '12px' : '16px',
-              padding: isMobile ? '8px 12px' : '10px 14px',
-              borderRadius: '999px',
-              background: 'rgba(255, 255, 255, 0.92)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.65)',
-              boxShadow: '0 4px 16px rgba(15, 45, 82, 0.12)',
-              fontSize: isMobile ? '11px' : '12px',
-              fontWeight: 700,
-              letterSpacing: '0.04em',
-              textTransform: 'uppercase',
-              color: NAVY,
-            }}
-          >
-            Prestadores verificados · Uruguay
-          </div>
         </>
       ) : (
         <div style={{
@@ -282,7 +262,7 @@ export default function LandingPage() {
                 color: TEXT_MUTED,
                 textAlign: 'center',
               }}>
-                Gratis · Sin tarjeta · 2 minutos
+                Gratis
               </p>
             </div>
           </div>

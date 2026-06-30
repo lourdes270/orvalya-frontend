@@ -278,8 +278,9 @@ export default function AudienceSplitSection() {
         }}>
           <AudienceCard
             imageSrc={PRESTADORES_IMAGE_SRC}
-            imageAlt="Prestadora de servicios en Uruguay"
-            imagePosition="left 62%"
+            imageAlt="Prestadora de servicios usando Orvalya en Uruguay"
+            imagePosition="50% 38%"
+            imagePositionMobile="52% 42%"
             placeholderIcon={Wrench}
             placeholderLabel="Ilustración de prestador de servicios"
             label="Para prestadores · Uruguay"
