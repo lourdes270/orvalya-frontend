@@ -9,6 +9,9 @@ import DocumentosPrestador from './documentos/DocumentosPrestador'
 import PerfilPrestador from './PerfilPrestador'
 import AvatarIncentiveCard from './AvatarIncentiveCard'
 import { statsGridStyle } from './dashboardLayout'
+import DashboardContratante from './DashboardContratante'
+import { useContratanteProfile } from '../../hooks/useContratanteProfile'
+import { Navigate } from 'react-router-dom'
 import { DISCLAIMER_PLATAFORMA } from '../legal/legalCopy'
 
 export { formatZonaDisplay } from './formatZona'
@@ -20,7 +23,7 @@ function esPerfilRecienCreado(createdAt: string | null | undefined): boolean {
   return Date.now() - new Date(createdAt).getTime() < CINCO_MINUTOS_MS
 }
 
-function BannerBienvenida({ onClose }: { onClose: () => void }) {
+function BannerBienvenida({ esContratante, onClose }: { esContratante: boolean; onClose: () => void }) {
   return (
     <div style={{
       display: 'flex',
@@ -32,7 +35,9 @@ function BannerBienvenida({ onClose }: { onClose: () => void }) {
       color: '#ffffff',
     }}>
       <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.5, flex: 1 }}>
-        ¡Bienvenida a Orvalya! Completá tus documentos para aparecer en búsquedas.
+        {esContratante
+          ? '¡Bienvenido a Orvalya! Completá tu perfil para publicar llamados de servicio.'
+          : '¡Bienvenida a Orvalya! Completá tus documentos para aparecer en búsquedas.'}
       </p>
       <button
         type="button"
@@ -108,6 +113,8 @@ export default function DashboardPage() {
   }
 
   const perfilActivo = perfil ?? perfilGlobal
+  const esContratante = perfilActivo?.tipo === 'contratante'
+  const { perfilCompleto, loading: loadingContratante } = useContratanteProfile()
   const mostrarBanner = !bannerCerrado && esPerfilRecienCreado(perfilActivo?.created_at)
 
   if (cargandoPerfil) {
@@ -118,9 +125,13 @@ export default function DashboardPage() {
     )
   }
 
+  if (esContratante && !loadingContratante && !perfilCompleto) {
+    return <Navigate to="/contratante/perfil" replace />
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: '#F8F9FA' }}>
-      {mostrarBanner && <BannerBienvenida onClose={() => setBannerCerrado(true)} />}
+      {mostrarBanner && <BannerBienvenida esContratante={esContratante} onClose={() => setBannerCerrado(true)} />}
       <div style={{ padding: '40px 16px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
@@ -219,25 +230,6 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
       <p style={{ margin: '8px 0 0', fontSize: '11px', color: '#ADB5BD', lineHeight: 1.5 }}>
         {DISCLAIMER_PLATAFORMA}
       </p>
-    </div>
-  )
-}
-
-function DashboardContratante() {
-  const isMobile = useIsMobile(640)
-  return (
-    <div>
-      <div style={statsGridStyle(isMobile)}>
-        <Tarjeta titulo="Proveedores" valor="0" desc="Prestadores vinculados" />
-        <Tarjeta titulo="Contratos activos" valor="0" desc="Órdenes generadas" />
-        <Tarjeta titulo="Alertas" valor="0" desc="Documentos por vencer" />
-      </div>
-      <Seccion titulo="Mis proveedores">
-        <ItemVacio texto="No tenés proveedores vinculados. Buscá prestadores verificados en el directorio." />
-      </Seccion>
-      <Seccion titulo="Contratos recientes">
-        <ItemVacio texto="No generaste contratos todavía. Las órdenes de servicio aparecerán acá." />
-      </Seccion>
     </div>
   )
 }

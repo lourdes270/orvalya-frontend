@@ -5,6 +5,8 @@ const TITLES: Record<string, string> = {
   '/': 'Orvalya',
   '/quienes-somos': 'Quiénes Somos | Orvalya',
   '/como-funciona': 'Cómo Funciona | Orvalya',
+  '/contratante/perfil': 'Perfil de empresa | Orvalya',
+  '/admin/moderacion': 'Moderación | Orvalya',
   '/terminos': 'Términos y Condiciones | Orvalya',
   '/privacidad': 'Política de Privacidad | Orvalya',
 }
@@ -31,6 +33,8 @@ export function DocumentTitle() {
     if (pathname === '/') document.title = TITLES['/']
     else if (pathname.startsWith('/quienes-somos')) document.title = TITLES['/quienes-somos']
     else if (pathname.startsWith('/como-funciona')) document.title = TITLES['/como-funciona']
+    else if (pathname.startsWith('/contratante/perfil')) document.title = TITLES['/contratante/perfil']
+    else if (pathname.startsWith('/admin/moderacion')) document.title = TITLES['/admin/moderacion']
     else if (pathname.startsWith('/terminos')) document.title = TITLES['/terminos']
     else if (pathname.startsWith('/privacidad')) document.title = TITLES['/privacidad']
     else if (pathname.startsWith('/onboarding')) document.title = 'Registrate | Orvalya'

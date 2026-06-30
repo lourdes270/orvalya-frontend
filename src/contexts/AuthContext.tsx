@@ -16,6 +16,8 @@ import {
   prepararBorradorParaOAuthOnboarding,
   restaurarBorradorOnboardingSiFalta,
 } from '../pages/onboarding/hooks/helpers'
+import { REGISTRO_TIPO_KEY } from '../lib/registroConstants'
+import { activarPerfilContratante } from '../lib/registroHelpers'
 
 const CALLBACK_TIMEOUT_MS = 12_000
 
@@ -67,6 +69,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       perfilData = await fetchPerfilData(user.id)
     }
     if (perfilData) setPerfil(perfilData)
+
+    const tipoRegistro = sessionStorage.getItem(REGISTRO_TIPO_KEY)
+    if (tipoRegistro === 'contratante' && user.email) {
+      try {
+        perfilData = await activarPerfilContratante(user.email)
+        setPerfil(perfilData)
+        sessionStorage.removeItem(REGISTRO_TIPO_KEY)
+      } catch (err) {
+        console.error('activarPerfilContratante:', err)
+      }
+    }
 
     if (window.location.pathname.startsWith('/onboarding')) return
 

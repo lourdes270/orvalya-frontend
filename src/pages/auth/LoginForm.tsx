@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
+import { REGISTRO_TIPO_KEY } from '../../lib/registroConstants'
+import { activarPerfilContratante } from '../../lib/registroHelpers'
 import { validarEmail } from '../../lib/validaciones'
 import { s } from './styles'
 
 export function LoginForm() {
-  const { signInWithPassword } = useAuth()
+  const { signInWithPassword, setPerfil } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,7 +30,16 @@ export function LoginForm() {
     setError('')
     setLoading(true)
     try {
-      await signInWithPassword({ email, password })
+      const emailNorm = email.trim().toLowerCase()
+      await signInWithPassword({ email: emailNorm, password })
+
+      const tipoRegistro = sessionStorage.getItem(REGISTRO_TIPO_KEY)
+      if (tipoRegistro === 'contratante') {
+        const perfilActualizado = await activarPerfilContratante(emailNorm)
+        setPerfil(perfilActualizado)
+        sessionStorage.removeItem(REGISTRO_TIPO_KEY)
+      }
+
       navigate('/dashboard')
     } catch {
       setError('Email o contraseña incorrectos.')

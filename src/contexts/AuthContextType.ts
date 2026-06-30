@@ -40,6 +40,7 @@ export type Perfil = {
   experiencia?: string | null
   cursos?: string | null
   documentacion_adicional?: DocumentacionAdicional | null
+  es_admin?: boolean
   updated_at?: string | null
   created_at?: string | null
 }
