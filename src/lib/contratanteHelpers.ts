@@ -1,3 +1,4 @@
+import { supabase } from './supabase'
 import type {
   Contratante,
   ContratantePerfilForm,
@@ -5,7 +6,7 @@ import type {
   Llamado,
   LlamadoForm,
 } from '../types/contratante'
-import { supabase } from './supabase'
+import { sanitizeText } from './sanitize'
 
 export async function fetchContratante(userId: string): Promise<Contratante | null> {
   const { data, error } = await supabase
@@ -24,7 +25,7 @@ export async function crearContratante(
 ): Promise<Contratante> {
   const payload = {
     id: userId,
-    nombre_empresa: form.nombre_empresa.trim(),
+    nombre_empresa: sanitizeText(form.nombre_empresa),
     rut: form.rut.trim(),
     tipo_contratante: form.tipo_contratante,
     rubro_principal: form.rubro_principal,
@@ -60,8 +61,8 @@ export async function crearLlamado(
 ): Promise<Llamado> {
   const payload = {
     contratante_id: contratanteId,
-    titulo: form.titulo.trim(),
-    descripcion: form.descripcion.trim(),
+    titulo: sanitizeText(form.titulo),
+    descripcion: sanitizeText(form.descripcion),
     rubro: form.rubro,
     zona: form.zona,
     estado: 'pendiente_moderacion' as const,

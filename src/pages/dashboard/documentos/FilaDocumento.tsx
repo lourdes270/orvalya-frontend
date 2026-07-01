@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { validateUploadFile } from '../../../lib/fileValidation'
 import { DECLARACION_JURADA, DISCLAIMER_DOCUMENTO } from './documentosConfig'
 import type { DocEstado } from './documentosTypes'
 import DocumentHistory from './DocumentHistory'
@@ -45,8 +46,21 @@ export default function FilaDocumento({
           title="Fecha de vencimiento del certificado"
           onChange={e => onChange({ fecha_vencimiento: e.target.value })}
           style={{ padding: '6px 10px', border: '1px solid #DEE2E6', borderRadius: '6px', fontSize: '13px' }} />
-        <input ref={inputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display: 'none' }}
-          onChange={e => onChange({ archivo: e.target.files?.[0] ?? null, declaracionAceptada: false })} />
+        <input ref={inputRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp" style={{ display: 'none' }}
+          onChange={async e => {
+            const file = e.target.files?.[0] ?? null
+            if (!file) {
+              onChange({ archivo: null, declaracionAceptada: false, error: '' })
+              return
+            }
+            const validacion = await validateUploadFile(file)
+            if (!validacion.ok) {
+              onChange({ archivo: null, declaracionAceptada: false, error: validacion.message })
+              e.target.value = ''
+              return
+            }
+            onChange({ archivo: file, declaracionAceptada: false, error: '' })
+          }} />
         <button type="button" onClick={() => inputRef.current?.click()}
           style={{ padding: '6px 12px', background: '#F8F9FA', border: '1px solid #DEE2E6', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>
           {estado.archivo ? estado.archivo.name.slice(0, 24) : 'Seleccionar archivo'}

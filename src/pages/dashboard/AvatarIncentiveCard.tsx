@@ -1,5 +1,6 @@
 import { useRef, useState, type ChangeEvent, type CSSProperties, type RefObject } from 'react'
 import { cropImageSquare } from '../../lib/cropImageSquare'
+import { validateImageUpload } from '../../lib/fileValidation'
 import { uploadAvatar } from '../../lib/uploadAvatar'
 import type { Perfil } from '../../contexts/AuthContextType'
 
@@ -24,6 +25,11 @@ export default function AvatarIncentiveCard({ perfil, onPerfilUpdate }: AvatarIn
     setSubiendo(true)
     setError('')
     try {
+      const validacion = await validateImageUpload(file)
+      if (!validacion.ok) {
+        setError(validacion.message)
+        return
+      }
       const blob = await cropImageSquare(file)
       const url = await uploadAvatar(perfil.id, blob)
       if (!url) throw new Error('No se pudo subir la imagen')

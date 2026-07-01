@@ -12,5 +12,13 @@ max_rows = 1000
 port = 54322
 major_version = 15
 
+[auth]
+enabled = true
+
+# Rate limiting nativo Auth: máx. 5 intentos login/registro por IP cada 5 min
+# (Supabase agrupa por ventana de 5 min; en producción replicar en Dashboard → Auth → Rate Limits)
+[auth.rate_limit]
+sign_in_sign_ups = 5
+
 [functions.verify-captcha]
 verify_jwt = false

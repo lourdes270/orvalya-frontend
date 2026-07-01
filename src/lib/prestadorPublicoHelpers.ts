@@ -5,6 +5,9 @@ import type { PrestadorPublico } from '../types/prestadorPublico'
 export async function fetchPrestadorPublico(id: string): Promise<PrestadorPublico | null> {
   const { data, error } = await supabase.rpc('fetch_prestador_publico', { p_id: id })
   if (error) {
+    if (error.message?.includes('rate_limit_exceeded')) {
+      throw new Error('Demasiadas solicitudes. Intentá de nuevo en unos minutos.')
+    }
     console.error('fetch_prestador_publico:', error)
     return null
   }

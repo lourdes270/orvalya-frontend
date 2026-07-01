@@ -40,6 +40,7 @@ export default function PrestadorPublicoPage() {
   const { id } = useParams<{ id: string }>()
   const isMobile = useIsMobile(768)
   const [prestador, setPrestador] = useState<PrestadorPublico | null | undefined>(undefined)
+  const [rateLimitMsg, setRateLimitMsg] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id || !UUID_RE.test(id)) {
@@ -47,17 +48,34 @@ export default function PrestadorPublicoPage() {
       return
     }
     let mounted = true
+    setRateLimitMsg(null)
     fetchPrestadorPublico(id)
       .then(data => { if (mounted) setPrestador(data) })
-      .catch(() => { if (mounted) setPrestador(null) })
+      .catch(err => {
+        if (!mounted) return
+        if (err instanceof Error && err.message.includes('Demasiadas solicitudes')) {
+          setRateLimitMsg(err.message)
+        }
+        setPrestador(null)
+      })
     return () => { mounted = false }
   }, [id])
 
-  if (prestador === undefined) {
+  if (prestador === undefined && !rateLimitMsg) {
     return (
       <LandingLayout>
         <div style={{ padding: '48px 16px', textAlign: 'center', color: TEXT_MUTED }}>
           Cargando perfil...
+        </div>
+      </LandingLayout>
+    )
+  }
+
+  if (rateLimitMsg) {
+    return (
+      <LandingLayout>
+        <div style={{ padding: '48px 16px', textAlign: 'center', color: TEXT_MUTED, maxWidth: '480px', margin: '0 auto' }}>
+          {rateLimitMsg}
         </div>
       </LandingLayout>
     )

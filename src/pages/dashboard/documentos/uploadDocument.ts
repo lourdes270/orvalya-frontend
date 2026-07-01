@@ -1,5 +1,6 @@
 import { supabase } from '../../../lib/supabase'
 import { buildFileMetadata } from './documentosTypes'
+import { validateUploadFile } from '../../../lib/fileValidation'
 
 interface UploadParams {
   prestadorId: string
@@ -34,6 +35,9 @@ export async function uploadDocumentVersion({
   archivo,
   fechaVencimiento,
 }: UploadParams): Promise<{ error: string | null; version?: number }> {
+  const validacion = await validateUploadFile(archivo)
+  if (!validacion.ok) return { error: validacion.message }
+
   const ext = archivo.name.split('.').pop()?.toLowerCase() ?? 'bin'
 
   const { data: prevRows } = await supabase

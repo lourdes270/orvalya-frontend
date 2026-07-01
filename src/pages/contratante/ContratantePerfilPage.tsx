@@ -3,7 +3,10 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { useContratanteProfile } from '../../hooks/useContratanteProfile'
 import { crearContratante } from '../../lib/contratanteHelpers'
+import { isProfileHoneypotTriggered } from '../../lib/botProtection/profileHoneypot'
+import { MENSAJE_RUT_DUPLICADO, rutYaRegistrado } from '../../lib/rutHelpers'
 import { normalizarRutContratante, normalizarTelefono, validarEmail, validarRutContratante, validarTelefono } from '../../lib/validaciones'
+import { HoneypotField } from '../../components/botProtection/HoneypotField'
 import { RUBROS } from '../onboarding/data/rubros'
 import { DEPARTAMENTOS } from '../onboarding/data/zonas'
 import type { ContratantePerfilForm, TipoContratante } from '../../types/contratante'
@@ -35,6 +38,7 @@ export default function ContratantePerfilPage() {
   const [errores, setErrores] = useState<Record<string, string>>({})
   const [general, setGeneral] = useState('')
   const [guardando, setGuardando] = useState(false)
+  const [honeypot, setHoneypot] = useState('')
 
   if (perfil?.tipo !== 'contratante') {
     return <Navigate to="/dashboard" replace />
@@ -60,6 +64,10 @@ export default function ContratantePerfilPage() {
 
   const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault()
+    if (isProfileHoneypotTriggered(honeypot, 'perfil-contratante')) {
+      navigate('/dashboard', { replace: true })
+      return
+    }
     const e = validar()
     if (Object.keys(e).length > 0) {
       setErrores(e)
@@ -71,15 +79,23 @@ export default function ContratantePerfilPage() {
     setGeneral('')
     setGuardando(true)
     try {
+      const rutNormalizado = normalizarRutContratante(form.rut)
+      if (await rutYaRegistrado(rutNormalizado, user.id)) {
+        setErrores({ rut: MENSAJE_RUT_DUPLICADO })
+        return
+      }
       await crearContratante(user.id, {
         ...form,
-        rut: normalizarRutContratante(form.rut),
+        rut: rutNormalizado,
         telefono: normalizarTelefono(form.telefono),
       })
       navigate('/dashboard', { replace: true })
     } catch (err) {
       console.error(err)
-      setGeneral('No pudimos guardar tu perfil. Revisá los datos e intentá de nuevo.')
+      const msg = typeof err === 'object' && err !== null && 'code' in err && (err as { code?: string }).code === '23505'
+        ? MENSAJE_RUT_DUPLICADO
+        : 'No pudimos guardar tu perfil. Revisá los datos e intentá de nuevo.'
+      setGeneral(msg)
     } finally {
       setGuardando(false)
     }
@@ -188,6 +204,8 @@ export default function ContratantePerfilPage() {
           />
 
           {general && <p style={{ color: '#dc3545', fontSize: '14px', margin: '0 0 16px' }}>{general}</p>}
+
+          <HoneypotField value={honeypot} onChange={setHoneypot} />
 
           <button type="submit" style={{ ...btnPrimary, width: '100%' }} disabled={guardando}>
             {guardando ? 'Guardando...' : 'Guardar y continuar'}

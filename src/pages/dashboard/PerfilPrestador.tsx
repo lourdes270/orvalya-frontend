@@ -7,6 +7,10 @@ import { formatZonaDisplay } from './formatZona'
 import PerfilPublicoCard from './PerfilPublicoCard'
 import { DescripcionServicioField } from './DescripcionServicioField'
 import { normalizarTelefono, validarTelefono } from '../../lib/validaciones'
+import { sanitizeText } from '../../lib/sanitize'
+import { MENSAJE_RUT_DUPLICADO, rutYaRegistrado } from '../../lib/rutHelpers'
+import { HoneypotField } from '../../components/botProtection/HoneypotField'
+import { isProfileHoneypotTriggered } from '../../lib/botProtection/profileHoneypot'
 
 interface PerfilPrestadorProps {
   perfil: Perfil
@@ -126,6 +130,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
   const [guardado, setGuardado] = useState(false)
   const [error, setError] = useState('')
   const [erroresCampo, setErroresCampo] = useState<Record<string, string>>({})
+  const [honeypot, setHoneypot] = useState('')
 
   useEffect(() => {
     if (!perfil) return
@@ -152,6 +157,11 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
 
   const guardar = async () => {
     if (!perfil) return
+    if (isProfileHoneypotTriggered(honeypot, 'perfil-prestador')) {
+      setGuardado(true)
+      setTimeout(() => setGuardado(false), 3000)
+      return
+    }
     const nextErrores: Record<string, string> = {}
     if (!form.nombre.trim()) nextErrores.nombre = 'El nombre es obligatorio.'
     const telErr = validarTelefono(form.telefono, { etiqueta: 'teléfono' })
@@ -167,6 +177,12 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
     setGuardando(true)
     setError('')
     try {
+      const rutVisible = form.rut.trim()
+      if (rutVisible && await rutYaRegistrado(rutVisible, perfil.id)) {
+        setErroresCampo({ rut: MENSAJE_RUT_DUPLICADO })
+        return
+      }
+
       const telefono = form.telefono.trim() ? normalizarTelefono(form.telefono) : ''
       const whatsapp = form.whatsapp.trim() ? normalizarTelefono(form.whatsapp) : ''
       const tarifa_hora = form.tarifa_hora.trim() ? parseNumero(form.tarifa_hora) : null
@@ -175,10 +191,10 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         : null
 
       const payload: Record<string, string | number | boolean | null | DocumentacionAdicional> = {
-        nombre: form.nombre,
+        nombre: sanitizeText(form.nombre),
         telefono,
         whatsapp,
-        rut: form.rut,
+        rut: rutVisible,
         rango_edad: form.rango_edad || null,
         tarifa_hora,
         tarifa_modalidad: form.tarifa_modalidad || null,
@@ -186,12 +202,12 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         viatico_diario,
         tiene_vehiculo: form.tiene_vehiculo,
         tipo_vehiculo: form.tiene_vehiculo && form.tipo_vehiculo ? form.tipo_vehiculo : null,
-        sobre_mi: form.sobre_mi.trim() || null,
-        experiencia: form.experiencia.trim() || null,
-        cursos: form.cursos.trim() || null,
+        sobre_mi: sanitizeText(form.sobre_mi) || null,
+        experiencia: sanitizeText(form.experiencia) || null,
+        cursos: sanitizeText(form.cursos) || null,
         documentacion_adicional: form.documentacion_adicional,
       }
-      if (!isDescripcionJson(form.descripcion)) payload.descripcion = form.descripcion
+      if (!isDescripcionJson(form.descripcion)) payload.descripcion = sanitizeText(form.descripcion)
       const { error } = await supabase.from('perfiles').update(payload).eq('id', perfil.id)
       if (error) throw error
       onPerfilUpdate({
@@ -473,6 +489,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
       </div>
 
       {error && <p style={{ color: '#dc2626', fontSize: '13px', margin: '0 0 12px' }}>{error}</p>}
+      <HoneypotField value={honeypot} onChange={setHoneypot} />
       <button onClick={guardar} disabled={guardando} style={{ padding: '10px 24px', background: guardado ? '#40C057' : '#1F3864', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
         {guardando ? 'Guardando...' : guardado ? 'Guardado ✓' : 'Guardar perfil'}
       </button>
