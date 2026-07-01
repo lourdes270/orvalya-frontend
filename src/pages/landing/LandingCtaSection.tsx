@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
+import { limpiarRegistroContratante } from '../../lib/registroConstants'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { NAVY, TEAL, touchButtonBase } from './landingStyles'
 
@@ -42,7 +43,10 @@ export default function LandingCtaSection({ showBackLink = false }: LandingCtaSe
         <button
           type="button"
           className="landing-btn"
-          onClick={() => navigate('/onboarding')}
+          onClick={() => {
+            limpiarRegistroContratante()
+            navigate('/auth')
+          }}
           style={{
             ...touchButtonBase,
             width: '100%',

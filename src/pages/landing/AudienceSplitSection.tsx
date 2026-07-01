@@ -6,7 +6,7 @@ import {
   UsersThree,
   Wrench,
 } from '@phosphor-icons/react'
-import { marcarRegistroContratante } from '../../lib/registroConstants'
+import { limpiarRegistroContratante, marcarRegistroContratante } from '../../lib/registroConstants'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { revealStyle, useScrollReveal } from '../../hooks/useScrollReveal'
 import {
@@ -191,7 +191,10 @@ export default function AudienceSplitSection() {
             <button
               type="button"
               className="landing-btn"
-              onClick={() => navigate('/onboarding')}
+              onClick={() => {
+                limpiarRegistroContratante()
+                navigate('/auth')
+              }}
               style={{
                 ...touchButtonBase,
                 width: '100%',

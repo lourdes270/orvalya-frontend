@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Image as ImageIcon } from '@phosphor-icons/react'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { revealStyle, useHeroFadeIn } from '../../hooks/useScrollReveal'
-import { marcarRegistroContratante } from '../../lib/registroConstants'
+import { limpiarRegistroContratante, marcarRegistroContratante } from '../../lib/registroConstants'
 import './landing.css'
 import LandingCtaSection from './LandingCtaSection'
 import LandingLayout from './LandingLayout'
@@ -174,7 +174,10 @@ export default function LandingPage() {
               <button
                 type="button"
                 className="landing-btn"
-                onClick={() => navigate('/onboarding')}
+                onClick={() => {
+                  limpiarRegistroContratante()
+                  navigate('/auth')
+                }}
                 style={{
                   ...touchButtonBase,
                   width: '100%',

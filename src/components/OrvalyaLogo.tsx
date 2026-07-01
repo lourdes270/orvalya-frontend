@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import orvalyaLogoUrl from '../assets/orvalya_logo.png'
 
 const NAVY = '#0F2D52'
 const TEAL = '#00B4A6'
@@ -31,7 +32,7 @@ export function OrvalyaLogo({ height = 28, showText = true, color = NAVY }: Orva
   if (!imgFailed) {
     return (
       <img
-        src="/orvalya_logo.png"
+        src={orvalyaLogoUrl}
         alt="Orvalya"
         height={iconSize}
         style={{ display: 'block', objectFit: 'contain', width: 'auto', maxHeight: iconSize }}
