@@ -1,0 +1,30 @@
+.landing-btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.landing-benefit-card {
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+@media (hover: hover) {
+  .landing-btn:hover {
+    transform: scale(1.02);
+  }
+
+  .landing-benefit-card:hover {
+    box-shadow: 0 8px 32px rgba(15, 45, 82, 0.12);
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-btn,
+  .landing-benefit-card {
+    transition: none;
+  }
+
+  .landing-btn:hover,
+  .landing-benefit-card:hover {
+    transform: none;
+  }
+}

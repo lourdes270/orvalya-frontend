@@ -17,46 +17,94 @@ export const pageShellStyle: CSSProperties = {
 }
 
 export const touchButtonBase: CSSProperties = {
-  minHeight: '48px',
-  borderRadius: '10px',
-  fontWeight: 600,
+  minHeight: '56px',
+  borderRadius: '12px',
+  fontWeight: 700,
   cursor: 'pointer',
   boxSizing: 'border-box',
   fontFamily: 'inherit',
 }
 
+export const sectionPadding: CSSProperties = {
+  padding: '80px 20px',
+}
+
+export const sectionPaddingDesktop: CSSProperties = {
+  padding: '100px 24px',
+}
+
+export const heroTitleStyle = (isMobile: boolean): CSSProperties => ({
+  margin: '0 0 20px',
+  fontSize: isMobile ? '2.8rem' : 'clamp(2.5rem, 4vw, 3.25rem)',
+  fontWeight: 800,
+  color: NAVY,
+  lineHeight: 1.15,
+  letterSpacing: '-0.03em',
+})
+
 export const sectionTitleStyle: CSSProperties = {
-  margin: '0 0 16px',
-  fontSize: 'clamp(22px, 4vw, 28px)',
-  fontWeight: 700,
+  margin: '0 0 20px',
+  fontSize: 'clamp(1.75rem, 5vw, 2.25rem)',
+  fontWeight: 800,
   color: NAVY,
   letterSpacing: '-0.02em',
-  lineHeight: 1.25,
+  lineHeight: 1.2,
+}
+
+export const sectionSubtitleStyle: CSSProperties = {
+  margin: '0 0 32px',
+  fontSize: '17px',
+  fontWeight: 600,
+  lineHeight: 1.6,
+  color: TEXT_BODY,
+  maxWidth: '36ch',
 }
 
 export const sectionBodyStyle: CSSProperties = {
   margin: 0,
   fontSize: '16px',
-  lineHeight: 1.7,
+  lineHeight: 1.6,
   color: TEXT_BODY,
+}
+
+export const bodyTextStyle: CSSProperties = {
+  margin: 0,
+  fontSize: '16px',
+  lineHeight: 1.6,
+  color: TEXT_BODY,
+}
+
+export const badgePillStyle: CSSProperties = {
+  display: 'inline-block',
+  margin: '0 0 20px',
+  padding: '10px 18px',
+  fontSize: '12px',
+  fontWeight: 800,
+  letterSpacing: '0.1em',
+  textTransform: 'uppercase',
+  color: TEAL,
+  background: '#fff',
+  border: `2px solid ${TEAL}`,
+  borderRadius: '999px',
 }
 
 export const benefitCardStyle: CSSProperties = {
   background: '#fff',
-  borderRadius: '12px',
-  padding: '20px',
+  borderRadius: '16px',
+  padding: '28px 24px',
   border: `1px solid ${BORDER}`,
-  boxShadow: '0 2px 12px rgba(15, 45, 82, 0.04)',
+  boxShadow: '0 4px 20px rgba(15, 45, 82, 0.06)',
+  transition: 'box-shadow 0.25s ease, transform 0.25s ease',
 }
 
-export const iconBoxStyle: CSSProperties = {
+export const iconBoxLargeStyle: CSSProperties = {
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '44px',
-  height: '44px',
-  borderRadius: '10px',
+  width: '56px',
+  height: '56px',
+  borderRadius: '14px',
   background: SURFACE,
-  marginBottom: '14px',
+  marginBottom: '18px',
   flexShrink: 0,
 }
