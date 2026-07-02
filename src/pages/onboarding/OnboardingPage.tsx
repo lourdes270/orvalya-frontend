@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { capturarRegistroDesdeUrl, esIntentoRegistroContratante, esRegistroContratante } from '../../lib/registroConstants'
-import { activarPerfilContratanteSiCorresponde } from '../../lib/registroHelpers'
-import { hasCurrentLegalAcceptance } from '../../lib/legalAcceptance'
+import { resolverFlujoContratante } from '../../lib/registroHelpers'
 import Step0TipoPerfil from './steps/Step0TipoPerfil'
 import Step1Categorias from './steps/Step1Categorias'
 import Step2DatosBasicos from './steps/Step2DatosBasicos'
@@ -13,10 +12,20 @@ import { useOnboardingForm } from './hooks/useOnboardingForm'
 import { useAuth } from '../../contexts/useAuth'
 import { intentarCompletarOnboardingPendiente, restaurarBorradorOnboardingSiFalta } from './hooks/helpers'
 
-function PantallaCarga({ texto }: { texto: string }) {
+function PantallaCarga({ texto, secundario }: { texto: string; secundario?: string }) {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', color: '#6b7280', fontSize: '15px' }}>
-      {texto}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '100vh',
+      padding: '24px',
+      textAlign: 'center',
+      gap: '8px',
+    }}>
+      <p style={{ color: '#374151', fontSize: '16px', margin: 0 }}>{texto}</p>
+      {secundario && <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>{secundario}</p>}
     </div>
   )
 }
@@ -24,11 +33,13 @@ function PantallaCarga({ texto }: { texto: string }) {
 export default function OnboardingPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
-  const { session, perfil, setPerfil, loading: authLoading } = useAuth()
+  const { session, perfil, setPerfil, loading: authLoading, postAuthPending } = useAuth()
   const pasoParam = searchParams.get('paso')
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [completandoPendiente, setCompletandoPendiente] = useState(false)
   const [sinDatosPrevios, setSinDatosPrevios] = useState(false)
+  const [cargaLarga, setCargaLarga] = useState(false)
+  const contratanteProcesado = useRef(false)
   const {
     form, selecciones, estadoFiscal, loading, error, fakeSuccess,
     setForm, setEstadoFiscal, toggleSubrubro, puedeAvanzar, guardarYFinalizar, handleRegistro,
@@ -46,25 +57,34 @@ export default function OnboardingPage() {
   }, [])
 
   useEffect(() => {
-    if (!session?.user || !esIntentoRegistroContratante(session.user)) return
+    const timer = setTimeout(() => setCargaLarga(true), 10_000)
+    return () => clearTimeout(timer)
+  }, [])
 
+  useEffect(() => {
+    if (!session?.user || contratanteProcesado.current) return
+    if (!esIntentoRegistroContratante(session.user)) return
+
+    contratanteProcesado.current = true
     let activo = true
     setCompletandoPendiente(true)
 
-    activarPerfilContratanteSiCorresponde(session.user, perfil)
-      .then(async actualizado => {
+    resolverFlujoContratante(session.user, perfil, navigate)
+      .then(({ perfil: actualizado, redirigido }) => {
         if (!activo) return
         if (actualizado) setPerfil(actualizado)
-        const acepto = await hasCurrentLegalAcceptance(session.user.id)
-        navigate(acepto ? '/contratante/perfil' : '/aceptar-terminos', { replace: true })
+        if (!redirigido) contratanteProcesado.current = false
       })
-      .catch(err => console.error('onboarding contratante:', err))
+      .catch(err => {
+        console.error('onboarding contratante:', err)
+        contratanteProcesado.current = false
+      })
       .finally(() => {
         if (activo) setCompletandoPendiente(false)
       })
 
     return () => { activo = false }
-  }, [session?.user, perfil, setPerfil, navigate])
+  }, [session?.user?.id, setPerfil, navigate])
 
   useEffect(() => {
     if (!session?.user || perfil?.tipo !== 'pendiente') return
@@ -76,23 +96,43 @@ export default function OnboardingPage() {
 
     intentarCompletarOnboardingPendiente(session.user, setPerfil, navigate)
       .then(result => {
-        if (activo && result === 'sin_datos') setSinDatosPrevios(true)
+        if (!activo) return
+        if (result === 'sin_datos') {
+          setSinDatosPrevios(true)
+          if (pasoParam && pasoParam !== '0') {
+            navigate('/onboarding?paso=0', { replace: true })
+          }
+        }
       })
       .finally(() => {
         if (activo) setCompletandoPendiente(false)
       })
 
     return () => { activo = false }
-  }, [session?.user?.id, perfil?.tipo, setPerfil, navigate])
+  }, [session?.user?.id, perfil?.tipo, setPerfil, navigate, pasoParam])
 
   const esperandoPerfil = !!session && perfil === null
+  const preparandoContratante = !!session?.user && esIntentoRegistroContratante(session.user)
 
-  if (esRegistroContratante() || esIntentoRegistroContratante(session?.user)) {
-    return <PantallaCarga texto={completandoPendiente ? 'Preparando tu cuenta...' : 'Cargando...'} />
+  if (esRegistroContratante() && !session && !authLoading && !postAuthPending) {
+    return <Navigate to="/auth" replace />
   }
 
-  if (authLoading || esperandoPerfil || completandoPendiente) {
-    return <PantallaCarga texto={completandoPendiente ? 'Finalizando tu perfil...' : 'Cargando...'} />
+  if (postAuthPending || authLoading) {
+    return <PantallaCarga texto="Ingresando a tu cuenta..." secundario="Un momento, estamos verificando tu email." />
+  }
+
+  if (preparandoContratante && (completandoPendiente || esperandoPerfil)) {
+    return <PantallaCarga texto="Preparando tu cuenta de empresa..." secundario="No hace falta elegir servicios." />
+  }
+
+  if (esperandoPerfil || completandoPendiente) {
+    return (
+      <PantallaCarga
+        texto={completandoPendiente ? 'Finalizando tu perfil...' : 'Cargando...'}
+        secundario={cargaLarga ? 'Si tarda mucho, recargá la página o volvé a iniciar sesión.' : undefined}
+      />
+    )
   }
 
   if (!pasoParam || pasoParam === '0') {
@@ -118,7 +158,11 @@ export default function OnboardingPage() {
     )
   }
 
-  const pasoNum = parseInt(pasoParam)
+  const pasoNum = parseInt(pasoParam, 10)
+  if (Number.isNaN(pasoNum) || pasoNum < 1 || pasoNum > 4) {
+    return <Navigate to="/onboarding?paso=0" replace />
+  }
+
   const yaTieneCuenta = !!session && perfil?.tipo === 'pendiente'
   const nav = (dir: number) => { window.location.href = `/onboarding?paso=${pasoNum + dir}` }
 
@@ -139,10 +183,7 @@ export default function OnboardingPage() {
       {pasoNum === 4 && !yaTieneCuenta && (
         <Step4Registro isMobile={isMobile} onRegistrar={handleRegistro} loading={loading} error={error} fakeSuccess={fakeSuccess} email={form.email} />
       )}
-      {pasoNum === 4 && yaTieneCuenta && !sinDatosPrevios && completandoPendiente && (
-        <PantallaCarga texto="Finalizando tu perfil..." />
-      )}
-      {pasoNum === 4 && yaTieneCuenta && sinDatosPrevios && (
+      {pasoNum === 4 && yaTieneCuenta && (
         <Navigate to="/onboarding?paso=0" replace />
       )}
       {error && pasoNum !== 4 && (

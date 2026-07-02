@@ -18,8 +18,7 @@ import {
 } from '../pages/onboarding/hooks/helpers'
 import { urlRedirectoResetPassword } from '../lib/authHelpers'
 import { capturarRegistroDesdeUrl, metadataRegistroContratante, type RegistroTipo } from '../lib/registroConstants'
-import { activarPerfilContratanteSiCorresponde } from '../lib/registroHelpers'
-import { hasCurrentLegalAcceptance } from '../lib/legalAcceptance'
+import { activarPerfilContratanteSiCorresponde, obtenerUsuarioAutenticado, resolverFlujoContratante } from '../lib/registroHelpers'
 
 const CALLBACK_TIMEOUT_MS = 12_000
 
@@ -66,34 +65,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const enrutarTrasAutenticacion = useCallback(async (activeSession: Session) => {
-    const user = activeSession.user
+    const authUser = (await obtenerUsuarioAutenticado()) ?? activeSession.user
     capturarRegistroDesdeUrl()
     restaurarBorradorOnboardingSiFalta()
 
-    let perfilData = await fetchPerfilData(user.id)
+    let perfilData = await fetchPerfilData(authUser.id)
     if (!perfilData) {
       await new Promise(resolve => setTimeout(resolve, 1500))
-      perfilData = await fetchPerfilData(user.id)
+      perfilData = await fetchPerfilData(authUser.id)
     }
 
-    perfilData = await activarPerfilContratanteSiCorresponde(user, perfilData)
-    if (perfilData) setPerfil(perfilData)
-
-    if (perfilData?.tipo === 'contratante') {
-      const acepto = await hasCurrentLegalAcceptance(user.id)
-      navigate(acepto ? '/contratante/perfil' : '/aceptar-terminos', { replace: true })
+    const contratante = await resolverFlujoContratante(authUser, perfilData, navigate)
+    if (contratante.redirigido) {
+      if (contratante.perfil) setPerfil(contratante.perfil)
       return
     }
+    perfilData = contratante.perfil
+
+    if (perfilData) setPerfil(perfilData)
 
     if (perfilData && perfilData.tipo !== 'pendiente') {
       navigate('/dashboard', { replace: true })
       return
     }
 
-    const result = await intentarCompletarOnboardingPendiente(user, setPerfil, navigate)
+    const result = await intentarCompletarOnboardingPendiente(authUser, setPerfil, navigate)
     if (result === 'completado' || result === 'reanudado') return
 
-    navigate(getOnboardingResumePath(user), { replace: true })
+    navigate(getOnboardingResumePath(authUser), { replace: true })
   }, [navigate])
 
   const procesarCallbackAuth = useCallback(async (activeSession: Session | null) => {
@@ -128,6 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const initSession = async () => {
+      capturarRegistroDesdeUrl()
       const errorCallback = obtenerMensajeErrorCallbackAuth()
       if (errorCallback) {
         setAuthOAuthError(errorCallback)

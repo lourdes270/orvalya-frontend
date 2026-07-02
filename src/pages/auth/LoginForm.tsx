@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { supabase } from '../../lib/supabase'
 import { esIntentoRegistroContratante, limpiarRegistroContratante } from '../../lib/registroConstants'
-import { activarPerfilContratanteSiCorresponde } from '../../lib/registroHelpers'
-import { hasCurrentLegalAcceptance } from '../../lib/legalAcceptance'
+import { resolverFlujoContratante } from '../../lib/registroHelpers'
 import { validarEmail } from '../../lib/validaciones'
 import { ForgotPasswordForm } from './ForgotPasswordForm'
 import { s } from './styles'
@@ -43,14 +42,10 @@ export function LoginForm() {
 
       const { data: { user } } = await supabase.auth.getUser()
       if (user && esIntentoRegistroContratante(user)) {
-        const perfilActualizado = await activarPerfilContratanteSiCorresponde(user, null)
+        const { perfil: perfilActualizado, redirigido } = await resolverFlujoContratante(user, null, navigate)
         if (perfilActualizado) setPerfil(perfilActualizado)
+        if (redirigido) return
         limpiarRegistroContratante()
-        localStorage.removeItem('orvalya_onboarding_draft')
-        sessionStorage.removeItem('orvalya_onboarding_draft')
-        const acepto = await hasCurrentLegalAcceptance(user.id)
-        navigate(acepto ? '/contratante/perfil' : '/aceptar-terminos')
-        return
       }
 
       navigate('/dashboard')

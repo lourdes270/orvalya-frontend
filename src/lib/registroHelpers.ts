@@ -2,8 +2,9 @@ import { supabase } from './supabase'
 import type { User } from '@supabase/supabase-js'
 import type { Perfil } from '../contexts/AuthContextType'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal } from '../pages/onboarding/types'
-import { esIntentoRegistroContratante, limpiarRegistroContratante } from './registroConstants'
+import { esIntentoRegistroContratante, limpiarRegistroContratante, capturarRegistroDesdeUrl } from './registroConstants'
 import { normalizarTelefono, validarTelefono } from './validaciones'
+import { hasCurrentLegalAcceptance } from './legalAcceptance'
 
 const TRIGGER_WAIT_MS = 1500
 
@@ -81,4 +82,29 @@ export async function refrescarPerfil(userId: string): Promise<Perfil | null> {
     .single()
   if (error) return null
   return data as Perfil
+}
+
+/** Usuario con metadata fresca tras confirmar email (evita JWT desactualizado). */
+export async function obtenerUsuarioAutenticado(): Promise<User | null> {
+  await supabase.auth.refreshSession().catch(() => {})
+  const { data: { user } } = await supabase.auth.getUser()
+  return user ?? null
+}
+
+export async function resolverFlujoContratante(
+  user: User,
+  perfil: Perfil | null,
+  navigate: (path: string, options?: { replace?: boolean }) => void,
+): Promise<{ perfil: Perfil | null; redirigido: boolean }> {
+  capturarRegistroDesdeUrl()
+  const authUser = (await obtenerUsuarioAutenticado()) ?? user
+
+  const actualizado = await activarPerfilContratanteSiCorresponde(authUser, perfil)
+  if (actualizado?.tipo !== 'contratante') {
+    return { perfil: actualizado, redirigido: false }
+  }
+
+  const acepto = await hasCurrentLegalAcceptance(authUser.id)
+  navigate(acepto ? '/contratante/perfil' : '/aceptar-terminos', { replace: true })
+  return { perfil: actualizado, redirigido: true }
 }
