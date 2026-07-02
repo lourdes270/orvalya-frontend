@@ -4,7 +4,6 @@ import type { DocumentacionAdicional, Perfil } from '../../contexts/AuthContextT
 import { isDescripcionJson } from '../../lib/formatDescripcionServicio'
 import { RANGOS_EDAD, selectRangoEdadStyle } from '../../lib/rangoEdad'
 import { formatZonaDisplay } from './formatZona'
-import PerfilPublicoCard from './PerfilPublicoCard'
 import { DescripcionServicioField } from './DescripcionServicioField'
 import { normalizarTelefono, validarTelefono } from '../../lib/validaciones'
 import { sanitizeText } from '../../lib/sanitize'
@@ -335,6 +334,9 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         placeholder={placeholder}
         maxLength={maximo}
         rows={4}
+        spellCheck={true}
+        autoCorrect="on"
+        autoCapitalize="sentences"
         style={{
           ...inputStyle,
           resize: 'vertical',
@@ -361,7 +363,6 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
   return (
     <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: '16px' }}>
       <h2 style={{ color: '#1F3864', fontSize: '16px', fontWeight: 600, margin: '0 0 20px' }}>Mi perfil</h2>
-      <PerfilPublicoCard perfil={{ ...perfil, nombre: form.nombre, rango_edad: form.rango_edad || null }} />
       {campo('Nombre de la empresa o persona', 'nombre', 'Ej: Limpieza Industrial García')}
       <div style={{ marginBottom: '16px' }}>
         <label style={labelStyle}>RUT</label>

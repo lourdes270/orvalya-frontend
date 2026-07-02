@@ -1,6 +1,5 @@
 import { jsPDF } from 'jspdf'
 import type { Perfil } from '../../contexts/AuthContextType'
-import { formatDescripcionServicio } from '../../lib/formatDescripcionServicio'
 import { RUBROS } from '../onboarding/data/rubros'
 import { formatZonaDisplay } from './formatZona'
 
@@ -17,7 +16,6 @@ const MUTED = { r: 73, g: 80, b: 87 } as const
 const SECTION_TITLES = {
   contacto: 'DATOS DE CONTACTO',
   servicios: 'SERVICIOS',
-  zona: 'ZONA DE TRABAJO',
   sobreMi: 'SOBRE MÍ',
   experiencia: 'EXPERIENCIA',
   formacion: 'FORMACIÓN',
@@ -75,29 +73,19 @@ function extractPalabrasClave(descripcion: string | null | undefined): string[] 
   }
 }
 
-function buildServiciosText(descripcion: string | null | undefined): string {
-  const resumen = formatDescripcionServicio(descripcion)
-  const claves = extractPalabrasClave(descripcion)
-  const partes: string[] = []
-
-  if (resumen) {
-    partes.push(`Profesional independiente en Uruguay. Servicios ofrecidos: ${resumen}.`)
-  }
-  if (claves.length > 0) {
-    partes.push(`Competencias y palabras clave: ${claves.join(', ')}.`)
-  }
-  return partes.join(' ') || 'Profesional de servicios independientes registrado en Orvalya, Uruguay.'
+function buildContactoText(perfil: Perfil): string[] {
+  const lineas: string[] = []
+  if (perfil.nombre?.trim()) lineas.push(perfil.nombre.trim())
+  if (perfil.email?.trim()) lineas.push(perfil.email.trim())
+  if (perfil.telefono?.trim()) lineas.push(`Tel: ${perfil.telefono.trim()}`)
+  if (perfil.whatsapp?.trim()) lineas.push(`WhatsApp: ${perfil.whatsapp.trim()}`)
+  return lineas
 }
 
-function buildContactoText(perfil: Perfil): string {
-  const lineas = [
-    perfil.nombre?.trim() ? `Nombre: ${perfil.nombre.trim()}.` : '',
-    perfil.email?.trim() ? `Email: ${perfil.email.trim()}.` : '',
-    perfil.telefono?.trim() ? `Teléfono: ${perfil.telefono.trim()}.` : '',
-    perfil.whatsapp?.trim() ? `WhatsApp: ${perfil.whatsapp.trim()}.` : '',
-  ].filter(Boolean)
-
-  return lineas.join(' ') || 'Datos de contacto disponibles en Orvalya.'
+function isSectionEmpty(body: string | null | undefined): boolean {
+  if (body == null) return true
+  const t = body.trim()
+  return t === '' || t === '—'
 }
 
 function ensureSpace(doc: jsPDF, y: number, needed: number): number {
@@ -122,7 +110,7 @@ function writeAtsSection(
   y: number,
   contentWidth: number,
 ): number {
-  const text = body.trim() || '—'
+  const text = body.trim()
   const lines = doc.splitTextToSize(text, contentWidth)
   y = ensureSpace(doc, y, 14 + lines.length * LINE_HEIGHT)
 
@@ -139,6 +127,92 @@ function writeAtsSection(
   doc.setTextColor(BODY.r, BODY.g, BODY.b)
   doc.text(lines, MARGIN, y)
   return y + lines.length * LINE_HEIGHT + 12
+}
+
+const CONTACT_LINE_HEIGHT = 6
+const CHIP_BG = { r: 224, g: 247, b: 245 } as const
+
+function writeContactoSection(
+  doc: jsPDF,
+  lines: string[],
+  y: number,
+  contentWidth: number,
+): number {
+  y = ensureSpace(doc, y, 14 + lines.length * CONTACT_LINE_HEIGHT)
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(10)
+  doc.setTextColor(NAVY.r, NAVY.g, NAVY.b)
+  doc.text(SECTION_TITLES.contacto, MARGIN, y)
+  y += 5
+  y = drawTealRule(doc, y, contentWidth)
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  for (const line of lines) {
+    doc.setTextColor(TEAL.r, TEAL.g, TEAL.b)
+    doc.text('•', MARGIN, y)
+    doc.setTextColor(BODY.r, BODY.g, BODY.b)
+    doc.text(line, MARGIN + 4, y)
+    y += CONTACT_LINE_HEIGHT
+  }
+  return y + 6
+}
+
+function writeServiciosChips(
+  doc: jsPDF,
+  descripcion: string | null | undefined,
+  y: number,
+  contentWidth: number,
+): number {
+  const chips = extractPalabrasClave(descripcion)
+  if (chips.length === 0) return y
+
+  const fontSize = 9
+  const chipPadH = 3
+  const chipGap = 2.5
+  const chipH = 7
+  const borderRadius = 3
+
+  y = ensureSpace(doc, y, 20)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(10)
+  doc.setTextColor(NAVY.r, NAVY.g, NAVY.b)
+  doc.text(SECTION_TITLES.servicios, MARGIN, y)
+  y += 5
+  y = drawTealRule(doc, y, contentWidth)
+  y += 5
+
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(fontSize)
+
+  let x = MARGIN
+  let rowY = y
+
+  for (const chip of chips) {
+    const textW = doc.getTextWidth(chip)
+    const chipW = textW + chipPadH * 2
+
+    if (x + chipW > MARGIN + contentWidth && x > MARGIN) {
+      x = MARGIN
+      rowY += chipH + chipGap
+    }
+
+    const prevPage = doc.getNumberOfPages()
+    rowY = ensureSpace(doc, rowY, chipH + 4)
+    if (doc.getNumberOfPages() > prevPage) {
+      x = MARGIN
+    }
+
+    doc.setFillColor(CHIP_BG.r, CHIP_BG.g, CHIP_BG.b)
+    doc.roundedRect(x, rowY, chipW, chipH, borderRadius, borderRadius, 'F')
+    doc.setTextColor(NAVY.r, NAVY.g, NAVY.b)
+    doc.text(chip, x + chipPadH, rowY + chipH - 2.5)
+
+    x += chipW + chipGap
+  }
+
+  return rowY + chipH + 12
 }
 
 async function drawHeader(doc: jsPDF, perfil: Perfil): Promise<number> {
@@ -177,7 +251,17 @@ async function drawHeader(doc: jsPDF, perfil: Perfil): Promise<number> {
   doc.setFontSize(20)
   doc.setTextColor(255, 255, 255)
   const nameLines = doc.splitTextToSize(nombre, nameMaxWidth)
-  doc.text(nameLines, MARGIN, 28)
+  const nameY = 26
+  const nameLineHeight = 8
+  doc.text(nameLines, MARGIN, nameY)
+
+  const zona = formatZonaDisplay(perfil.zona)
+  if (zona) {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+    doc.setTextColor(180, 195, 210)
+    doc.text(zona, MARGIN, nameY + nameLines.length * nameLineHeight)
+  }
 
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(9)
@@ -200,16 +284,24 @@ export async function descargarPerfilPdf(perfil: Perfil): Promise<void> {
   const width = contentWidth(doc)
   let y = await drawHeader(doc, perfil)
 
-  const sections: [string, string][] = [
-    [SECTION_TITLES.contacto, buildContactoText(perfil)],
-    [SECTION_TITLES.servicios, buildServiciosText(perfil.descripcion)],
-    [SECTION_TITLES.zona, formatZonaDisplay(perfil.zona) || '—'],
+  const contactoLines = buildContactoText(perfil)
+  if (contactoLines.length > 0) {
+    y = writeContactoSection(doc, contactoLines, y, width)
+  }
+
+  const servicioChips = extractPalabrasClave(perfil.descripcion)
+  if (servicioChips.length > 0) {
+    y = writeServiciosChips(doc, perfil.descripcion, y, width)
+  }
+
+  const textSections: [string, string][] = [
     [SECTION_TITLES.sobreMi, perfil.sobre_mi ?? ''],
     [SECTION_TITLES.experiencia, perfil.experiencia ?? ''],
     [SECTION_TITLES.formacion, perfil.cursos ?? ''],
   ]
 
-  for (const [title, body] of sections) {
+  for (const [title, body] of textSections) {
+    if (isSectionEmpty(body)) continue
     y = writeAtsSection(doc, title, body, y, width)
   }
 

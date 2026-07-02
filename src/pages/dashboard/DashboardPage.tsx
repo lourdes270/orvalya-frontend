@@ -134,12 +134,9 @@ export default function DashboardPage() {
       <div style={{ padding: '40px 16px' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <div>
-            <h1 style={{ color: '#1F3864', fontSize: '24px', fontWeight: 700, margin: 0 }}>Orvalya</h1>
-            <p style={{ color: '#8C96A3', fontSize: '13px', margin: '4px 0 0' }}>
-              {user?.email} · {perfilActivo?.tipo === 'prestador' ? 'Prestador' : 'Empresa contratante'}
-            </p>
-          </div>
+          <p style={{ color: '#8C96A3', fontSize: '13px', margin: 0 }}>
+            {user?.email} · {perfilActivo?.tipo === 'prestador' ? 'Prestador' : 'Empresa contratante'}
+          </p>
           <button onClick={handleSignOut} style={{ padding: '8px 16px', background: '#fff', border: '1.5px solid #DEE2E6', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', color: '#495057' }}>
             Cerrar sesión
           </button>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { usuarioUsaEmailPassword, usuarioUsaGoogle } from '../../lib/authHelpers'
 import { mensajeErrorAuth, validarContrasena } from '../../lib/validaciones'
@@ -12,7 +13,8 @@ const cardStyle = {
 } as const
 
 export default function CuentaSeguridadPanel() {
-  const { user, updatePassword, resetPasswordForEmail } = useAuth()
+  const { user, updatePassword, resetPasswordForEmail, signOut } = useAuth()
+  const navigate = useNavigate()
   const usaEmail = usuarioUsaEmailPassword(user)
   const usaGoogle = usuarioUsaGoogle(user)
   const [password, setPassword] = useState('')
@@ -65,17 +67,41 @@ export default function CuentaSeguridadPanel() {
     }
   }
 
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/')
+  }
+
+  if (usaGoogle && !usaEmail) {
+    return (
+      <div style={cardStyle}>
+        <p style={{ margin: '0 0 16px', fontSize: '14px', color: '#495057', lineHeight: 1.5 }}>
+          Tu cuenta usa <strong>Google</strong>. La contraseña se gestiona desde tu cuenta de Google, no desde Orvalya.
+        </p>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          style={{
+            padding: '8px 16px',
+            background: '#fff',
+            border: '1.5px solid #DEE2E6',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            color: '#495057',
+          }}
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div style={cardStyle}>
       <h2 style={{ color: '#1F3864', fontSize: '16px', fontWeight: 600, margin: '0 0 8px' }}>
         Seguridad de la cuenta
       </h2>
-
-      {usaGoogle && !usaEmail && (
-        <p style={{ margin: 0, fontSize: '14px', color: '#495057', lineHeight: 1.5 }}>
-          Tu cuenta usa <strong>Google</strong>. La contraseña se gestiona desde tu cuenta de Google, no desde Orvalya.
-        </p>
-      )}
 
       {usaEmail && (
         <>
