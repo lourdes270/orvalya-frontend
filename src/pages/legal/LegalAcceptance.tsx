@@ -5,7 +5,7 @@ import { legalStyles } from './legalCopy'
 
 interface LegalAcceptanceProps {
   userId: string
-  onAccepted: () => void
+  onAccepted: (accepted?: boolean) => void
 }
 
 export default function LegalAcceptance({ userId, onAccepted }: LegalAcceptanceProps) {
@@ -24,7 +24,7 @@ export default function LegalAcceptance({ userId, onAccepted }: LegalAcceptanceP
       setError('No pudimos registrar tu aceptación. Intentá de nuevo.')
       return
     }
-    onAccepted()
+    onAccepted(true)
   }
 
   return (

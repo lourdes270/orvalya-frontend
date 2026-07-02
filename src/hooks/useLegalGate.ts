@@ -1,20 +1,14 @@
 import { useEffect, useState } from 'react'
-import { hasCurrentLegalAcceptance, tieneAceptacionLegalOptimista } from '../lib/legalAcceptance'
+import { hasCurrentLegalAcceptance } from '../lib/legalAcceptance'
 
 export function useLegalGate(userId: string | undefined) {
-  const [checking, setChecking] = useState(() => !userId || tieneAceptacionLegalOptimista(userId))
-  const [accepted, setAccepted] = useState(() => (userId ? tieneAceptacionLegalOptimista(userId) : false))
+  const [checking, setChecking] = useState(true)
+  const [accepted, setAccepted] = useState(false)
 
   useEffect(() => {
     if (!userId) {
       setChecking(false)
       setAccepted(false)
-      return
-    }
-
-    if (tieneAceptacionLegalOptimista(userId)) {
-      setAccepted(true)
-      setChecking(false)
       return
     }
 
