@@ -29,3 +29,10 @@ src/.env
 
 # Supabase CLI temp
 supabase/.temp/
+
+# Playwright
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+.env.e2e

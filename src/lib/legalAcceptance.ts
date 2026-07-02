@@ -8,6 +8,21 @@ export type AceptacionLegal = {
   aceptado_en: string
 }
 
+/** Evita que el gate legal rebote a /aceptar-terminos antes de que Supabase responda. */
+const aceptacionOptimista = new Set<string>()
+
+export function marcarAceptacionLegalOptimista(userId: string): void {
+  aceptacionOptimista.add(userId)
+}
+
+export function limpiarAceptacionLegalOptimista(userId: string): void {
+  aceptacionOptimista.delete(userId)
+}
+
+export function tieneAceptacionLegalOptimista(userId: string): boolean {
+  return aceptacionOptimista.has(userId)
+}
+
 export async function fetchLatestLegalAcceptance(userId: string): Promise<AceptacionLegal | null> {
   const { data, error } = await supabase
     .from('aceptaciones_legales')
@@ -31,25 +46,29 @@ export function isLegalAcceptanceCurrent(row: AceptacionLegal | null): boolean {
 }
 
 export async function hasCurrentLegalAcceptance(userId: string): Promise<boolean> {
+  if (aceptacionOptimista.has(userId)) return true
   const row = await fetchLatestLegalAcceptance(userId)
-  return isLegalAcceptanceCurrent(row)
+  const ok = isLegalAcceptanceCurrent(row)
+  if (ok) aceptacionOptimista.add(userId)
+  return ok
 }
 
 export async function insertLegalAcceptance(userId: string): Promise<{ error: string | null }> {
-  const [ipAddress] = await Promise.all([fetchClientIp()])
   const { error } = await supabase.from('aceptaciones_legales').insert({
     user_id: userId,
     version_terminos: CURRENT_TERMS_VERSION,
     version_privacidad: CURRENT_PRIVACY_VERSION,
-    ip_address: ipAddress,
+    ip_address: await fetchClientIp(),
     user_agent: getUserAgent(),
   })
 
   if (error) {
+    limpiarAceptacionLegalOptimista(userId)
     const msg = error.code === 'PGRST205'
       ? 'Tabla aceptaciones_legales no existe. Aplicá la migración 001 en Supabase.'
       : error.message
     return { error: msg }
   }
+  marcarAceptacionLegalOptimista(userId)
   return { error: null }
 }

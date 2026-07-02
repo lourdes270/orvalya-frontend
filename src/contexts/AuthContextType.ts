@@ -55,7 +55,7 @@ export type AuthContextValue = {
   perfil: Perfil | null
   setPerfil: (perfil: Perfil) => void
   signInWithPassword: (args: { email: string; password: string }) => Promise<void>
-  signUp: (args: { email: string; password: string }) => Promise<SignUpResult>
+  signUp: (args: { email: string; password: string; registroTipo?: 'contratante' | 'prestador' }) => Promise<SignUpResult>
   signInWithGoogle: (options?: { fromOnboarding?: boolean }) => Promise<void>
   signOut: () => Promise<void>
   resetPasswordForEmail: (email: string) => Promise<void>

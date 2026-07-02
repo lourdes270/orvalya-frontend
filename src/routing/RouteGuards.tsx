@@ -48,7 +48,10 @@ export function LegalAcceptanceRoute({ children }: { children: React.ReactNode }
   if (perfil?.tipo === 'pendiente') {
     return <Navigate to={getOnboardingResumePath(user)} replace />
   }
-  if (accepted) return <Navigate to="/dashboard" replace />
+  if (accepted) {
+    const destino = perfil?.tipo === 'contratante' ? '/contratante/perfil' : '/dashboard'
+    return <Navigate to={destino} replace />
+  }
   return <>{children}</>
 }
 

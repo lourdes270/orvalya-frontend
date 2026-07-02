@@ -1,4 +1,4 @@
-import { REGISTRO_TIPO_KEY } from '../../../lib/registroConstants'
+import { esIntentoRegistroContratante } from '../../../lib/registroConstants'
 import { supabase } from '../../../lib/supabase'
 import {
   FAKE_REGISTRATION_SUCCESS_MSG,
@@ -61,8 +61,8 @@ export function restaurarBorradorOnboardingSiFalta(): void {
 }
 
 export function getOnboardingResumePath(user?: User | null): string {
-  if (sessionStorage.getItem(REGISTRO_TIPO_KEY) === 'contratante') {
-    return '/auth'
+  if (esIntentoRegistroContratante(user)) {
+    return '/aceptar-terminos'
   }
   const draft = user ? obtenerBorradorOnboarding(user) : cargarBorradorOnboarding()
   if (!draft) return '/onboarding?paso=0'
@@ -182,8 +182,7 @@ export async function intentarCompletarOnboardingPendiente(
     .eq('id', user.id)
   if (updateError) {
     console.error('intentarCompletarOnboardingPendiente update error:', updateError)
-    navigate(`/onboarding?paso=4`, { replace: true })
-    return 'reanudado'
+    return 'sin_datos'
   }
 
   const { data: perfilResult } = await supabase

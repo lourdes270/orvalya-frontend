@@ -1,13 +1,9 @@
-/** Best-effort: IP pública vía servicio externo; puede fallar o quedar null. */
+/**
+ * IP del cliente: no usamos servicios externos (CSP, redes lentas, celulares modestos).
+ * El campo ip_address en aceptaciones_legales queda null; es opcional para auditoría.
+ */
 export async function fetchClientIp(): Promise<string | null> {
-  try {
-    const res = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(3000) })
-    if (!res.ok) return null
-    const data = (await res.json()) as { ip?: string }
-    return data.ip ?? null
-  } catch {
-    return null
-  }
+  return null
 }
 
 export function getUserAgent(): string | null {

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { esRegistroContratante } from '../../lib/registroConstants'
+import { capturarRegistroDesdeUrl, esIntentoRegistroContratante, esRegistroContratante } from '../../lib/registroConstants'
+import { activarPerfilContratanteSiCorresponde } from '../../lib/registroHelpers'
+import { hasCurrentLegalAcceptance } from '../../lib/legalAcceptance'
 import Step0TipoPerfil from './steps/Step0TipoPerfil'
 import Step1Categorias from './steps/Step1Categorias'
 import Step2DatosBasicos from './steps/Step2DatosBasicos'
@@ -34,6 +36,7 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     restaurarBorradorOnboardingSiFalta()
+    capturarRegistroDesdeUrl()
   }, [])
 
   useEffect(() => {
@@ -43,7 +46,29 @@ export default function OnboardingPage() {
   }, [])
 
   useEffect(() => {
+    if (!session?.user || !esIntentoRegistroContratante(session.user)) return
+
+    let activo = true
+    setCompletandoPendiente(true)
+
+    activarPerfilContratanteSiCorresponde(session.user, perfil)
+      .then(async actualizado => {
+        if (!activo) return
+        if (actualizado) setPerfil(actualizado)
+        const acepto = await hasCurrentLegalAcceptance(session.user.id)
+        navigate(acepto ? '/contratante/perfil' : '/aceptar-terminos', { replace: true })
+      })
+      .catch(err => console.error('onboarding contratante:', err))
+      .finally(() => {
+        if (activo) setCompletandoPendiente(false)
+      })
+
+    return () => { activo = false }
+  }, [session?.user, perfil, setPerfil, navigate])
+
+  useEffect(() => {
     if (!session?.user || perfil?.tipo !== 'pendiente') return
+    if (esIntentoRegistroContratante(session.user)) return
 
     let activo = true
     setCompletandoPendiente(true)
@@ -62,8 +87,8 @@ export default function OnboardingPage() {
 
   const esperandoPerfil = !!session && perfil === null
 
-  if (esRegistroContratante()) {
-    return <Navigate to="/auth" replace />
+  if (esRegistroContratante() || esIntentoRegistroContratante(session?.user)) {
+    return <PantallaCarga texto={completandoPendiente ? 'Preparando tu cuenta...' : 'Cargando...'} />
   }
 
   if (authLoading || esperandoPerfil || completandoPendiente) {
@@ -114,7 +139,7 @@ export default function OnboardingPage() {
       {pasoNum === 4 && !yaTieneCuenta && (
         <Step4Registro isMobile={isMobile} onRegistrar={handleRegistro} loading={loading} error={error} fakeSuccess={fakeSuccess} email={form.email} />
       )}
-      {pasoNum === 4 && yaTieneCuenta && !sinDatosPrevios && (
+      {pasoNum === 4 && yaTieneCuenta && !sinDatosPrevios && completandoPendiente && (
         <PantallaCarga texto="Finalizando tu perfil..." />
       )}
       {pasoNum === 4 && yaTieneCuenta && sinDatosPrevios && (

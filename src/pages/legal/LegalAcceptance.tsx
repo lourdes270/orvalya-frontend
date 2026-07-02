@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { insertLegalAcceptance } from '../../lib/legalAcceptance'
+import { insertLegalAcceptance, marcarAceptacionLegalOptimista } from '../../lib/legalAcceptance'
 import LegalAcceptanceSummary from './LegalAcceptanceSummary'
 import { legalStyles } from './legalCopy'
 
@@ -17,6 +17,7 @@ export default function LegalAcceptance({ userId, onAccepted }: LegalAcceptanceP
     if (!checked) return
     setLoading(true)
     setError('')
+    marcarAceptacionLegalOptimista(userId)
     const { error: insertError } = await insertLegalAcceptance(userId)
     setLoading(false)
     if (insertError) {

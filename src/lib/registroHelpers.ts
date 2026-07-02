@@ -1,6 +1,8 @@
 import { supabase } from './supabase'
+import type { User } from '@supabase/supabase-js'
 import type { Perfil } from '../contexts/AuthContextType'
 import type { OnboardingForm, SeleccionCategorias, EstadoFiscal } from '../pages/onboarding/types'
+import { esIntentoRegistroContratante, limpiarRegistroContratante } from './registroConstants'
 import { normalizarTelefono, validarTelefono } from './validaciones'
 
 const TRIGGER_WAIT_MS = 1500
@@ -56,6 +58,19 @@ export async function activarPerfilContratante(email: string): Promise<Perfil> {
 
   if (fetchError || !data) throw fetchError ?? new Error('Perfil no encontrado')
   return data as Perfil
+}
+
+export async function activarPerfilContratanteSiCorresponde(
+  user: User,
+  perfil: Perfil | null,
+): Promise<Perfil | null> {
+  if (perfil?.tipo === 'contratante') return perfil
+  if (!esIntentoRegistroContratante(user) || !user.email) return perfil
+  if (perfil && perfil.tipo !== 'pendiente') return perfil
+
+  const activado = await activarPerfilContratante(user.email)
+  limpiarRegistroContratante()
+  return activado
 }
 
 export async function refrescarPerfil(userId: string): Promise<Perfil | null> {

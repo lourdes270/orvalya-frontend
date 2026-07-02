@@ -7,8 +7,8 @@ import {
   FAKE_REGISTRATION_SUCCESS_MSG,
   runRegistrationGuard,
 } from '../../lib/botProtection/runRegistrationGuard'
-import { REGISTRO_TIPO_KEY, limpiarRegistroContratante } from '../../lib/registroConstants'
-import { activarPerfilContratante } from '../../lib/registroHelpers'
+import { esRegistroContratante, limpiarRegistroContratante } from '../../lib/registroConstants'
+import { activarPerfilContratanteSiCorresponde } from '../../lib/registroHelpers'
 import { mensajeErrorAuth, validarContrasena, validarEmail, MENSAJE_CONFIRMACION_EMAIL } from '../../lib/validaciones'
 import { ConfirmacionEmailPanel } from '../onboarding/components/ConfirmacionEmailPanel'
 import { s } from './styles'
@@ -65,7 +65,12 @@ export function RegisterForm() {
       }
 
       const emailNorm = email.trim().toLowerCase()
-      const { session } = await signUp({ email: emailNorm, password })
+      const esContratante = esRegistroContratante()
+      const { session, user: signedUpUser } = await signUp({
+        email: emailNorm,
+        password,
+        registroTipo: esContratante ? 'contratante' : undefined,
+      })
 
       if (!session) {
         setEmailConfirmado(emailNorm)
@@ -73,10 +78,9 @@ export function RegisterForm() {
         return
       }
 
-      const tipoRegistro = sessionStorage.getItem(REGISTRO_TIPO_KEY)
-      if (tipoRegistro === 'contratante') {
-        const perfil = await activarPerfilContratante(emailNorm)
-        setPerfil(perfil)
+      if (esContratante && signedUpUser) {
+        const perfil = await activarPerfilContratanteSiCorresponde(signedUpUser, null)
+        if (perfil) setPerfil(perfil)
         limpiarRegistroContratante()
         localStorage.removeItem('orvalya_onboarding_draft')
         sessionStorage.removeItem('orvalya_onboarding_draft')

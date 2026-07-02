@@ -3,7 +3,7 @@ import {
   useMemo, useRef, useState, type ReactNode,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { Session } from '@supabase/supabase-js'
+import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { AuthContext, type AuthContextValue, type Perfil } from './AuthContextType'
 import { esUsuarioDuplicadoSinError, lanzarErrorEmailDuplicado, urlRedirectoAuth, urlRedirectoPostOAuth } from '../lib/validaciones'
@@ -17,8 +17,9 @@ import {
   restaurarBorradorOnboardingSiFalta,
 } from '../pages/onboarding/hooks/helpers'
 import { urlRedirectoResetPassword } from '../lib/authHelpers'
-import { REGISTRO_TIPO_KEY } from '../lib/registroConstants'
-import { activarPerfilContratante } from '../lib/registroHelpers'
+import { capturarRegistroDesdeUrl, metadataRegistroContratante, type RegistroTipo } from '../lib/registroConstants'
+import { activarPerfilContratanteSiCorresponde } from '../lib/registroHelpers'
+import { hasCurrentLegalAcceptance } from '../lib/legalAcceptance'
 
 const CALLBACK_TIMEOUT_MS = 12_000
 
@@ -42,9 +43,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const callbackHandled = useRef(!!obtenerMensajeErrorCallbackAuth())
   const esperandoCallback = useRef(esCallbackAuth() && !obtenerMensajeErrorCallbackAuth())
 
-  const fetchPerfil = useCallback(async (userId: string) => {
+  const fetchPerfil = useCallback(async (userId: string, authUser?: User | null) => {
     try {
-      const data = await fetchPerfilData(userId)
+      let data = await fetchPerfilData(userId)
+      const user = authUser ?? (await supabase.auth.getUser()).data.user
+      if (user) {
+        data = await activarPerfilContratanteSiCorresponde(user, data)
+      }
       setPerfil(data)
     } catch (err) {
       console.error('fetchPerfil catch:', err)
@@ -62,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const enrutarTrasAutenticacion = useCallback(async (activeSession: Session) => {
     const user = activeSession.user
+    capturarRegistroDesdeUrl()
     restaurarBorradorOnboardingSiFalta()
 
     let perfilData = await fetchPerfilData(user.id)
@@ -69,21 +75,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await new Promise(resolve => setTimeout(resolve, 1500))
       perfilData = await fetchPerfilData(user.id)
     }
+
+    perfilData = await activarPerfilContratanteSiCorresponde(user, perfilData)
     if (perfilData) setPerfil(perfilData)
 
-    const tipoRegistro = sessionStorage.getItem(REGISTRO_TIPO_KEY)
-    if (tipoRegistro === 'contratante' && user.email) {
-      try {
-        perfilData = await activarPerfilContratante(user.email)
-        setPerfil(perfilData)
-        sessionStorage.removeItem(REGISTRO_TIPO_KEY)
-        localStorage.removeItem('orvalya_onboarding_draft')
-        sessionStorage.removeItem('orvalya_onboarding_draft')
-        navigate('/contratante/perfil', { replace: true })
-        return
-      } catch (err) {
-        console.error('activarPerfilContratante:', err)
-      }
+    if (perfilData?.tipo === 'contratante') {
+      const acepto = await hasCurrentLegalAcceptance(user.id)
+      navigate(acepto ? '/contratante/perfil' : '/aceptar-terminos', { replace: true })
+      return
     }
 
     if (perfilData && perfilData.tipo !== 'pendiente') {
@@ -154,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (esperandoCallback.current || esCallbackAuth()) {
             await procesarCallbackAuth(initialSession)
           } else {
-            fetchPerfil(initialSession.user.id).catch(err => console.error('BG fetch error:', err))
+            fetchPerfil(initialSession.user.id, initialSession.user).catch(err => console.error('BG fetch error:', err))
           }
         } else if (esCallbackAuth()) {
           // Hash presente pero sesión aún no lista: onAuthStateChange la procesará.
@@ -182,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (esRetornoAuth && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED')) {
           await procesarCallbackAuth(nextSession)
         } else if (!callbackHandled.current) {
-          fetchPerfil(nextSession.user.id).catch(err => console.error('BG fetch error:', err))
+          fetchPerfil(nextSession.user.id, nextSession.user).catch(err => console.error('BG fetch error:', err))
         }
       } else {
         setPerfil(null)
@@ -212,12 +211,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [])
 
   const signUp = useCallback(
-    async ({ email, password }: { email: string; password: string }) => {
+    async ({ email, password, registroTipo }: { email: string; password: string; registroTipo?: RegistroTipo }) => {
       const emailNorm = email.trim().toLowerCase()
       const { data, error } = await supabase.auth.signUp({
         email: emailNorm,
         password,
-        options: { emailRedirectTo: urlRedirectoAuth() },
+        options: {
+          emailRedirectTo: urlRedirectoAuth(registroTipo),
+          data: registroTipo === 'contratante' ? metadataRegistroContratante() : undefined,
+        },
       })
       if (error) throw error
       if (esUsuarioDuplicadoSinError(data.user)) lanzarErrorEmailDuplicado()

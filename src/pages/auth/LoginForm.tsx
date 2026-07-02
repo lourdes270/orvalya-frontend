@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
-import { REGISTRO_TIPO_KEY, limpiarRegistroContratante } from '../../lib/registroConstants'
-import { activarPerfilContratante } from '../../lib/registroHelpers'
+import { supabase } from '../../lib/supabase'
+import { esIntentoRegistroContratante, limpiarRegistroContratante } from '../../lib/registroConstants'
+import { activarPerfilContratanteSiCorresponde } from '../../lib/registroHelpers'
+import { hasCurrentLegalAcceptance } from '../../lib/legalAcceptance'
 import { validarEmail } from '../../lib/validaciones'
 import { ForgotPasswordForm } from './ForgotPasswordForm'
 import { s } from './styles'
@@ -39,14 +41,15 @@ export function LoginForm() {
       const emailNorm = email.trim().toLowerCase()
       await signInWithPassword({ email: emailNorm, password })
 
-      const tipoRegistro = sessionStorage.getItem(REGISTRO_TIPO_KEY)
-      if (tipoRegistro === 'contratante') {
-        const perfilActualizado = await activarPerfilContratante(emailNorm)
-        setPerfil(perfilActualizado)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user && esIntentoRegistroContratante(user)) {
+        const perfilActualizado = await activarPerfilContratanteSiCorresponde(user, null)
+        if (perfilActualizado) setPerfil(perfilActualizado)
         limpiarRegistroContratante()
         localStorage.removeItem('orvalya_onboarding_draft')
         sessionStorage.removeItem('orvalya_onboarding_draft')
-        navigate('/contratante/perfil')
+        const acepto = await hasCurrentLegalAcceptance(user.id)
+        navigate(acepto ? '/contratante/perfil' : '/aceptar-terminos')
         return
       }
 

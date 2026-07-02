@@ -33,8 +33,10 @@ export function esMensajeConfirmacionEmail(mensaje: string): boolean {
   return mensaje === MENSAJE_CONFIRMACION_EMAIL
 }
 
-export function urlRedirectoAuth(): string {
-  return `${window.location.origin}/auth`
+export function urlRedirectoAuth(registroTipo?: 'contratante' | 'prestador'): string {
+  const base = `${window.location.origin}/auth`
+  if (registroTipo === 'contratante') return `${base}?registro=contratante`
+  return base
 }
 
 /** Tras OAuth (Google): onboarding retoma paso 4; login normal vuelve a /auth para enrutar según perfil. */

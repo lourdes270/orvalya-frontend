@@ -2,7 +2,7 @@ import { GoogleAuthButton } from '../../components/auth/GoogleAuthButton'
 import { OrvalyaLogo } from '../../components/OrvalyaLogo'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { esRegistroContratante, limpiarRegistroContratante, marcarRegistroContratante } from '../../lib/registroConstants'
+import { esRegistroContratante, limpiarRegistroContratante, marcarRegistroContratante, capturarRegistroDesdeUrl } from '../../lib/registroConstants'
 import { LoginForm } from './LoginForm'
 import { RegisterForm } from './RegisterForm'
 import { s } from './styles'
@@ -15,6 +15,7 @@ export default function AuthPage() {
   const esEmpresa = esRegistroContratante()
 
   useEffect(() => {
+    capturarRegistroDesdeUrl()
     if (esRegistroContratante()) setTab('register')
   }, [])
 
