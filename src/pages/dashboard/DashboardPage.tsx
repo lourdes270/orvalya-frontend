@@ -2,13 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { X } from '@phosphor-icons/react'
 import { useAuth } from '../../contexts/useAuth'
-import { useIsMobile } from '../../hooks/useIsMobile'
 import type { Perfil } from '../../contexts/AuthContextType'
 import { supabase } from '../../lib/supabase'
 import DocumentosPrestador from './documentos/DocumentosPrestador'
 import PerfilPrestador from './PerfilPrestador'
 import AvatarIncentiveCard from './AvatarIncentiveCard'
-import { statsGridStyle } from './dashboardLayout'
 import DashboardContratante from './DashboardContratante'
 import CuentaSeguridadPanel from './CuentaSeguridadPanel'
 import { useContratanteProfile } from '../../hooks/useContratanteProfile'
@@ -146,7 +144,6 @@ export default function DashboardPage() {
             Cerrar sesión
           </button>
         </div>
-        <CuentaSeguridadPanel />
         {perfilActivo?.tipo === 'prestador'
           ? <DashboardPrestador perfil={perfilActivo} onPerfilUpdate={handlePerfilUpdate} />
           : <DashboardContratante />}
@@ -157,7 +154,7 @@ export default function DashboardPage() {
 }
 
 function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerfilUpdate: (p: Perfil) => void }) {
-  const isMobile = useIsMobile(640)
+  const [tabActiva, setTabActiva] = useState<'perfil' | 'documentos' | 'cuenta'>('perfil')
   const [semaforo, setSemaforo] = useState<string>('rojo')
   const [docsCount, setDocsCount] = useState(0)
   const [generandoPdf, setGenerandoPdf] = useState(false)
@@ -191,77 +188,114 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
     }
   }
 
+  const tabStyle = (tab: string): React.CSSProperties => ({
+    flex: 1,
+    padding: '12px 4px',
+    fontSize: '13px',
+    fontWeight: tabActiva === tab ? 600 : 400,
+    border: 'none',
+    borderBottom: tabActiva === tab ? '2px solid #00B4A6' : '2px solid transparent',
+    background: tabActiva === tab ? '#fff' : '#F8F9FA',
+    color: tabActiva === tab ? '#00B4A6' : '#8C96A3',
+    cursor: 'pointer',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '2px',
+  })
+
   return (
-    <div>
-      <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-        <button
-          type="button"
-          onClick={handleDescargarPdf}
-          disabled={generandoPdf}
-          style={{
-            padding: '10px 18px',
-            background: '#1F3864',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: 600,
-            cursor: generandoPdf ? 'not-allowed' : 'pointer',
-            opacity: generandoPdf ? 0.7 : 1,
-          }}
-        >
-          {generandoPdf ? 'Generando PDF...' : 'Descargar presentación comercial como PDF'}
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', borderBottom: '1px solid #DEE2E6', marginBottom: '0', background: '#F8F9FA', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
+        <button style={tabStyle('perfil')} onClick={() => setTabActiva('perfil')}>
+          <span style={{ fontSize: '18px' }}>👤</span>
+          Mi perfil
+        </button>
+        <button style={tabStyle('documentos')} onClick={() => setTabActiva('documentos')}>
+          <span style={{ fontSize: '18px' }}>📄</span>
+          Documentos
+        </button>
+        <button style={tabStyle('cuenta')} onClick={() => setTabActiva('cuenta')}>
+          <span style={{ fontSize: '18px' }}>⚙️</span>
+          Mi cuenta
         </button>
       </div>
-      <div style={statsGridStyle(isMobile)}>
-        <Tarjeta
-          titulo="Semáforo"
-          valor={`${semaforoIcon} ${semaforoLabel}`}
-          desc="Estado de documentación"
-          disclaimer="El semáforo indica el estado de tu documentación según lo que declaraste. No constituye verificación legal ni certificación de cumplimiento."
-        />
-        <Tarjeta titulo="Documentos" valor={`${docsCount} / 3`} desc="Certificados cargados" />
-        <Tarjeta titulo="Contratos activos" valor="0" desc="Órdenes de servicio" />
-      </div>
-      <AvatarIncentiveCard perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
-      <PerfilPrestador perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
-      <DocumentosPrestador perfil={perfil} />
-      <Seccion titulo="Mis contratos">
-        <ItemVacio texto="Todavía no tenés contratos. Las empresas que te encuentren en Orvalya podrán contratarte desde acá." />
-      </Seccion>
-      <p style={{ margin: '8px 0 0', fontSize: '11px', color: '#ADB5BD', lineHeight: 1.5 }}>
-        {DISCLAIMER_PLATAFORMA}
-      </p>
-    </div>
-  )
-}
 
-function Tarjeta({ titulo, valor, desc, disclaimer }: { titulo: string; valor: string; desc: string; disclaimer?: string }) {
-  return (
-    <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-      <p style={{ color: '#8C96A3', fontSize: '13px', margin: '0 0 8px' }}>{titulo}</p>
-      <p style={{ color: '#1F3864', fontSize: '22px', fontWeight: 700, margin: '0 0 4px' }}>{valor}</p>
-      <p style={{ color: '#ADB5BD', fontSize: '12px', margin: disclaimer ? '0 0 8px' : 0 }}>{desc}</p>
-      {disclaimer && (
-        <p style={{ color: '#ADB5BD', fontSize: '11px', lineHeight: 1.4, margin: 0 }}>{disclaimer}</p>
+      {/* TAB: MI PERFIL */}
+      {tabActiva === 'perfil' && (
+        <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: '20px 16px' }}>
+          {/* Botón PDF arriba y visible */}
+          <button
+            type="button"
+            onClick={handleDescargarPdf}
+            disabled={generandoPdf}
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: '#0F2D52',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '15px',
+              fontWeight: 600,
+              cursor: generandoPdf ? 'not-allowed' : 'pointer',
+              opacity: generandoPdf ? 0.7 : 1,
+              marginBottom: '20px',
+            }}
+          >
+            {generandoPdf ? 'Generando PDF...' : '⬇ Descargar presentación como PDF'}
+          </button>
+
+          {/* Avatar e incentivo */}
+          <AvatarIncentiveCard perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
+
+          {/* Formulario de perfil */}
+          <PerfilPrestador perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
+        </div>
       )}
-    </div>
-  )
-}
 
-function Seccion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  return (
-    <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: '16px' }}>
-      <h2 style={{ color: '#1F3864', fontSize: '16px', fontWeight: 600, margin: '0 0 16px' }}>{titulo}</h2>
-      {children}
-    </div>
-  )
-}
+      {/* TAB: DOCUMENTOS */}
+      {tabActiva === 'documentos' && (
+        <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: '20px 16px' }}>
+          {/* Semáforo — informativo, no agresivo */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px 14px',
+            background: '#F8F9FA',
+            border: '1px solid #DEE2E6',
+            borderRadius: '8px',
+            marginBottom: '16px',
+          }}>
+            <span style={{ fontSize: '24px' }}>{semaforoIcon}</span>
+            <div>
+              <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#1F3864' }}>
+                Documentación: {semaforoLabel}
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#8C96A3' }}>
+                {docsCount} de 3 certificados cargados
+              </p>
+            </div>
+          </div>
 
-function ItemVacio({ texto }: { texto: string }) {
-  return (
-    <p style={{ color: '#ADB5BD', fontSize: '14px', margin: 0, padding: '16px', background: '#F8F9FA', borderRadius: '8px', textAlign: 'center' }}>
-      {texto}
-    </p>
+          <DocumentosPrestador perfil={perfil} />
+
+          <p style={{ margin: '16px 0 0', fontSize: '11px', color: '#ADB5BD', lineHeight: 1.5 }}>
+            {DISCLAIMER_PLATAFORMA}
+          </p>
+        </div>
+      )}
+
+      {/* TAB: MI CUENTA */}
+      {tabActiva === 'cuenta' && (
+        <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: '20px 16px' }}>
+          <CuentaSeguridadPanel />
+        </div>
+      )}
+
+    </div>
   )
 }
