@@ -222,33 +222,15 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
 
       {/* TAB: MI PERFIL */}
       {tabActiva === 'perfil' && (
-        <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: '20px 16px' }}>
-          {/* Botón PDF arriba y visible */}
-          <button
-            type="button"
-            onClick={handleDescargarPdf}
-            disabled={generandoPdf}
-            style={{
-              width: '100%',
-              padding: '14px',
-              background: '#0F2D52',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '15px',
-              fontWeight: 600,
-              cursor: generandoPdf ? 'not-allowed' : 'pointer',
-              opacity: generandoPdf ? 0.7 : 1,
-              marginBottom: '20px',
-            }}
-          >
-            {generandoPdf ? 'Generando PDF...' : '⬇ Descargar presentación como PDF'}
-          </button>
-
-          {/* Avatar e incentivo */}
-          <AvatarIncentiveCard perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
-
-          {/* Formulario de perfil */}
+        <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: '16px' }}>
+          <AvatarIncentiveCard
+            perfil={perfil}
+            onPerfilUpdate={onPerfilUpdate}
+            semaforo={semaforo}
+            docsCount={docsCount}
+            onDescargarPdf={handleDescargarPdf}
+            generandoPdf={generandoPdf}
+          />
           <PerfilPrestador perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
         </div>
       )}
