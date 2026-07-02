@@ -51,8 +51,10 @@ export default function ContratantePerfilPage() {
   const validar = () => {
     const e: Record<string, string> = {}
     if (!form.nombre_empresa.trim()) e.nombre_empresa = 'El nombre es obligatorio.'
-    const rutErr = validarRutContratante(form.rut)
-    if (rutErr) e.rut = rutErr
+    if (form.tipo_contratante === 'empresa' || form.rut.trim()) {
+      const rutErr = validarRutContratante(form.rut)
+      if (rutErr) e.rut = rutErr
+    }
     const emailErr = validarEmail(form.email)
     if (emailErr) e.email = emailErr
     if (!form.rubro_principal) e.rubro_principal = 'Elegí un rubro principal.'
@@ -142,7 +144,7 @@ export default function ContratantePerfilPage() {
             value={form.nombre_empresa}
             onChange={v => setForm(f => ({ ...f, nombre_empresa: v }))}
             error={errores.nombre_empresa}
-            autoCapitalize={form.tipo_contratante === 'empresa' ? 'words' : undefined}
+            autoCapitalize="words"
             capitalize={form.tipo_contratante === 'empresa'}
           />
 
