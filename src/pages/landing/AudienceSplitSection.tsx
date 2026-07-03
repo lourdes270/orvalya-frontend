@@ -6,7 +6,7 @@ import {
   UsersThree,
   Wrench,
 } from '@phosphor-icons/react'
-import { limpiarRegistroContratante, marcarRegistroContratante } from '../../lib/registroConstants'
+import { limpiarRegistroContratante } from '../../lib/registroConstants'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { revealStyle, useScrollReveal } from '../../hooks/useScrollReveal'
 import {
@@ -132,9 +132,9 @@ export default function AudienceSplitSection() {
 
   return (
     <>
-      {/* Prestadores — prioritaria */}
+      {/* Empresas — prioritaria */}
       <section
-        ref={prestadoresRef}
+        ref={empresasRef}
         style={{
           ...sectionPadding,
           background: SURFACE,
@@ -146,27 +146,103 @@ export default function AudienceSplitSection() {
             maxWidth: '1040px',
             margin: '0 auto',
             display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row',
+            flexDirection: isMobile ? 'column' : 'row-reverse',
             alignItems: isMobile ? 'stretch' : 'center',
             gap: isMobile ? '36px' : '56px',
-            ...revealStyle(prestadoresVisible),
+            ...revealStyle(empresasVisible),
           }}
         >
           <div style={{ flex: isMobile ? 'none' : '0 0 48%' }}>
             <SectionImage
+              src={EMPRESAS_IMAGE_SRC}
+              alt="Empresa contratante usando Orvalya en Uruguay"
+              tall
+              position="55% 40%"
+            />
+          </div>
+
+          <div style={{ flex: 1 }}>
+            <p style={{ ...badgePillStyle, marginBottom: '16px' }}>Para empresas</p>
+            <h2 style={sectionTitleStyle}>
+              Contratá con la documentación a la vista
+            </h2>
+            <p style={{ ...bodyTextStyle, marginBottom: '32px', maxWidth: '44ch' }}>
+              Cada prestador con su legajo y su documentación declarada, visible antes de contratar.
+              Y si querés que lo llevemos por vos, ese es nuestro servicio.
+            </p>
+
+            <button
+              type="button"
+              className="landing-btn"
+              onClick={() => navigate('/contacto/contratante')}
+              style={{
+                ...touchButtonBase,
+                width: '100%',
+                padding: '16px 24px',
+                backgroundColor: TEAL,
+                color: '#fff',
+                border: 'none',
+                fontSize: '18px',
+                boxShadow: '0 4px 16px rgba(0, 180, 166, 0.3)',
+              }}
+            >
+              Quiero el servicio
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Prestadores — secundaria */}
+      <section
+        ref={prestadoresRef}
+        style={{
+          padding: isMobile ? '56px 20px' : '72px 24px',
+          background: '#fff',
+          borderTop: `1px solid ${BORDER}`,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '880px',
+            margin: '0 auto',
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            alignItems: isMobile ? 'stretch' : 'center',
+            gap: isMobile ? '28px' : '40px',
+            ...revealStyle(prestadoresVisible),
+          }}
+        >
+          <div style={{ flex: isMobile ? 'none' : '0 0 42%' }}>
+            <SectionImage
               src={PRESTADORES_IMAGE_SRC}
               alt="Prestadora de servicios usando Orvalya en Uruguay"
-              tall
               position="52% 40%"
             />
           </div>
 
           <div style={{ flex: 1 }}>
-            <p style={{ ...badgePillStyle, marginBottom: '16px' }}>Para prestadores</p>
-            <h2 style={sectionTitleStyle}>
+            <p
+              style={{
+                ...badgePillStyle,
+                marginBottom: '12px',
+                fontSize: '11px',
+                padding: '8px 14px',
+                color: TEXT_MUTED,
+                borderColor: BORDER,
+              }}
+            >
+              Para prestadores
+            </p>
+            <h2
+              style={{
+                ...sectionTitleStyle,
+                fontSize: isMobile ? '1.5rem' : '1.75rem',
+                marginBottom: '12px',
+              }}
+            >
               Hacé que las empresas te encuentren a vos
             </h2>
-            <p style={sectionSubtitleStyle}>
+            <p style={{ ...sectionSubtitleStyle, marginBottom: '24px', maxWidth: '40ch' }}>
               Mostrá tus papeles al día. Aparecé cuando te buscan. Gratis.
             </p>
 
@@ -175,7 +251,7 @@ export default function AudienceSplitSection() {
                 display: 'grid',
                 gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
                 gap: '14px',
-                marginBottom: '32px',
+                marginBottom: '24px',
               }}
             >
               {PRESTADOR_BENEFITS.map((b, i) => (
@@ -197,84 +273,6 @@ export default function AudienceSplitSection() {
               }}
               style={{
                 ...touchButtonBase,
-                width: '100%',
-                padding: '16px 24px',
-                backgroundColor: TEAL,
-                color: '#fff',
-                border: 'none',
-                fontSize: '18px',
-                boxShadow: '0 4px 16px rgba(0, 180, 166, 0.3)',
-              }}
-            >
-              Quiero registrarme
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Empresas — secundaria, más compacta */}
-      <section
-        ref={empresasRef}
-        style={{
-          padding: isMobile ? '56px 20px' : '72px 24px',
-          background: '#fff',
-          borderTop: `1px solid ${BORDER}`,
-        }}
-      >
-        <div
-          style={{
-            maxWidth: '880px',
-            margin: '0 auto',
-            display: 'flex',
-            flexDirection: isMobile ? 'column' : 'row-reverse',
-            alignItems: isMobile ? 'stretch' : 'center',
-            gap: isMobile ? '28px' : '40px',
-            ...revealStyle(empresasVisible),
-          }}
-        >
-          <div style={{ flex: isMobile ? 'none' : '0 0 42%' }}>
-            <SectionImage
-              src={EMPRESAS_IMAGE_SRC}
-              alt="Empresa contratante usando Orvalya en Uruguay"
-              position="55% 40%"
-            />
-          </div>
-
-          <div style={{ flex: 1 }}>
-            <p
-              style={{
-                ...badgePillStyle,
-                marginBottom: '12px',
-                fontSize: '11px',
-                padding: '8px 14px',
-                color: TEXT_MUTED,
-                borderColor: BORDER,
-              }}
-            >
-              Para empresas
-            </p>
-            <h2
-              style={{
-                ...sectionTitleStyle,
-                fontSize: isMobile ? '1.5rem' : '1.75rem',
-                marginBottom: '12px',
-              }}
-            >
-              Contratá sin riesgos legales
-            </h2>
-            <p style={{ ...bodyTextStyle, marginBottom: '24px', maxWidth: '40ch' }}>
-              Prestadores con documentación visible antes de contratar.
-            </p>
-
-            <button
-              type="button"
-              className="landing-btn"
-              onClick={() => {
-                marcarRegistroContratante()
-                navigate('/auth')
-              }}
-              style={{
-                ...touchButtonBase,
                 width: isMobile ? '100%' : 'auto',
                 minWidth: isMobile ? undefined : '280px',
                 padding: '14px 24px',
@@ -284,7 +282,7 @@ export default function AudienceSplitSection() {
                 fontSize: '16px',
               }}
             >
-              Busco prestadores
+              Quiero registrarme
             </button>
           </div>
         </div>

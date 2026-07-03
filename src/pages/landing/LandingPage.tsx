@@ -1,14 +1,16 @@
 import { useState, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Image as ImageIcon } from '@phosphor-icons/react'
+import { PageMeta } from '../../components/seo/PageMeta'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { revealStyle, useHeroFadeIn } from '../../hooks/useScrollReveal'
-import { limpiarRegistroContratante, marcarRegistroContratante } from '../../lib/registroConstants'
+import { limpiarRegistroContratante } from '../../lib/registroConstants'
 import './landing.css'
 import LandingCtaSection from './LandingCtaSection'
 import LandingLayout from './LandingLayout'
 import AudienceSplitSection from './AudienceSplitSection'
 import PorQueOrvalyaGrid from './PorQueOrvalyaGrid'
+import ServicioSteps from './ServicioSteps'
 import {
   BORDER,
   NAVY,
@@ -24,7 +26,9 @@ import {
 
 const HERO_IMAGE_SRC = '/hero-servicios.jpg'
 
-const rubros = ['Limpieza', 'Mantenimiento', 'Servicios']
+const LANDING_TITLE = 'Orvalya — Seguimiento documental de prestadores tercerizados en Uruguay'
+const LANDING_DESCRIPTION =
+  'Legajos, certificados y alertas de vencimiento de tus prestadores tercerizados, en un solo lugar. Leyes 18.099 y 18.251. Servicio para empresas uruguayas.'
 
 function heroRevealStyle(visible: boolean, delay = 0): CSSProperties {
   return revealStyle(visible, delay)
@@ -93,6 +97,8 @@ export default function LandingPage() {
 
   return (
     <LandingLayout>
+      <PageMeta title={LANDING_TITLE} description={LANDING_DESCRIPTION} />
+
       <section style={{
         background: `linear-gradient(180deg, ${SURFACE} 0%, #fff 100%)`,
         ...sectionPadding,
@@ -121,36 +127,12 @@ export default function LandingPage() {
             ...heroRevealStyle(heroVisible),
           }}>
             <p style={badgePillStyle}>
-              Prestadores independientes · Uruguay
+              Empresas que tercerizan · Uruguay
             </p>
 
             <h1 style={heroTitleStyle(isMobile)}>
-              ¿Sos monotributista? Que las empresas te encuentren a vos.
+              ¿Tercerizás servicios? Nosotros te llevamos el seguimiento documental.
             </h1>
-
-            <div style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '10px',
-              marginBottom: '20px',
-            }}>
-              {rubros.map(r => (
-                <span
-                  key={r}
-                  style={{
-                    padding: '8px 14px',
-                    fontSize: '14px',
-                    fontWeight: 700,
-                    color: NAVY,
-                    background: '#fff',
-                    border: `1px solid ${BORDER}`,
-                    borderRadius: '999px',
-                  }}
-                >
-                  {r}
-                </span>
-              ))}
-            </div>
 
             <p style={{
               ...bodyTextStyle,
@@ -158,7 +140,8 @@ export default function LandingPage() {
               fontWeight: 600,
               fontSize: '17px',
             }}>
-              Papeles al día. Aparecé cuando te buscan. Sin intermediarios.
+              Certificados, vencimientos y legajo de cada prestador, ordenados y al día.
+              Vos contratás tranquila, nosotros perseguimos los papeles.
             </p>
 
             <p style={{
@@ -167,17 +150,14 @@ export default function LandingPage() {
               lineHeight: 1.6,
               color: TEXT_MUTED,
             }}>
-              Gratis para prestadores en Uruguay.
+              Servicio para empresas de todo Uruguay.
             </p>
 
             <div style={{ width: '100%' }}>
               <button
                 type="button"
                 className="landing-btn"
-                onClick={() => {
-                  limpiarRegistroContratante()
-                  navigate('/auth')
-                }}
+                onClick={() => navigate('/contacto/contratante')}
                 style={{
                   ...touchButtonBase,
                   width: '100%',
@@ -189,13 +169,13 @@ export default function LandingPage() {
                   boxShadow: '0 4px 16px rgba(0, 180, 166, 0.3)',
                 } as CSSProperties}
               >
-                Quiero registrarme
+                Quiero el servicio
               </button>
               <button
                 type="button"
                 className="landing-btn"
                 onClick={() => {
-                  marcarRegistroContratante()
+                  limpiarRegistroContratante()
                   navigate('/auth')
                 }}
                 style={{
@@ -210,10 +190,21 @@ export default function LandingPage() {
                   fontWeight: 600,
                 } as CSSProperties}
               >
-                Soy empresa, busco prestadores
+                Soy prestador · Perfil gratis
               </button>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section style={{
+        ...sectionPadding,
+        paddingTop: isMobile ? '56px' : '72px',
+        background: '#fff',
+        borderTop: `1px solid ${BORDER}`,
+      }}>
+        <div style={{ maxWidth: '1040px', margin: '0 auto' }}>
+          <ServicioSteps />
         </div>
       </section>
 

@@ -22,31 +22,19 @@ export default function LandingCtaSection({ showBackLink = false }: LandingCtaSe
         textAlign: 'center',
       }}>
         <h2 style={{
-          margin: '0 0 16px',
+          margin: '0 0 36px',
           fontSize: isMobile ? '2rem' : '2.25rem',
           fontWeight: 800,
           color: '#fff',
           letterSpacing: '-0.02em',
           lineHeight: 1.2,
         }}>
-          Empezá gratis hoy
+          ¿Tercerizás? Sacate el papeleo de encima.
         </h2>
-        <p style={{
-          margin: '0 0 36px',
-          fontSize: '17px',
-          fontWeight: 600,
-          lineHeight: 1.6,
-          color: 'rgba(255, 255, 255, 0.88)',
-        }}>
-          Tu perfil listo en minutos.
-        </p>
         <button
           type="button"
           className="landing-btn"
-          onClick={() => {
-            limpiarRegistroContratante()
-            navigate('/auth')
-          }}
+          onClick={() => navigate('/contacto/contratante')}
           style={{
             ...touchButtonBase,
             width: '100%',
@@ -59,8 +47,23 @@ export default function LandingCtaSection({ showBackLink = false }: LandingCtaSe
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
           }}
         >
-          Quiero registrarme
+          Quiero el servicio
         </button>
+        <p style={{
+          margin: '20px 0 0',
+          fontSize: '16px',
+          fontWeight: 600,
+          lineHeight: 1.5,
+          color: 'rgba(255, 255, 255, 0.88)',
+        }}>
+          <Link
+            to="/auth"
+            onClick={() => limpiarRegistroContratante()}
+            style={{ color: '#fff', textDecoration: 'underline' }}
+          >
+            ¿Sos prestador? Creá tu perfil bonificado en esta etapa de lanzamiento
+          </Link>
+        </p>
         <p style={{
           margin: '16px 0 0',
           fontSize: '16px',
@@ -68,7 +71,7 @@ export default function LandingCtaSection({ showBackLink = false }: LandingCtaSe
           lineHeight: 1.5,
           color: 'rgba(255, 255, 255, 0.75)',
         }}>
-          Gratis · Sin tarjeta · 2 minutos
+          Respondemos en el día · Sin permanencia
         </p>
         {showBackLink && (
           <p style={{ margin: '28px 0 0', fontSize: '15px' }}>

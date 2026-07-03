@@ -8,16 +8,16 @@ import {
 } from '@phosphor-icons/react'
 
 export const QUIENES_SOMOS_TEXT =
-  'Orvalya nace de más de una década de experiencia directa en el sector de servicios en Uruguay. Vimos de cerca lo que significa para un prestador independiente perder una oportunidad por no tener un papel a mano, y para una empresa asumir un riesgo legal por no saber con quién está trabajando. Construimos la plataforma que resuelve eso — simple, automática y pensada para la realidad uruguaya.'
+  'Orvalya nace de más de una década de experiencia directa en el sector de servicios en Uruguay. Vimos de cerca lo que significa para un prestador independiente perder una oportunidad por no tener un papel a mano, y para una empresa asumir un riesgo legal por no saber con quién está trabajando. Construimos la plataforma que resuelve eso — simple y pensada para la realidad uruguaya.'
 
 export const VISION_TEXT =
-  'Que cada prestador de servicios en Uruguay pueda demostrar su cumplimiento legal con un clic, y que cada empresa pueda contratar con la tranquilidad de saber que está en regla. Sin trámites, sin intermediarios, sin sorpresas.'
+  'Que cada prestador de servicios en Uruguay pueda demostrar su cumplimiento legal con un clic, y que cada empresa pueda contratar con la documentación a la vista. Sin trámites, sin intermediarios, sin sorpresas.'
 
 export const POR_QUE_ORVALYA: { icon: Icon; title: string; text: string }[] = [
   {
     icon: CloudCheck,
-    title: '100% digital y automático',
-    text: 'Olvidate del papeleo',
+    title: 'Todo en un solo lugar',
+    text: 'Legajos, certificados y vencimientos sin planillas sueltas',
   },
   {
     icon: Wrench,
