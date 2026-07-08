@@ -6,6 +6,47 @@
   transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
 
+.landing-btn-prestador-signup {
+  color: #fff;
+  border: none;
+  background: linear-gradient(
+    125deg,
+    #0F2D52 0%,
+    #2A4A7A 16%,
+    #6B5BD4 38%,
+    #D946EF 58%,
+    #00B4A6 100%
+  );
+  background-size: 220% 220%;
+  box-shadow: 0 8px 28px rgba(107, 91, 212, 0.38);
+  animation:
+    landing-prestador-signup-gradient 9s ease-in-out infinite,
+    landing-prestador-signup-pulse 3.5s ease-in-out infinite;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+@keyframes landing-prestador-signup-gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes landing-prestador-signup-pulse {
+  0%, 100% {
+    box-shadow: 0 8px 28px rgba(107, 91, 212, 0.38);
+  }
+
+  50% {
+    box-shadow:
+      0 12px 36px rgba(217, 70, 239, 0.42),
+      0 0 0 3px rgba(0, 180, 166, 0.2);
+  }
+}
+
 @media (hover: hover) {
   .landing-btn:hover {
     transform: scale(1.02);
@@ -15,6 +56,16 @@
     box-shadow: 0 8px 32px rgba(15, 45, 82, 0.12);
     transform: translateY(-2px);
   }
+
+  .landing-btn-prestador-signup:hover {
+    transform: scale(1.03);
+    box-shadow: 0 14px 40px rgba(217, 70, 239, 0.48);
+    animation: none;
+  }
+}
+
+.landing-btn-prestador-signup:active {
+  transform: scale(0.98);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -25,6 +76,17 @@
 
   .landing-btn:hover,
   .landing-benefit-card:hover {
+    transform: none;
+  }
+
+  .landing-btn-prestador-signup {
+    animation: none;
+    transition: none;
+    background-size: 100% 100%;
+  }
+
+  .landing-btn-prestador-signup:hover,
+  .landing-btn-prestador-signup:active {
     transform: none;
   }
 }

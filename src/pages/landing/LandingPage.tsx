@@ -1,19 +1,17 @@
 import { useState, type CSSProperties } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Image as ImageIcon } from '@phosphor-icons/react'
 import { PageMeta } from '../../components/seo/PageMeta'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { revealStyle, useHeroFadeIn } from '../../hooks/useScrollReveal'
-import { limpiarRegistroContratante } from '../../lib/registroConstants'
 import './landing.css'
 import LandingCtaSection from './LandingCtaSection'
 import LandingLayout from './LandingLayout'
 import AudienceSplitSection from './AudienceSplitSection'
 import PorQueOrvalyaGrid from './PorQueOrvalyaGrid'
 import ServicioSteps from './ServicioSteps'
+import HeroRoleSelector from './HeroRoleSelector'
 import {
   BORDER,
-  NAVY,
   SURFACE,
   TEAL,
   TEXT_MUTED,
@@ -21,7 +19,6 @@ import {
   bodyTextStyle,
   heroTitleStyle,
   sectionPadding,
-  touchButtonBase,
 } from './landingStyles'
 
 const HERO_IMAGE_SRC = '/hero-servicios.jpg'
@@ -91,7 +88,6 @@ function HeroImage({ isMobile }: { isMobile: boolean }) {
 }
 
 export default function LandingPage() {
-  const navigate = useNavigate()
   const isMobile = useIsMobile(768)
   const heroVisible = useHeroFadeIn()
 
@@ -145,7 +141,7 @@ export default function LandingPage() {
             </p>
 
             <p style={{
-              margin: '0 0 32px',
+              margin: '0 0 24px',
               fontSize: '16px',
               lineHeight: 1.6,
               color: TEXT_MUTED,
@@ -153,46 +149,7 @@ export default function LandingPage() {
               Servicio para empresas de todo Uruguay.
             </p>
 
-            <div style={{ width: '100%' }}>
-              <button
-                type="button"
-                className="landing-btn"
-                onClick={() => navigate('/contacto/contratante')}
-                style={{
-                  ...touchButtonBase,
-                  width: '100%',
-                  padding: '18px 24px',
-                  backgroundColor: TEAL,
-                  color: '#fff',
-                  border: 'none',
-                  fontSize: '18px',
-                  boxShadow: '0 4px 16px rgba(0, 180, 166, 0.3)',
-                } as CSSProperties}
-              >
-                Quiero el servicio
-              </button>
-              <button
-                type="button"
-                className="landing-btn"
-                onClick={() => {
-                  limpiarRegistroContratante()
-                  navigate('/auth')
-                }}
-                style={{
-                  ...touchButtonBase,
-                  width: '100%',
-                  marginTop: '14px',
-                  padding: '16px 24px',
-                  backgroundColor: 'transparent',
-                  color: NAVY,
-                  border: `2px solid ${BORDER}`,
-                  fontSize: '16px',
-                  fontWeight: 600,
-                } as CSSProperties}
-              >
-                Soy prestador · Perfil gratis
-              </button>
-            </div>
+            <HeroRoleSelector />
           </div>
         </div>
       </section>

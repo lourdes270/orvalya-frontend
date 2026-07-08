@@ -266,7 +266,7 @@ export default function AudienceSplitSection() {
 
             <button
               type="button"
-              className="landing-btn"
+              className="landing-btn landing-btn-prestador-signup"
               onClick={() => {
                 limpiarRegistroContratante()
                 navigate('/auth')
@@ -275,11 +275,8 @@ export default function AudienceSplitSection() {
                 ...touchButtonBase,
                 width: isMobile ? '100%' : 'auto',
                 minWidth: isMobile ? undefined : '280px',
-                padding: '14px 24px',
-                backgroundColor: '#fff',
-                color: NAVY,
-                border: `2px solid ${TEAL}`,
-                fontSize: '16px',
+                padding: isMobile ? '18px 24px' : '16px 28px',
+                fontSize: isMobile ? '18px' : '17px',
               }}
             >
               Quiero registrarme
