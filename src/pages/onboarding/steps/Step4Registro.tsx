@@ -6,10 +6,12 @@ import { GoogleAuthButton } from '../../../components/auth/GoogleAuthButton'
 import type { RegistrationBotPayload } from '../../../lib/botProtection/types'
 import { validarContrasena, validarEmail, esMensajeEmailDuplicado, esMensajeConfirmacionEmail } from '../../../lib/validaciones'
 import { ConfirmacionEmailPanel } from '../components/ConfirmacionEmailPanel'
+import { COPY } from '../copy'
 
 interface Step4RegistroProps {
   isMobile: boolean
   onRegistrar: (email: string, password: string, bot: RegistrationBotPayload) => Promise<void>
+  onVolver: () => void
   loading: boolean
   error: string
   fakeSuccess: string
@@ -19,6 +21,7 @@ interface Step4RegistroProps {
 export default function Step4Registro({
   isMobile,
   onRegistrar,
+  onVolver,
   loading,
   error,
   fakeSuccess,
@@ -156,6 +159,27 @@ export default function Step4Registro({
         }}>
           Guardalo gratis para aparecer en búsquedas
         </p>
+
+        <button
+          type="button"
+          onClick={onVolver}
+          style={{
+            display: 'block',
+            width: '100%',
+            marginBottom: '20px',
+            padding: '12px 16px',
+            background: '#ffffff',
+            color: '#1F3864',
+            border: '1.5px solid #DEE2E6',
+            borderRadius: '8px',
+            fontSize: '15px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            textAlign: 'center',
+          }}
+        >
+          {COPY.botones.revisarPasos}
+        </button>
 
         <GoogleAuthButton fromOnboarding />
 

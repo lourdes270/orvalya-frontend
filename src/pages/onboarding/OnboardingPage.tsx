@@ -10,7 +10,12 @@ import Step4Registro from './steps/Step4Registro'
 import ProgressBar from './components/ProgressBar'
 import { useOnboardingForm } from './hooks/useOnboardingForm'
 import { useAuth } from '../../contexts/useAuth'
-import { intentarCompletarOnboardingPendiente, restaurarBorradorOnboardingSiFalta } from './hooks/helpers'
+import {
+  intentarCompletarOnboardingPendiente,
+  obtenerBorradorOnboarding,
+  restaurarBorradorOnboardingSiFalta,
+} from './hooks/helpers'
+import type { PasoOnboarding } from './types'
 
 function PantallaCarga({ texto, secundario }: { texto: string; secundario?: string }) {
   return (
@@ -42,8 +47,17 @@ export default function OnboardingPage() {
   const contratanteProcesado = useRef(false)
   const {
     form, selecciones, estadoFiscal, loading, error, fakeSuccess,
-    setForm, setEstadoFiscal, toggleSubrubro, puedeAvanzar, guardarYFinalizar, handleRegistro,
+    setForm, setEstadoFiscal, setPaso, toggleSubrubro, puedeAvanzar, guardarYFinalizar, handleRegistro,
   } = useOnboardingForm()
+
+  useEffect(() => {
+    if (pasoParam) {
+      const n = Number.parseInt(pasoParam, 10)
+      if (!Number.isNaN(n) && n >= 0 && n <= 4) {
+        setPaso(n as PasoOnboarding)
+      }
+    }
+  }, [pasoParam, setPaso])
 
   useEffect(() => {
     restaurarBorradorOnboardingSiFalta()
@@ -90,26 +104,9 @@ export default function OnboardingPage() {
     if (!session?.user || perfil?.tipo !== 'pendiente') return
     if (esIntentoRegistroContratante(session.user)) return
 
-    let activo = true
-    setCompletandoPendiente(true)
-    setSinDatosPrevios(false)
-
-    intentarCompletarOnboardingPendiente(session.user, setPerfil, navigate)
-      .then(result => {
-        if (!activo) return
-        if (result === 'sin_datos') {
-          setSinDatosPrevios(true)
-          if (pasoParam && pasoParam !== '0') {
-            navigate('/onboarding?paso=0', { replace: true })
-          }
-        }
-      })
-      .finally(() => {
-        if (activo) setCompletandoPendiente(false)
-      })
-
-    return () => { activo = false }
-  }, [session?.user?.id, perfil?.tipo, setPerfil, navigate, pasoParam])
+    const draft = obtenerBorradorOnboarding(session.user)
+    setSinDatosPrevios(!draft)
+  }, [session?.user?.id, perfil?.tipo])
 
   const esperandoPerfil = !!session && perfil === null
   const preparandoContratante = !!session?.user && esIntentoRegistroContratante(session.user)
@@ -126,10 +123,10 @@ export default function OnboardingPage() {
     return <PantallaCarga texto="Preparando tu cuenta de empresa..." secundario="No hace falta elegir servicios." />
   }
 
-  if (esperandoPerfil || completandoPendiente) {
+  if (esperandoPerfil) {
     return (
       <PantallaCarga
-        texto={completandoPendiente ? 'Finalizando tu perfil...' : 'Cargando...'}
+        texto="Cargando..."
         secundario={cargaLarga ? 'Si tarda mucho, recargá la página o volvé a iniciar sesión.' : undefined}
       />
     )
@@ -164,30 +161,83 @@ export default function OnboardingPage() {
   }
 
   const yaTieneCuenta = !!session && perfil?.tipo === 'pendiente'
-  const nav = (dir: number) => { window.location.href = `/onboarding?paso=${pasoNum + dir}` }
+
+  const irAPaso = (destino: number) => {
+    setPaso(destino as PasoOnboarding)
+    navigate(`/onboarding?paso=${destino}`)
+  }
+
+  const finalizarPaso3 = async () => {
+    if (yaTieneCuenta && session?.user) {
+      setCompletandoPendiente(true)
+      await intentarCompletarOnboardingPendiente(session.user, setPerfil, navigate)
+      setCompletandoPendiente(false)
+      return
+    }
+    guardarYFinalizar()
+  }
+
+  if (pasoNum === 4 && yaTieneCuenta) {
+    return <Navigate to="/onboarding?paso=3" replace />
+  }
 
   return (
     <>
-      {isMobile && pasoNum >= 1 && pasoNum <= 3 && (
-        <ProgressBar pasoActual={pasoNum as 1 | 2 | 3} isMobile />
+      {completandoPendiente && (
+        <PantallaCarga texto="Finalizando tu perfil..." />
       )}
-      {pasoNum === 1 && (
-        <Step1Categorias form={form} selecciones={selecciones} setForm={setForm} toggleSubrubro={toggleSubrubro} isMobile={isMobile} onAvanzar={() => nav(1)} puedeAvanzar={() => puedeAvanzar(1)} />
-      )}
-      {pasoNum === 2 && (
-        <Step2DatosBasicos form={form} setForm={setForm} isMobile={isMobile} onAvanzar={() => nav(1)} onVolver={() => nav(-1)} puedeAvanzar={() => puedeAvanzar(2)} />
-      )}
-      {pasoNum === 3 && (
-        <Step3Fiscalizacion estadoFiscal={estadoFiscal} setEstadoFiscal={setEstadoFiscal} isMobile={isMobile} onVolver={() => nav(-1)} onFinalizar={guardarYFinalizar} loading={loading} />
-      )}
-      {pasoNum === 4 && !yaTieneCuenta && (
-        <Step4Registro isMobile={isMobile} onRegistrar={handleRegistro} loading={loading} error={error} fakeSuccess={fakeSuccess} email={form.email} />
-      )}
-      {pasoNum === 4 && yaTieneCuenta && (
-        <Navigate to="/onboarding?paso=0" replace />
-      )}
-      {error && pasoNum !== 4 && (
-        <div style={{ position: 'fixed', bottom: '100px', left: '20px', right: '20px', padding: '12px', background: '#fee2e2', borderRadius: '8px', color: '#dc2626', fontSize: '14px' }}>{error}</div>
+      {!completandoPendiente && (
+        <>
+          {isMobile && pasoNum >= 1 && pasoNum <= 3 && (
+            <ProgressBar pasoActual={pasoNum as 1 | 2 | 3} isMobile />
+          )}
+          {pasoNum === 1 && (
+            <Step1Categorias
+              form={form}
+              selecciones={selecciones}
+              setForm={setForm}
+              toggleSubrubro={toggleSubrubro}
+              isMobile={isMobile}
+              onAvanzar={() => irAPaso(2)}
+              onVolver={() => irAPaso(0)}
+              puedeAvanzar={() => puedeAvanzar(1)}
+            />
+          )}
+          {pasoNum === 2 && (
+            <Step2DatosBasicos
+              form={form}
+              setForm={setForm}
+              isMobile={isMobile}
+              onAvanzar={() => irAPaso(3)}
+              onVolver={() => irAPaso(1)}
+              puedeAvanzar={() => puedeAvanzar(2)}
+            />
+          )}
+          {pasoNum === 3 && (
+            <Step3Fiscalizacion
+              estadoFiscal={estadoFiscal}
+              setEstadoFiscal={setEstadoFiscal}
+              isMobile={isMobile}
+              onVolver={() => irAPaso(2)}
+              onFinalizar={finalizarPaso3}
+              loading={loading || completandoPendiente}
+            />
+          )}
+          {pasoNum === 4 && !yaTieneCuenta && (
+            <Step4Registro
+              isMobile={isMobile}
+              onRegistrar={handleRegistro}
+              onVolver={() => irAPaso(3)}
+              loading={loading}
+              error={error}
+              fakeSuccess={fakeSuccess}
+              email={form.email}
+            />
+          )}
+          {error && pasoNum !== 4 && (
+            <div style={{ position: 'fixed', bottom: '100px', left: '20px', right: '20px', padding: '12px', background: '#fee2e2', borderRadius: '8px', color: '#dc2626', fontSize: '14px' }}>{error}</div>
+          )}
+        </>
       )}
     </>
   )

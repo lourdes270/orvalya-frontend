@@ -13,7 +13,17 @@ interface Step1CategoriasProps {
   toggleSubrubro: (rubroId: string, subrubroId: string) => void
   isMobile: boolean
   onAvanzar: () => void
+  onVolver: () => void
   puedeAvanzar: () => boolean
+}
+
+function textoLibreInicial(form: OnboardingForm, selecciones: SeleccionCategorias): Record<string, string> {
+  if (!form.otroTexto.trim()) return {}
+  const rubroOtro = RUBROS.find(r => r.id === 'otro')
+  if (rubroOtro && (selecciones.otro?.length ?? 0) > 0) {
+    return { otro: form.otroTexto }
+  }
+  return { otro: form.otroTexto }
 }
 
 // Selección de categorías y subrubros
@@ -24,11 +34,14 @@ export default function Step1Categorias({
   toggleSubrubro,
   isMobile,
   onAvanzar,
+  onVolver,
   puedeAvanzar,
 }: Step1CategoriasProps) {
   const [rubroAbierto, setRubroAbierto] = useState<string | null>(null)
   const [error, setError] = useState('')
-  const [textoLibrePorRubro, setTextoLibrePorRubro] = useState<Record<string, string>>({})
+  const [textoLibrePorRubro, setTextoLibrePorRubro] = useState<Record<string, string>>(
+    () => textoLibreInicial(form, selecciones),
+  )
 
   const handleAvanzar = () => {
     if (!puedeAvanzar()) {
@@ -48,10 +61,24 @@ export default function Step1Categorias({
     setForm({ ...form, otroTexto: texto })
   }
 
+  const botonVolverSecundario = {
+    ...STYLES.botonPrimario(isMobile),
+    background: '#ffffff',
+    color: '#1F3864',
+    border: '1.5px solid #DEE2E6',
+  }
+
   return (
     <div style={STYLES.wrapper(isMobile)}>
-      <div style={STYLES.card(isMobile)}>
-        <h1 style={STYLES.titulo(isMobile)}>{COPY.paso1.titulo}</h1>
+      <div style={{ position: 'relative', ...STYLES.card(isMobile) }}>
+        {isMobile && (
+          <button type="button" style={STYLES.botonVolver()} onClick={onVolver} aria-label={COPY.botones.volver}>
+            {COPY.botones.volver}
+          </button>
+        )}
+        <h1 style={{ ...STYLES.titulo(isMobile), paddingTop: isMobile ? '48px' : '0' }}>
+          {COPY.paso1.titulo}
+        </h1>
         <p style={STYLES.subtitulo()}>{COPY.paso1.subtitulo}</p>
         <div style={{
           display: isMobile ? 'block' : 'grid',
@@ -69,14 +96,17 @@ export default function Step1Categorias({
               onToggleAbierto={() => handleToggleRubro(rubro.id)}
               onToggleSubrubro={(subrubroId) => toggleSubrubro(rubro.id, subrubroId)}
               onTextoLibreChange={(texto) => handleTextoLibreChange(rubro.id, texto)}
-              textoLibre={textoLibrePorRubro[rubro.id] || ''}
+              textoLibre={textoLibrePorRubro[rubro.id] || (rubro.id === 'otro' ? form.otroTexto : '')}
               isMobile={isMobile}
             />
           ))}
         </div>
         {error && <p style={STYLES.error()}>{error}</p>}
         {!isMobile && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <button type="button" style={botonVolverSecundario} onClick={onVolver}>
+              {COPY.botones.volver}
+            </button>
             <button
               type="button"
               style={{

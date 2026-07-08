@@ -59,6 +59,7 @@ export const COPY = {
   botones: {
     siguiente: 'Siguiente',
     comenzar: 'Comenzar',
-    volver: '←'
+    volver: '← Atrás',
+    revisarPasos: '← Revisar pasos anteriores',
   }
 }

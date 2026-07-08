@@ -165,14 +165,7 @@ export async function intentarCompletarOnboardingPendiente(
 ): Promise<'completado' | 'reanudado' | 'sin_datos'> {
   const draft = obtenerBorradorOnboarding(user)
   if (!draft || !puedeAvanzar(3, draft.form, draft.selecciones, draft.estadoFiscal)) {
-    if (draft) {
-      const paso = inferirPasoOnboarding(draft)
-      if (paso > 0) {
-        navigate(`/onboarding?paso=${paso}`, { replace: true })
-        return 'reanudado'
-      }
-    }
-    return 'sin_datos'
+    return draft ? 'reanudado' : 'sin_datos'
   }
 
   const payload = buildPrestadorPerfilUpdate(draft.form, draft.selecciones, draft.estadoFiscal)

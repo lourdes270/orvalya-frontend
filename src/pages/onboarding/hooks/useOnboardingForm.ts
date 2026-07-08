@@ -55,7 +55,10 @@ export function useOnboardingForm() {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(data))
   }, [paso, form, selecciones, estadoFiscal])
 
-  const guardarYFinalizar = () => navigate('/onboarding?paso=4')
+  const guardarYFinalizar = () => {
+    setPaso(4)
+    navigate('/onboarding?paso=4')
+  }
 
   const handleRegistro = async (email: string, password: string, bot: RegistrationBotPayload) => {
     setLoading(true)
