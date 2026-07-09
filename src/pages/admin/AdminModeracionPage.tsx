@@ -8,10 +8,10 @@ import {
   moderarLlamado,
 } from '../../lib/contratanteHelpers'
 import type { Llamado } from '../../types/contratante'
-import { RUBROS } from '../onboarding/data/rubros'
+import { getRubroLabel } from '../onboarding/data/rubros'
 import { btnOutline, btnPrimary, cardStyle, MUTED, NAVY, pageStyle } from '../contratante/contratanteStyles'
 
-const rubroLabel = (id: string) => RUBROS.find(r => r.id === id)?.label ?? id
+const rubroLabel = (id: string) => getRubroLabel(id)
 
 export default function AdminModeracionPage() {
   const { user, perfil, signOut } = useAuth()

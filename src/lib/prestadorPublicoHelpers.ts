@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { RUBROS } from '../pages/onboarding/data/rubros'
+import { getRubroLabel } from '../pages/onboarding/data/rubros'
 import type { PrestadorPublico } from '../types/prestadorPublico'
 
 export async function fetchPrestadorPublico(id: string): Promise<PrestadorPublico | null> {
@@ -22,8 +22,7 @@ export function categoriaPrincipal(descripcion: string | null | undefined): stri
     if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
       const firstKey = Object.keys(parsed)[0]
       if (firstKey) {
-        const rubro = RUBROS.find(r => r.id === firstKey)
-        if (rubro) return rubro.label
+        if (firstKey) return getRubroLabel(firstKey)
       }
     }
   } catch {

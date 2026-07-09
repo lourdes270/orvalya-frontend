@@ -12,33 +12,43 @@ const createSubrubros = (items: SubrubroInput[]): SubRubro[] =>
       : item
   )
 
+/** Rubros retirados del onboarding; se mantienen para perfiles ya guardados. */
+const RUBROS_LEGACY_LABELS: Record<string, string> = {
+  domestico: 'Servicio doméstico',
+}
+
+export function getRubroLabel(id: string): string {
+  return RUBROS.find(r => r.id === id)?.label ?? RUBROS_LEGACY_LABELS[id] ?? id
+}
+
 export const RUBROS: Omit<Rubro, 'icono'>[] = [
   {
     id: 'limpieza',
     label: 'Limpieza y sanitización',
     subrubros: createSubrubros([
-      'Hogares', 'Oficinas', 'Industrial', 'Post-obra',
-      'Vidrios y altura', 'Desinfección', 'Alfombras y tapizados'
-    ])
-  },
-  {
-    id: 'domestico',
-    label: 'Servicio doméstico',
-    subrubros: createSubrubros([
-      // Categoría General (Consejo de Salarios — trabajo doméstico)
-      'Ama de llaves',
-      { id: 'ordenamiento', label: 'Orden y limpieza del hogar' },
-      'Planchado y lavandería',
-      { id: 'compras-del-hogar', label: 'Mandados y compras del hogar' },
-      // Categoría Cocina (Consejo de Salarios — trabajo doméstico)
-      { id: 'cocinero/a', label: 'Cocinero/a' },
+      // Categorías del Consejo de Salarios — Grupo 19, Subgrupo 07 (Empresas de limpieza)
+      'Limpiador/a',
+      'Auxiliar de servicio',
+      'Peón',
+      'Limpiavidrios',
+      'Maquinista',
+      { id: 'vidrios-y-altura', label: 'Limpiador/a de fachada' },
+      'Encargado/a',
+      'Auxiliar área salud',
+      'Supervisor/a',
+      // Sectores donde suelen contratar empresas (Leyes 18.099 y 18.251 — tercerización)
+      { id: 'hogares', label: 'Hogares' },
+      { id: 'oficinas', label: 'Oficinas y edificios' },
+      'Industrial',
+      'Post-obra',
+      'Desinfección',
+      'Alfombras y tapizados',
     ])
   },
   {
     id: 'cuidados',
     label: 'Cuidados y salud',
     subrubros: createSubrubros([
-      // Categoría Cuidados (Consejo de Salarios — trabajo doméstico)
       'Adultos mayores', 'Niños', 'Enfermos y postoperatorio',
       'Personas con discapacidad', 'Enfermero/a',
       'Acompañante terapéutico'
