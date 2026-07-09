@@ -10,11 +10,13 @@ import {
 } from './helpers/env'
 import {
   deleteUserByEmail,
+  ensureContratanteWithRut,
   findUserByEmail,
   getPerfilField,
 } from './helpers/supabase-admin'
 import { INVALID_EXE, OVERSIZE_PDF } from './helpers/fixtures'
 import {
+  fillContratanteCamposRequeridos,
   fillContratanteNombre,
   fillContratantePerfilMinimo,
   fillContratanteRut,
@@ -47,20 +49,22 @@ test.describe.serial('Validaciones de formularios', () => {
 
   test('setup contratante para validaciones de RUT', async ({ page }) => {
     await setRegistroContratante(page)
-    const { registerAndAuthenticate } = await import('./helpers/auth')
+    const { registerAndAuthenticate, acceptLegalTerms } = await import('./helpers/auth')
     await registerAndAuthenticate(page, contratanteEmail, password)
+    await page.waitForURL(/\/(aceptar-terminos|contratante\/perfil)/, { timeout: 20_000 })
+    if (page.url().includes('/aceptar-terminos')) {
+      await acceptLegalTerms(page)
+    }
     await expect(page).toHaveURL(/\/contratante\/perfil/)
   })
 
   test('RUT contratante: letras rechazadas', async ({ page }) => {
+    await setRegistroContratante(page)
+    await loginWithEmail(page, contratanteEmail, password)
     await page.goto('/contratante/perfil')
-    if (!page.url().includes('/contratante/perfil')) {
-      await setRegistroContratante(page)
-      await loginWithEmail(page, contratanteEmail, password)
-      await page.goto('/contratante/perfil')
-    }
     test.skip(!page.url().includes('/contratante/perfil'), 'Perfil contratante no disponible')
 
+    await fillContratanteCamposRequeridos(page)
     await fillContratanteRut(page, 'ABCD1234')
     await submitContratantePerfil(page)
     await expect(page.getByText('al menos 8 dígitos', { exact: false })).toBeVisible()
@@ -72,12 +76,14 @@ test.describe.serial('Validaciones de formularios', () => {
     await page.goto('/contratante/perfil')
     test.skip(!page.url().includes('/contratante/perfil'), 'Perfil contratante no disponible')
 
+    await fillContratanteCamposRequeridos(page)
     await fillContratanteRut(page, '1234567')
     await submitContratantePerfil(page)
     await expect(page.getByText('al menos 8 dígitos', { exact: false })).toBeVisible()
   })
 
   test('RUT duplicado muestra mensaje correcto', async ({ page }) => {
+    await ensureContratanteWithRut(EXISTING_RUT)
     await setRegistroContratante(page)
     await loginWithEmail(page, contratanteEmail, password)
     await page.goto('/contratante/perfil')
@@ -94,12 +100,14 @@ test.describe.serial('Validaciones de formularios', () => {
 
   test('archivo mayor a 5MB rechazado', async ({ page }) => {
     await loginWithEmail(page, prestadorEmail, password)
+    await page.getByRole('button', { name: /Documentos/i }).click()
     await page.locator('input[type="file"]').first().setInputFiles(OVERSIZE_PDF)
     await expect(page.getByText(UPLOAD_REJECTION_MESSAGE)).toBeVisible()
   })
 
   test('archivo tipo incorrecto rechazado', async ({ page }) => {
     await loginWithEmail(page, prestadorEmail, password)
+    await page.getByRole('button', { name: /Documentos/i }).click()
     const fileInputs = page.locator('input[type="file"]')
     const index = (await fileInputs.count()) > 1 ? 1 : 0
     await fileInputs.nth(index).setInputFiles(INVALID_EXE)

@@ -6,6 +6,7 @@ import type { Perfil } from '../../contexts/AuthContextType'
 import { supabase } from '../../lib/supabase'
 import DocumentosPrestador from './documentos/DocumentosPrestador'
 import PerfilPrestador from './PerfilPrestador'
+import PerfilPublicoCard from './PerfilPublicoCard'
 import AvatarIncentiveCard from './AvatarIncentiveCard'
 import DashboardContratante from './DashboardContratante'
 import CuentaSeguridadPanel from './CuentaSeguridadPanel'
@@ -231,6 +232,7 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
             onDescargarPdf={handleDescargarPdf}
             generandoPdf={generandoPdf}
           />
+          <PerfilPublicoCard perfil={perfil} />
           <PerfilPrestador perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
         </div>
       )}

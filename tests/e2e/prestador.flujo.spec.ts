@@ -29,36 +29,35 @@ test.describe.serial('Prestador — flujo completo', () => {
     await completeOnboardingPrestador(page, email)
     await acceptLegalTerms(page)
 
-    await expect(page.getByText('Semáforo')).toBeVisible()
-    await expect(page.getByText('Incompleto')).toBeVisible()
-    await expect(page.getByText('0 / 3')).toBeVisible()
+    await expect(page.getByText('Documentación incompleta')).toBeVisible()
+    await expect(page.getByText('0/3 docs')).toBeVisible()
   })
 
   test('login al dashboard', async ({ page }) => {
     await loginWithEmail(page, email, password)
-    await expect(page.getByText('Documentos')).toBeVisible()
+    await expect(page.getByRole('button', { name: /Documentos/i })).toBeVisible()
     const user = await findUserByEmail(email)
     expect(user?.id).toBeTruthy()
   })
 
   test('sube documento PDF válido', async ({ page }) => {
     await loginWithEmail(page, email, password)
+    await page.getByRole('button', { name: /Documentos/i }).click()
 
     await page.locator('input[type="file"]').first().setInputFiles(VALID_PDF)
 
     const future = new Date()
     future.setFullYear(future.getFullYear() + 1)
     await page.locator('input[type="date"]').first().fill(future.toISOString().slice(0, 10))
-    await page.getByText('Declaro que este documento es auténtico', { exact: false }).click()
+    await page.getByText('Declaro que este documento es auténtico', { exact: false }).first().click()
     await page.getByRole('button', { name: 'Subir' }).first().click()
 
-    await expect(
-      page.getByText('v1 vigente').or(page.getByText('Subir nueva versión')),
-    ).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByText('v1 vigente').first()).toBeVisible({ timeout: 30_000 })
   })
 
   test('rechaza archivo inválido (exe)', async ({ page }) => {
     await loginWithEmail(page, email, password)
+    await page.getByRole('button', { name: /Documentos/i }).click()
 
     const fileInputs = page.locator('input[type="file"]')
     const index = (await fileInputs.count()) > 1 ? 1 : 0

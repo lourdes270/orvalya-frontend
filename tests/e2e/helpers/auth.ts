@@ -79,16 +79,21 @@ export async function completeOnboardingPrestador(
   page: Page,
   email: string,
 ): Promise<void> {
-  if (page.url().includes('/onboarding')) {
-    const paso0 = page.getByRole('button', { name: /Ofrezco servicios/i })
-    if (await paso0.isVisible({ timeout: 3_000 }).catch(() => false)) {
-      await paso0.click()
+  if (!page.url().includes('paso=1')) {
+    if (!page.url().includes('/onboarding')) {
+      await page.goto('/onboarding?paso=0')
+    } else if (!page.url().includes('paso=') || page.url().includes('paso=0')) {
+      await page.goto('/onboarding?paso=0')
     }
-  } else {
-    await page.goto('/onboarding?paso=1')
+
+    if (!page.url().includes('paso=1')) {
+      const prestadorBtn = page.getByRole('button', { name: /Ofrezco servicios/i })
+      await prestadorBtn.waitFor({ state: 'visible', timeout: 30_000 })
+      await prestadorBtn.click()
+    }
   }
 
-  await page.waitForURL('**/onboarding?paso=1**')
+  await page.waitForURL('**/onboarding?paso=1**', { timeout: 30_000 })
 
   await page.getByText('Limpieza y sanitización', { exact: true }).click()
   await page.getByText('Hogares', { exact: true }).click()
@@ -107,8 +112,10 @@ export async function completeOnboardingPrestador(
   await page.getByText('Tengo RUT activo', { exact: true }).click()
   await page.getByRole('button', { name: 'Comenzar' }).click()
 
-  await page.waitForURL('**/onboarding?paso=4**', { timeout: 20_000 })
-  await page.waitForURL('**/aceptar-terminos**', { timeout: 60_000 })
+  await page.waitForURL(/\/(onboarding\?paso=4|aceptar-terminos)/, { timeout: 60_000 })
+  if (page.url().includes('paso=4')) {
+    await page.waitForURL('**/aceptar-terminos**', { timeout: 60_000 })
+  }
 }
 
 export async function fillHoneypotRegister(page: Page, value: string): Promise<void> {

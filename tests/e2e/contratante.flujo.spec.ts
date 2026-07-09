@@ -12,8 +12,9 @@ import {
   uniqueEmail,
   uniqueRut,
 } from './helpers/env'
-import { deleteUserByEmail } from './helpers/supabase-admin'
+import { deleteUserByEmail, ensureContratanteWithRut } from './helpers/supabase-admin'
 import {
+  fillContratanteCamposRequeridos,
   fillContratanteNombre,
   fillContratantePerfilMinimo,
   fillContratanteRut,
@@ -43,13 +44,11 @@ test.describe.serial('Contratante — flujo completo', () => {
 
   test('aceptación de términos y redirección a perfil', async ({ page }) => {
     await loginWithEmail(page, email, password)
+    await page.waitForURL(/\/(aceptar-terminos|contratante\/perfil)/, { timeout: 20_000 })
     if (page.url().includes('/aceptar-terminos')) {
       await acceptLegalTerms(page)
     }
-    if (!page.url().includes('/contratante/perfil')) {
-      await page.waitForURL(/\/contratante\/perfil/, { timeout: 20_000 })
-    }
-    await expect(page).toHaveURL(/\/contratante\/perfil/)
+    await expect(page).toHaveURL(/\/contratante\/perfil/, { timeout: 20_000 })
   })
 
   test('validación RUT solo números (letras filtradas)', async ({ page }) => {
@@ -57,7 +56,9 @@ test.describe.serial('Contratante — flujo completo', () => {
     await page.goto('/contratante/perfil')
     await expect(page).toHaveURL(/\/contratante\/perfil/)
 
+    await fillContratanteCamposRequeridos(page)
     await fillContratanteRut(page, '12ABC34')
+    await expect(page.locator('input[placeholder="12345678"]')).toHaveValue('1234')
     await submitContratantePerfil(page)
     await expect(page.getByText('al menos 8 dígitos', { exact: false })).toBeVisible()
   })
@@ -66,14 +67,17 @@ test.describe.serial('Contratante — flujo completo', () => {
     await loginWithEmail(page, email, password)
     await page.goto('/contratante/perfil')
 
+    await fillContratanteCamposRequeridos(page)
     await fillContratanteRut(page, '1234567')
     await submitContratantePerfil(page)
     await expect(page.getByText('al menos 8 dígitos', { exact: false })).toBeVisible()
   })
 
   test('validación RUT duplicado', async ({ page }) => {
+    await ensureContratanteWithRut(EXISTING_RUT)
     await loginWithEmail(page, email, password)
     await page.goto('/contratante/perfil')
+    await expect(page).toHaveURL(/\/contratante\/perfil/)
 
     await fillContratanteNombre(page, 'Otra Empresa E2E')
     await fillContratanteRut(page, EXISTING_RUT)

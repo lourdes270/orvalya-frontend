@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { TEST_PASSWORD, uniqueEmail } from './env'
 
 let adminClient: SupabaseClient | null = null
 
@@ -86,4 +87,42 @@ export async function countLlamadosPendientes(): Promise<number> {
     .eq('estado', 'pendiente_moderacion')
   if (error) throw error
   return count ?? 0
+}
+
+/** Garantiza un contratante con el RUT indicado para probar duplicados. */
+export async function ensureContratanteWithRut(rut: string): Promise<void> {
+  const admin = getAdminClient()
+  const normalizado = rut.replace(/\D/g, '')
+
+  const { data: existing } = await admin
+    .from('contratantes')
+    .select('id')
+    .eq('rut', normalizado)
+    .maybeSingle()
+  if (existing) return
+
+  const email = uniqueEmail('rut-seed')
+  const { data: created, error: createError } = await admin.auth.admin.createUser({
+    email,
+    password: TEST_PASSWORD,
+    email_confirm: true,
+  })
+  if (createError) throw createError
+
+  const userId = created.user.id
+  await new Promise(resolve => setTimeout(resolve, 1500))
+
+  await admin.from('perfiles').update({ tipo: 'contratante', email }).eq('id', userId)
+
+  const { error: insertError } = await admin.from('contratantes').insert({
+    id: userId,
+    nombre_empresa: 'Empresa Seed E2E',
+    rut: normalizado,
+    tipo_contratante: 'empresa',
+    rubro_principal: 'limpieza',
+    zona: 'Montevideo',
+    email,
+    telefono: '099111222',
+  })
+  if (insertError) throw insertError
 }
