@@ -25,19 +25,22 @@ export const RUBROS: Omit<Rubro, 'icono'>[] = [
     id: 'domestico',
     label: 'Servicio doméstico',
     subrubros: createSubrubros([
-      { id: 'ama-de-llaves', label: 'Administración del hogar' },
-      { id: 'cocinero/a', label: 'Cocina doméstica' },
+      // Categoría General (Consejo de Salarios — trabajo doméstico)
+      'Ama de llaves',
+      { id: 'ordenamiento', label: 'Orden y limpieza del hogar' },
       'Planchado y lavandería',
-      'Ordenamiento', 'Compras del hogar'
+      { id: 'compras-del-hogar', label: 'Mandados y compras del hogar' },
+      // Categoría Cocina (Consejo de Salarios — trabajo doméstico)
+      { id: 'cocinero/a', label: 'Cocinero/a' },
     ])
   },
   {
     id: 'cuidados',
     label: 'Cuidados y salud',
     subrubros: createSubrubros([
+      // Categoría Cuidados (Consejo de Salarios — trabajo doméstico)
       'Adultos mayores', 'Niños', 'Enfermos y postoperatorio',
-      'Personas con discapacidad',
-      { id: 'enfermero/a', label: 'Enfermería' },
+      'Personas con discapacidad', 'Enfermero/a',
       'Acompañante terapéutico'
     ])
   },
@@ -45,48 +48,32 @@ export const RUBROS: Omit<Rubro, 'icono'>[] = [
     id: 'mascotas',
     label: 'Mascotas',
     subrubros: createSubrubros([
-      { id: 'paseador/a', label: 'Paseo de mascotas' },
-      { id: 'bañador/a', label: 'Baño de mascotas' },
-      'Guardería en casa', 'Adiestramiento'
+      'Paseador/a', 'Bañador/a', 'Guardería en casa', 'Adiestramiento'
     ])
   },
   {
     id: 'oficios',
     label: 'Oficios y mantenimiento',
     subrubros: createSubrubros([
-      'Electricista',
-      { id: 'plomero/a', label: 'Plomería' },
-      { id: 'pintor/a', label: 'Pintura' },
-      { id: 'jardinero/a', label: 'Jardinería' },
-      'Albañil',
-      { id: 'carpintero/a', label: 'Carpintería' },
-      { id: 'herrero/a', label: 'Herrería' },
-      { id: 'fumigador/a', label: 'Fumigación' },
-      { id: 'cerrajero/a', label: 'Cerrajería' },
-      'Reparación de electrodomésticos'
+      'Electricista', 'Plomero/a', 'Pintor/a', 'Jardinero/a',
+      'Albañil', 'Carpintero/a', 'Herrero/a', 'Fumigador/a',
+      'Cerrajero/a', 'Reparación de electrodomésticos'
     ])
   },
   {
     id: 'comercio',
     label: 'Comercio y ventas',
     subrubros: createSubrubros([
-      { id: 'vendedor/a', label: 'Ventas en local' },
-      { id: 'cajero/a', label: 'Atención de caja' },
-      { id: 'repositor/a', label: 'Reposición en góndola' },
-      { id: 'promotor/a', label: 'Promoción de productos' },
-      { id: 'carnicero/a', label: 'Carnicería' },
-      { id: 'panadero/a', label: 'Panadería' },
-      'Feriante'
+      'Vendedor/a', 'Cajero/a', 'Repositor/a', 'Promotor/a',
+      'Carnicero/a', 'Panadero/a', 'Feriante'
     ])
   },
   {
     id: 'gastronomia',
     label: 'Gastronomía y eventos',
     subrubros: createSubrubros([
-      'Catering', 'Repostería',
-      { id: 'mozo/a', label: 'Servicio de mesa' },
-      'Bartender',
-      { id: 'cocinero/a', label: 'Cocina' },
+      'Catering', 'Repostería', 'Mozo/a', 'Bartender',
+      { id: 'cocinero/a', label: 'Cocinero/a' },
       'Organización de eventos'
     ])
   },
