@@ -26,7 +26,7 @@ export const RUBROS: Omit<Rubro, 'icono'>[] = [
     id: 'limpieza',
     label: 'Limpieza y sanitización',
     subrubros: createSubrubros([
-      // Categorías del Consejo de Salarios — Grupo 19, Subgrupo 07 (Empresas de limpieza)
+      // G19 · SG07 — Empresas de limpieza
       'Limpiador/a',
       'Auxiliar de servicio',
       'Peón',
@@ -36,7 +36,7 @@ export const RUBROS: Omit<Rubro, 'icono'>[] = [
       'Encargado/a',
       'Auxiliar área salud',
       'Supervisor/a',
-      // Sectores donde suelen contratar empresas (Leyes 18.099 y 18.251 — tercerización)
+      // Sectores habituales en tercerización (Leyes 18.099 y 18.251)
       { id: 'hogares', label: 'Hogares' },
       { id: 'oficinas', label: 'Oficinas y edificios' },
       'Industrial',
@@ -49,83 +49,150 @@ export const RUBROS: Omit<Rubro, 'icono'>[] = [
     id: 'cuidados',
     label: 'Cuidados y salud',
     subrubros: createSubrubros([
-      'Adultos mayores', 'Niños', 'Enfermos y postoperatorio',
-      'Personas con discapacidad', 'Enfermero/a',
-      'Acompañante terapéutico'
+      // G15 — Servicios de salud y anexos
+      'Auxiliar de enfermería',
+      { id: 'enfermero/a', label: 'Enfermero/a' },
+      'Acompañante terapéutico',
+      { id: 'adultos-mayores', label: 'Cuidador/a de adultos mayores' },
+      { id: 'niños', label: 'Cuidador/a infantil' },
+      { id: 'enfermos-y-postoperatorio', label: 'Cuidados postoperatorios' },
+      { id: 'personas-con-discapacidad', label: 'Cuidados a personas con discapacidad' },
     ])
   },
   {
     id: 'mascotas',
     label: 'Mascotas',
     subrubros: createSubrubros([
-      'Paseador/a', 'Bañador/a', 'Guardería en casa', 'Adiestramiento'
+      // G19 residual — sin laudo específico
+      'Paseador/a',
+      'Bañador/a',
+      'Guardería en casa',
+      'Adiestramiento',
     ])
   },
   {
     id: 'oficios',
     label: 'Oficios y mantenimiento',
     subrubros: createSubrubros([
-      'Electricista', 'Plomero/a', 'Pintor/a', 'Jardinero/a',
-      'Albañil', 'Carpintero/a', 'Herrero/a', 'Fumigador/a',
-      'Cerrajero/a', 'Reparación de electrodomésticos'
+      // G9 · SG01 — Construcción e instalaciones
+      'Peón de obra',
+      'Albañil/a',
+      { id: 'electricista', label: 'Electricista' },
+      'Pintor/a',
+      'Carpintero/a',
+      'Herrero/a',
+      'Plomero/a',
+      // G19 · SG16 — Áreas verdes
+      { id: 'jardinero/a', label: 'Jardinero/a' },
+      // G19 — oficios especializados
+      'Fumigador/a',
+      'Cerrajero/a',
+      'Reparación de electrodomésticos',
     ])
   },
   {
     id: 'comercio',
     label: 'Comercio y ventas',
     subrubros: createSubrubros([
-      'Vendedor/a', 'Cajero/a', 'Repositor/a', 'Promotor/a',
-      'Carnicero/a', 'Panadero/a', 'Feriante'
+      // G10 · SG01 — Tiendas y comercio general
+      'Cadete',
+      'Vendedor/a',
+      'Cajero/a',
+      { id: 'repositor/a', label: 'Repositor/a' },
+      'Promotor/a',
+      // G11 · SG01 — Comercio minorista de alimentación
+      'Carnicero/a',
+      { id: 'panadero/a', label: 'Panadero/a' },
+      { id: 'feriante', label: 'Feriante de alimentos' },
     ])
   },
   {
     id: 'gastronomia',
     label: 'Gastronomía y eventos',
     subrubros: createSubrubros([
-      'Catering', 'Repostería', 'Mozo/a', 'Bartender',
+      // G12 · SG04 — Restoranes, parrilladas y cantinas
+      'Peón de cocina',
+      'Ayudante de cocina',
+      'Mozo/a',
+      'Bartender',
+      'Gambusero/a',
       { id: 'cocinero/a', label: 'Cocinero/a' },
-      'Organización de eventos'
+      'Repostero/a',
+      'Parrillero/a',
+      'Jefe de cocina',
+      // G12 · SG01 / catering
+      'Catering',
+      'Organización de eventos',
     ])
   },
   {
     id: 'logistica',
     label: 'Logística y transporte',
     subrubros: createSubrubros([
-      'Delivery', 'Mudanzas', 'Mensajería',
-      'Remis y traslados', 'Flete', 'Acompañante de viaje'
+      // G13 — Transporte y almacenamiento
+      { id: 'delivery', label: 'Chofer/a delivery' },
+      { id: 'flete', label: 'Chofer/a de carga' },
+      'Fletero/a',
+      'Mudanzas',
+      'Mensajería',
+      { id: 'remis-y-traslados', label: 'Remis y traslados' },
+      'Acompañante de viaje',
     ])
   },
   {
     id: 'seguridad',
     label: 'Seguridad',
     subrubros: createSubrubros([
-      'Vigilancia', 'Control de acceso', 'Monitoreo'
+      // G19 · SG08 — Empresas de seguridad y vigilancia (seguridad física)
+      { id: 'vigilancia', label: 'Vigilante auxiliar' },
+      { id: 'control-de-acceso', label: 'Control de acceso' },
+      'Encargado de turno',
+      { id: 'monitoreo', label: 'Monitoreo y CCTV' },
+      'Chofer de seguridad',
     ])
   },
   {
     id: 'profesionales',
     label: 'Freelancers y profesionales',
     subrubros: createSubrubros([
-      'Diseño gráfico', 'Desarrollo web', 'Marketing digital',
-      'Fotografía', 'Video y edición', 'Redacción y traducción',
-      'Contabilidad', 'Asesoría legal', 'RRHH', 'Arquitectura'
+      // G19 — Servicios profesionales y técnicos especializados
+      'Diseño gráfico',
+      'Desarrollo web',
+      'Marketing digital',
+      'Fotografía',
+      'Video y edición',
+      'Redacción y traducción',
+      'Contabilidad',
+      'Asesoría legal',
+      'RRHH',
+      'Arquitectura',
     ])
   },
   {
     id: 'arte',
     label: 'Arte y educación',
     subrubros: createSubrubros([
-      'Clases particulares', 'Música', 'Idiomas',
-      'Arte y manualidades', 'Yoga y fitness',
-      'Peluquería y estética'
+      // G16 — Servicios de enseñanza
+      { id: 'clases-particulares', label: 'Profesor/a particular' },
+      { id: 'música', label: 'Clases de música' },
+      { id: 'idiomas', label: 'Enseñanza de idiomas' },
+      // G18 — Culturales y esparcimiento
+      { id: 'arte-y-manualidades', label: 'Arte y manualidades' },
+      { id: 'yoga-y-fitness', label: 'Yoga y fitness' },
+      // G19 · SG15 — Peluquerías unisex
+      { id: 'peluquería-y-estética', label: 'Peluquería y estética' },
+      'Oficial peinador/a',
+      'Manicura y estética',
     ])
   },
   {
     id: 'varios',
     label: 'Varios',
     subrubros: createSubrubros([
-      'Limpieza + cuidados', 'Logística + comercio',
-      'Oficios + jardinería', 'Combinación propia'
+      'Limpieza + cuidados',
+      'Logística + comercio',
+      'Oficios + jardinería',
+      'Combinación propia',
     ]),
     tieneTextoLibre: true
   },
