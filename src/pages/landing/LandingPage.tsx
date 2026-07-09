@@ -137,7 +137,7 @@ export default function LandingPage() {
               fontSize: '17px',
             }}>
               Certificados, vencimientos y legajo de cada prestador, ordenados y al día.
-              Vos contratás tranquila, nosotros perseguimos los papeles.
+              Vos contratás con tranquilidad, nosotros perseguimos los papeles.
             </p>
 
             <p style={{

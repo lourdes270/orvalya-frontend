@@ -27,7 +27,7 @@ export default function Step3Fiscalizacion({
       value: 'activo' as EstadoFiscal,
       icono: <CheckCircle weight="light" size={28} color="#40C057" />,
       titulo: 'Tengo RUT activo',
-      descripcion: 'Estoy registrado en DGI y trabajo formalmente.',
+      descripcion: 'Cuento con RUT activo en DGI y trabajo formalmente.',
     },
     {
       value: 'tramite' as EstadoFiscal,

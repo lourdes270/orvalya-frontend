@@ -215,7 +215,7 @@ export default function AudienceSplitSection() {
           <div style={{ flex: isMobile ? 'none' : '0 0 42%' }}>
             <SectionImage
               src={PRESTADORES_IMAGE_SRC}
-              alt="Prestadora de servicios usando Orvalya en Uruguay"
+              alt="Prestador de servicios usando Orvalya en Uruguay"
               position="52% 40%"
             />
           </div>

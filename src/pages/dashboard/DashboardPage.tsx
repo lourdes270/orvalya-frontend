@@ -35,8 +35,8 @@ function BannerBienvenida({ esContratante, onClose }: { esContratante: boolean; 
     }}>
       <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.5, flex: 1 }}>
         {esContratante
-          ? '¡Bienvenido a Orvalya! Completá tu perfil para publicar llamados de servicio.'
-          : '¡Bienvenida a Orvalya! Completá tus documentos para aparecer en búsquedas.'}
+          ? 'Te damos la bienvenida a Orvalya. Completá tu perfil para publicar llamados de servicio.'
+          : 'Te damos la bienvenida a Orvalya. Completá tus documentos para aparecer en búsquedas.'}
       </p>
       <button
         type="button"
