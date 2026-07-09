@@ -3,8 +3,14 @@ import type { Rubro, SubRubro } from '../types'
 const slugify = (text: string): string =>
   text.toLowerCase().replace(/\s+/g, '-')
 
-const createSubrubros = (labels: string[]): SubRubro[] =>
-  labels.map(label => ({ id: slugify(label), label }))
+type SubrubroInput = string | { id: string; label: string }
+
+const createSubrubros = (items: SubrubroInput[]): SubRubro[] =>
+  items.map(item =>
+    typeof item === 'string'
+      ? { id: slugify(item), label: item }
+      : item
+  )
 
 export const RUBROS: Omit<Rubro, 'icono'>[] = [
   {
@@ -19,7 +25,9 @@ export const RUBROS: Omit<Rubro, 'icono'>[] = [
     id: 'domestico',
     label: 'Servicio doméstico',
     subrubros: createSubrubros([
-      'Ama de llaves', 'Cocinero/a', 'Planchado y lavandería',
+      { id: 'ama-de-llaves', label: 'Administración del hogar' },
+      { id: 'cocinero/a', label: 'Cocina doméstica' },
+      'Planchado y lavandería',
       'Ordenamiento', 'Compras del hogar'
     ])
   },
@@ -28,7 +36,8 @@ export const RUBROS: Omit<Rubro, 'icono'>[] = [
     label: 'Cuidados y salud',
     subrubros: createSubrubros([
       'Adultos mayores', 'Niños', 'Enfermos y postoperatorio',
-      'Personas con discapacidad', 'Enfermero/a',
+      'Personas con discapacidad',
+      { id: 'enfermero/a', label: 'Enfermería' },
       'Acompañante terapéutico'
     ])
   },
@@ -36,32 +45,49 @@ export const RUBROS: Omit<Rubro, 'icono'>[] = [
     id: 'mascotas',
     label: 'Mascotas',
     subrubros: createSubrubros([
-      'Paseador/a', 'Bañador/a', 'Guardería en casa', 'Adiestramiento'
+      { id: 'paseador/a', label: 'Paseo de mascotas' },
+      { id: 'bañador/a', label: 'Baño de mascotas' },
+      'Guardería en casa', 'Adiestramiento'
     ])
   },
   {
     id: 'oficios',
     label: 'Oficios y mantenimiento',
     subrubros: createSubrubros([
-      'Electricista', 'Plomero/a', 'Pintor/a', 'Jardinero/a',
-      'Albañil', 'Carpintero/a', 'Herrero/a', 'Fumigador/a',
-      'Cerrajero/a', 'Reparación de electrodomésticos'
+      'Electricista',
+      { id: 'plomero/a', label: 'Plomería' },
+      { id: 'pintor/a', label: 'Pintura' },
+      { id: 'jardinero/a', label: 'Jardinería' },
+      'Albañil',
+      { id: 'carpintero/a', label: 'Carpintería' },
+      { id: 'herrero/a', label: 'Herrería' },
+      { id: 'fumigador/a', label: 'Fumigación' },
+      { id: 'cerrajero/a', label: 'Cerrajería' },
+      'Reparación de electrodomésticos'
     ])
   },
   {
     id: 'comercio',
     label: 'Comercio y ventas',
     subrubros: createSubrubros([
-      'Vendedor/a', 'Cajero/a', 'Repositor/a', 'Promotor/a',
-      'Carnicero/a', 'Panadero/a', 'Feriante'
+      { id: 'vendedor/a', label: 'Ventas en local' },
+      { id: 'cajero/a', label: 'Atención de caja' },
+      { id: 'repositor/a', label: 'Reposición en góndola' },
+      { id: 'promotor/a', label: 'Promoción de productos' },
+      { id: 'carnicero/a', label: 'Carnicería' },
+      { id: 'panadero/a', label: 'Panadería' },
+      'Feriante'
     ])
   },
   {
     id: 'gastronomia',
     label: 'Gastronomía y eventos',
     subrubros: createSubrubros([
-      'Catering', 'Repostería', 'Mozo/a', 'Bartender',
-      'Cocinero/a', 'Organización de eventos'
+      'Catering', 'Repostería',
+      { id: 'mozo/a', label: 'Servicio de mesa' },
+      'Bartender',
+      { id: 'cocinero/a', label: 'Cocina' },
+      'Organización de eventos'
     ])
   },
   {
