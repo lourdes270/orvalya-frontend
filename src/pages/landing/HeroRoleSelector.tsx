@@ -1,13 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import { Wrench } from '@phosphor-icons/react'
+import { Briefcase, Wrench } from '@phosphor-icons/react'
 import { limpiarRegistroContratante } from '../../lib/registroConstants'
 import { useIsMobile } from '../../hooks/useIsMobile'
-import {
-  NAVY,
-  TEAL,
-  TEXT_MUTED,
-  touchButtonBase,
-} from './landingStyles'
+import { touchButtonBase } from './landingStyles'
 
 const ROLE_PATHS = [
   {
@@ -17,6 +12,8 @@ const ROLE_PATHS = [
     subtitle: 'Certificados y seguimiento de cada prestador, todo en un lugar',
     to: '/contacto/contratante',
     clearContratante: false,
+    cardClass: 'landing-btn landing-btn-contratante-signup',
+    Icon: Briefcase,
   },
   {
     id: 'prestador',
@@ -25,6 +22,8 @@ const ROLE_PATHS = [
     subtitle: 'Limpieza, construcción, jardinería, cuidados y más',
     to: '/auth',
     clearContratante: true,
+    cardClass: 'landing-btn landing-btn-prestador-signup',
+    Icon: Wrench,
   },
 ] as const
 
@@ -43,17 +42,13 @@ export default function HeroRoleSelector() {
       }}
     >
       {ROLE_PATHS.map((path) => {
-        const isPrestador = path.id === 'prestador'
+        const Icon = path.Icon
 
         return (
           <button
             key={path.intent}
             type="button"
-            className={
-              isPrestador
-                ? 'landing-btn landing-btn-prestador-signup'
-                : 'landing-benefit-card landing-btn'
-            }
+            className={path.cardClass}
             onClick={() => {
               if (path.clearContratante) limpiarRegistroContratante()
               navigate(path.to)
@@ -65,16 +60,9 @@ export default function HeroRoleSelector() {
               alignItems: 'flex-start',
               textAlign: 'left',
               width: '100%',
-              minHeight: isPrestador
-                ? (isMobile ? '136px' : '148px')
-                : (isMobile ? '120px' : '132px'),
-              padding: isPrestador
-                ? (isMobile ? '22px 20px' : '24px 22px')
-                : (isMobile ? '20px 18px' : '22px 20px'),
-              background: isPrestador ? undefined : '#fff',
-              border: isPrestador ? undefined : `2px solid ${TEAL}`,
+              minHeight: isMobile ? '136px' : '148px',
+              padding: isMobile ? '22px 20px' : '24px 22px',
               borderRadius: '16px',
-              boxShadow: isPrestador ? undefined : '0 4px 20px rgba(15, 45, 82, 0.06)',
             }}
           >
             <span style={{
@@ -84,7 +72,7 @@ export default function HeroRoleSelector() {
               fontWeight: 800,
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
-              color: isPrestador ? 'rgba(255, 255, 255, 0.92)' : TEAL,
+              color: 'rgba(255, 255, 255, 0.92)',
               lineHeight: 1.3,
             }}>
               {path.intent}
@@ -94,32 +82,26 @@ export default function HeroRoleSelector() {
               alignItems: 'center',
               gap: '8px',
               marginBottom: '6px',
-              fontSize: isPrestador
-                ? (isMobile ? '19px' : '18px')
-                : (isMobile ? '18px' : '17px'),
+              fontSize: isMobile ? '19px' : '18px',
               fontWeight: 800,
-              color: isPrestador ? '#fff' : NAVY,
+              color: '#fff',
               lineHeight: 1.3,
               letterSpacing: '-0.01em',
             }}>
-              {isPrestador && (
-                <Wrench
-                  size={isMobile ? 24 : 22}
-                  weight="duotone"
-                  color="#fff"
-                  aria-hidden
-                  style={{ flexShrink: 0 }}
-                />
-              )}
+              <Icon
+                size={isMobile ? 24 : 22}
+                weight="duotone"
+                color="#fff"
+                aria-hidden
+                style={{ flexShrink: 0 }}
+              />
               {path.title}
             </span>
             <span style={{
               display: 'block',
-              fontSize: isPrestador
-                ? (isMobile ? '15px' : '14px')
-                : (isMobile ? '15px' : '14px'),
-              fontWeight: isPrestador ? 600 : 500,
-              color: isPrestador ? 'rgba(255, 255, 255, 0.9)' : TEXT_MUTED,
+              fontSize: isMobile ? '15px' : '14px',
+              fontWeight: 600,
+              color: 'rgba(255, 255, 255, 0.9)',
               lineHeight: 1.45,
             }}>
               {path.subtitle}
