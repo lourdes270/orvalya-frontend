@@ -1,5 +1,6 @@
 -- Fix: authenticated no puede INSERTAR en aceptaciones_legales (42501)
--- Ejecutar en SQL Editor si la app muestra "No pudimos registrar tu aceptación"
+-- Superseded por supabase/migrations/013_crud_grants_storage_documentos.sql
+-- Ejecutar en SQL Editor solo si 013 aún no está aplicada.
 
 GRANT SELECT, INSERT ON public.aceptaciones_legales TO authenticated;
 GRANT ALL ON public.aceptaciones_legales TO service_role;
