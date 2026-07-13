@@ -8,6 +8,7 @@ import {
   fetchMisLlamados,
   labelEstadoLlamado,
 } from '../../lib/contratanteHelpers'
+import { esLlamadoDePrueba } from '../../lib/llamadosE2E'
 import type { Llamado, LlamadoForm } from '../../types/contratante'
 import { RUBROS } from '../onboarding/data/rubros'
 import { DEPARTAMENTOS } from '../onboarding/data/zonas'
@@ -71,8 +72,9 @@ export default function DashboardContratante() {
     )
   }
 
-  const activos = llamados.filter(l => l.estado === 'activo').length
-  const pendientes = llamados.filter(l => l.estado === 'pendiente_moderacion').length
+  const llamadosVisibles = llamados.filter(l => !esLlamadoDePrueba(l.titulo))
+  const activos = llamadosVisibles.filter(l => l.estado === 'activo').length
+  const pendientes = llamadosVisibles.filter(l => l.estado === 'pendiente_moderacion').length
 
   const validarLlamado = () => {
     const e: Record<string, string> = {}
@@ -119,7 +121,7 @@ export default function DashboardContratante() {
       <div style={statsGridStyle(isMobile)}>
         <Stat titulo="Llamados activos" valor={String(activos)} desc="Visibles para prestadores" />
         <Stat titulo="En moderación" valor={String(pendientes)} desc="Esperando aprobación" />
-        <Stat titulo="Total publicados" valor={String(llamados.length)} desc="Todos los estados" />
+        <Stat titulo="Total publicados" valor={String(llamadosVisibles.length)} desc="Todos los estados" />
       </div>
 
       {esAdmin && (
@@ -184,13 +186,13 @@ export default function DashboardContratante() {
         </h2>
         {cargandoLlamados ? (
           <p style={{ color: MUTED, margin: 0 }}>Cargando...</p>
-        ) : llamados.length === 0 ? (
+        ) : llamadosVisibles.length === 0 ? (
           <p style={{ color: MUTED, margin: 0, padding: '16px', background: '#F8F9FA', borderRadius: '8px', textAlign: 'center' }}>
             Todavía no publicaste llamados.
           </p>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {llamados.map(l => (
+            {llamadosVisibles.map(l => (
               <article key={l.id} style={{ padding: '16px', border: '1px solid #E9ECEF', borderRadius: '10px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
                   <h3 style={{ margin: 0, fontSize: '15px', color: NAVY }}>{l.titulo}</h3>

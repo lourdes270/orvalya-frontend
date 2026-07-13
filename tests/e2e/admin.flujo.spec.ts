@@ -3,14 +3,14 @@ import { loginWithEmail } from './helpers/auth'
 import { ADMIN_EMAIL, ADMIN_PASSWORD, TEST_PASSWORD } from './helpers/env'
 import {
   countLlamadosPendientes,
-  findUserByEmail,
+  deleteLlamadoByTitulo,
+  ensureE2EModeracionContratante,
   insertLlamadoPendiente,
 } from './helpers/supabase-admin'
 import { skipWithoutAdmin } from './helpers/skip'
 
 test.describe.serial('Admin — flujo completo', () => {
   const llamadoTitulo = `E2E Moderación ${Date.now()}`
-  let pendientesAntes = 0
 
   test.beforeEach(() => {
     skipWithoutAdmin()
@@ -20,25 +20,18 @@ test.describe.serial('Admin — flujo completo', () => {
     if (!process.env.E2E_SUPABASE_SERVICE_ROLE_KEY || !ADMIN_EMAIL) return
 
     try {
-      pendientesAntes = await countLlamadosPendientes()
-
-      const adminUser = await findUserByEmail(ADMIN_EMAIL)
-      if (!adminUser) return
-
-      const { getAdminClient } = await import('./helpers/supabase-admin')
-      const admin = getAdminClient()
-      const { data: contratante } = await admin
-        .from('contratantes')
-        .select('id')
-        .limit(1)
-        .maybeSingle()
-
-      if (contratante?.id) {
-        await insertLlamadoPendiente(contratante.id as string, llamadoTitulo)
-      }
+      const contratanteId = await ensureE2EModeracionContratante()
+      await insertLlamadoPendiente(contratanteId, llamadoTitulo)
     } catch (err) {
       console.warn('[e2e admin] beforeAll:', err instanceof Error ? err.message : err)
     }
+  })
+
+  test.afterAll(async () => {
+    if (!process.env.E2E_SUPABASE_SERVICE_ROLE_KEY) return
+    await deleteLlamadoByTitulo(llamadoTitulo).catch(err => {
+      console.warn('[e2e admin] afterAll:', err instanceof Error ? err.message : err)
+    })
   })
 
   test('login admin y ver cola de moderación', async ({ page }) => {

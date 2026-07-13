@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { esAdminPlataforma } from '../../lib/adminHelpers'
 import {
+  ERROR_MOTIVO_RECHAZO_REQUERIDO,
   fetchLlamadosPendientes,
   labelEstadoLlamado,
   moderarLlamado,
@@ -20,6 +21,7 @@ export default function AdminModeracionPage() {
   const [loading, setLoading] = useState(true)
   const [procesando, setProcesando] = useState<string | null>(null)
   const [motivos, setMotivos] = useState<Record<string, string>>({})
+  const [erroresMotivo, setErroresMotivo] = useState<Record<string, string>>({})
 
   const esAdmin = esAdminPlataforma(user?.email, perfil)
 
@@ -36,13 +38,27 @@ export default function AdminModeracionPage() {
   }
 
   const handleModerar = async (id: string, estado: 'activo' | 'rechazado') => {
+    if (estado === 'rechazado' && !motivos[id]?.trim()) {
+      setErroresMotivo(prev => ({ ...prev, [id]: ERROR_MOTIVO_RECHAZO_REQUERIDO }))
+      return
+    }
+
+    setErroresMotivo(prev => {
+      const { [id]: _, ...rest } = prev
+      return rest
+    })
     setProcesando(id)
     try {
       await moderarLlamado(id, estado, motivos[id])
       setLlamados(prev => prev.filter(l => l.id !== id))
     } catch (err) {
       console.error(err)
-      alert('No se pudo moderar el llamado.')
+      const msg = err instanceof Error ? err.message : 'No se pudo moderar el llamado.'
+      if (msg === ERROR_MOTIVO_RECHAZO_REQUERIDO) {
+        setErroresMotivo(prev => ({ ...prev, [id]: msg }))
+      } else {
+        alert(msg)
+      }
     } finally {
       setProcesando(null)
     }
@@ -82,14 +98,32 @@ export default function AdminModeracionPage() {
               </p>
               <div style={{ marginBottom: '12px' }}>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: NAVY, marginBottom: '6px' }}>
-                  Motivo de rechazo (si aplica)
+                  Motivo de rechazo (obligatorio para rechazar)
                 </label>
                 <input
                   value={motivos[l.id] ?? ''}
-                  onChange={e => setMotivos(prev => ({ ...prev, [l.id]: e.target.value }))}
-                  placeholder="Solo si vas a rechazar"
-                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1.5px solid #DEE2E6', boxSizing: 'border-box' }}
+                  onChange={e => {
+                    const value = e.target.value
+                    setMotivos(prev => ({ ...prev, [l.id]: value }))
+                    if (value.trim()) {
+                      setErroresMotivo(prev => {
+                        const { [l.id]: _, ...rest } = prev
+                        return rest
+                      })
+                    }
+                  }}
+                  placeholder="Ej: El título no describe claramente el servicio"
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: `1.5px solid ${erroresMotivo[l.id] ? '#dc3545' : '#DEE2E6'}`,
+                    boxSizing: 'border-box',
+                  }}
                 />
+                {erroresMotivo[l.id] && (
+                  <p style={{ margin: '6px 0 0', fontSize: '13px', color: '#dc3545' }}>{erroresMotivo[l.id]}</p>
+                )}
               </div>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button
@@ -103,7 +137,7 @@ export default function AdminModeracionPage() {
                 <button
                   type="button"
                   style={{ ...btnOutline, borderColor: '#dc3545', color: '#dc3545' }}
-                  disabled={procesando === l.id}
+                  disabled={procesando === l.id || !motivos[l.id]?.trim()}
                   onClick={() => handleModerar(l.id, 'rechazado')}
                 >
                   Rechazar

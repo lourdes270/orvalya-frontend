@@ -90,6 +90,8 @@ export async function fetchLlamadosPendientes(): Promise<Llamado[]> {
   return (data ?? []) as Llamado[]
 }
 
+export const ERROR_MOTIVO_RECHAZO_REQUERIDO = 'El motivo de rechazo es obligatorio.'
+
 export async function moderarLlamado(
   llamadoId: string,
   estado: Extract<EstadoLlamado, 'activo' | 'rechazado'>,
@@ -98,11 +100,16 @@ export async function moderarLlamado(
   const { data: { user }, error: userError } = await supabase.auth.getUser()
   if (userError || !user) throw new Error('No autenticado')
 
+  const motivo = motivoRechazo?.trim() ?? ''
+  if (estado === 'rechazado' && !motivo) {
+    throw new Error(ERROR_MOTIVO_RECHAZO_REQUERIDO)
+  }
+
   const payload = {
     estado,
     moderado_por: user.id,
     moderado_at: new Date().toISOString(),
-    motivo_rechazo: estado === 'rechazado' ? (motivoRechazo?.trim() || 'Sin motivo especificado') : null,
+    motivo_rechazo: estado === 'rechazado' ? motivo : null,
   }
 
   const { data, error } = await supabase

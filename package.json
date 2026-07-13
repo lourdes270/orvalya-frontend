@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report playwright-report"
+    "test:e2e:report": "playwright show-report playwright-report",
+    "cleanup:e2e-llamados": "tsx scripts/cleanup-e2e-llamados.mts"
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^2.0.2",

@@ -126,3 +126,76 @@ export async function ensureContratanteWithRut(rut: string): Promise<void> {
   })
   if (insertError) throw insertError
 }
+
+export const E2E_MODERACION_CONTRATANTE_EMAIL = 'moderacion-fixture@e2e.orvalya.test'
+
+/** Contratante dedicado para tests de moderación (no usa cuentas reales). */
+export async function ensureE2EModeracionContratante(): Promise<string> {
+  const admin = getAdminClient()
+  const email = E2E_MODERACION_CONTRATANTE_EMAIL
+
+  let user = await findUserByEmail(email)
+  if (!user) {
+    const { data: created, error: createError } = await admin.auth.admin.createUser({
+      email,
+      password: TEST_PASSWORD,
+      email_confirm: true,
+    })
+    if (createError) throw createError
+    user = created.user
+    await new Promise(resolve => setTimeout(resolve, 1500))
+  }
+
+  const userId = user.id
+  await admin.from('perfiles').update({ tipo: 'contratante', email }).eq('id', userId)
+
+  const { data: contratante } = await admin
+    .from('contratantes')
+    .select('id')
+    .eq('id', userId)
+    .maybeSingle()
+
+  if (!contratante?.id) {
+    const rut = `9999${String(Date.now()).slice(-8)}`
+    const { error: insertError } = await admin.from('contratantes').insert({
+      id: userId,
+      nombre_empresa: 'Fixture E2E Moderación',
+      rut,
+      tipo_contratante: 'empresa',
+      rubro_principal: 'limpieza',
+      zona: 'Montevideo',
+      email,
+      telefono: '099000111',
+    })
+    if (insertError) throw insertError
+  }
+
+  return userId
+}
+
+export async function deleteLlamadoByTitulo(titulo: string): Promise<void> {
+  const admin = getAdminClient()
+  const { error } = await admin.from('llamados').delete().eq('titulo', titulo)
+  if (error) throw error
+}
+
+export async function deleteLlamadosE2ELegacy(): Promise<number> {
+  const admin = getAdminClient()
+  let total = 0
+
+  for (const patron of ['E2E Moderación%', 'E2E Llamado%']) {
+    const { data: rows, error: selectError } = await admin
+      .from('llamados')
+      .select('id')
+      .like('titulo', patron)
+    if (selectError) throw selectError
+    if (!rows?.length) continue
+
+    const ids = rows.map(r => r.id as string)
+    const { error: deleteError } = await admin.from('llamados').delete().in('id', ids)
+    if (deleteError) throw deleteError
+    total += ids.length
+  }
+
+  return total
+}
