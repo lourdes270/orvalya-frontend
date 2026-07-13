@@ -79,6 +79,43 @@ export async function crearLlamado(
   return data as Llamado
 }
 
+export function llamadoEsEditable(estado: EstadoLlamado): boolean {
+  return estado !== 'cerrado'
+}
+
+export function llamadoToForm(llamado: Llamado): LlamadoForm {
+  return {
+    titulo: llamado.titulo,
+    descripcion: llamado.descripcion,
+    rubro: llamado.rubro,
+    zona: llamado.zona,
+    expires_at: llamado.expires_at ? llamado.expires_at.slice(0, 10) : '',
+  }
+}
+
+export async function actualizarLlamado(
+  llamadoId: string,
+  form: LlamadoForm,
+): Promise<Llamado> {
+  const payload = {
+    titulo: sanitizeText(form.titulo),
+    descripcion: sanitizeText(form.descripcion),
+    rubro: form.rubro,
+    zona: form.zona,
+    expires_at: form.expires_at.trim() ? new Date(form.expires_at).toISOString() : null,
+  }
+
+  const { data, error } = await supabase
+    .from('llamados')
+    .update(payload)
+    .eq('id', llamadoId)
+    .select('*')
+    .single()
+
+  if (error) throw error
+  return data as Llamado
+}
+
 export async function fetchLlamadosPendientes(): Promise<Llamado[]> {
   const { data, error } = await supabase
     .from('llamados')

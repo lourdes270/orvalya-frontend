@@ -113,4 +113,18 @@ test.describe.serial('Contratante — flujo completo', () => {
     await expect(page.getByText('Pendiente de moderación')).toBeVisible()
     await expect(page.getByText(llamadoTitulo)).toBeVisible()
   })
+
+  test('editar llamado propio', async ({ page }) => {
+    await loginWithEmail(page, email, password)
+    await expect(page).toHaveURL(/\/dashboard/)
+
+    const tituloEditado = `${llamadoTitulo} (editado)`
+    const card = page.locator('article').filter({ hasText: llamadoTitulo })
+    await card.getByRole('button', { name: 'Editar' }).click()
+    await card.getByPlaceholder('Ej: Limpieza de oficinas en Carrasco').fill(tituloEditado)
+    await card.getByRole('button', { name: 'Guardar cambios' }).click()
+
+    await expect(page.getByText('Cambios guardados.')).toBeVisible()
+    await expect(page.getByText(tituloEditado)).toBeVisible()
+  })
 })

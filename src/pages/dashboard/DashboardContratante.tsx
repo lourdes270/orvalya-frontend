@@ -4,9 +4,12 @@ import { useAuth } from '../../contexts/useAuth'
 import { esAdminPlataforma } from '../../lib/adminHelpers'
 import { useContratanteProfile } from '../../hooks/useContratanteProfile'
 import {
+  actualizarLlamado,
   crearLlamado,
   fetchMisLlamados,
   labelEstadoLlamado,
+  llamadoEsEditable,
+  llamadoToForm,
 } from '../../lib/contratanteHelpers'
 import { esLlamadoDePrueba } from '../../lib/llamadosE2E'
 import type { Llamado, LlamadoForm } from '../../types/contratante'
@@ -16,6 +19,7 @@ import { statsGridStyle } from './dashboardLayout'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import {
   btnPrimary,
+  btnOutline,
   cardStyle,
   inputStyle,
   labelStyle,
@@ -44,6 +48,11 @@ export default function DashboardContratante() {
   const [errores, setErrores] = useState<Record<string, string>>({})
   const [publicando, setPublicando] = useState(false)
   const [mensaje, setMensaje] = useState('')
+  const [editandoId, setEditandoId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState<LlamadoForm>(emptyLlamado)
+  const [editErrores, setEditErrores] = useState<Record<string, string>>({})
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false)
+  const [mensajeEdicion, setMensajeEdicion] = useState('')
 
   useEffect(() => {
     if (!perfilCompleto || !contratante) return
@@ -76,19 +85,61 @@ export default function DashboardContratante() {
   const activos = llamadosVisibles.filter(l => l.estado === 'activo').length
   const pendientes = llamadosVisibles.filter(l => l.estado === 'pendiente_moderacion').length
 
-  const validarLlamado = () => {
+  const validarLlamado = (data: LlamadoForm) => {
     const e: Record<string, string> = {}
-    if (!form.titulo.trim()) e.titulo = 'El título es obligatorio.'
-    if (!form.descripcion.trim()) e.descripcion = 'La descripción es obligatoria.'
-    if (!form.rubro) e.rubro = 'Elegí un rubro.'
-    if (!form.zona) e.zona = 'Elegí una zona.'
+    if (!data.titulo.trim()) e.titulo = 'El título es obligatorio.'
+    if (!data.descripcion.trim()) e.descripcion = 'La descripción es obligatoria.'
+    if (!data.rubro) e.rubro = 'Elegí un rubro.'
+    if (!data.zona) e.zona = 'Elegí una zona.'
     return e
+  }
+
+  const iniciarEdicion = (llamado: Llamado) => {
+    setEditandoId(llamado.id)
+    setEditForm(llamadoToForm(llamado))
+    setEditErrores({})
+    setMensajeEdicion('')
+  }
+
+  const cancelarEdicion = () => {
+    setEditandoId(null)
+    setEditForm(emptyLlamado)
+    setEditErrores({})
+    setMensajeEdicion('')
+  }
+
+  const handleGuardarEdicion = async (ev: React.FormEvent, llamado: Llamado) => {
+    ev.preventDefault()
+    const e = validarLlamado(editForm)
+    if (Object.keys(e).length > 0) {
+      setEditErrores(e)
+      return
+    }
+
+    setEditErrores({})
+    setMensajeEdicion('')
+    setGuardandoEdicion(true)
+    try {
+      const actualizado = await actualizarLlamado(llamado.id, editForm)
+      setLlamados(prev => prev.map(l => (l.id === actualizado.id ? actualizado : l)))
+      cancelarEdicion()
+      setMensaje(
+        llamado.estado === 'rechazado'
+          ? 'Cambios guardados. El llamado volvió a moderación.'
+          : 'Cambios guardados.',
+      )
+    } catch (err) {
+      console.error(err)
+      setMensajeEdicion('No pudimos guardar los cambios. Intentá de nuevo.')
+    } finally {
+      setGuardandoEdicion(false)
+    }
   }
 
   const handlePublicar = async (ev: React.FormEvent) => {
     ev.preventDefault()
     if (!contratante) return
-    const e = validarLlamado()
+    const e = validarLlamado(form)
     if (Object.keys(e).length > 0) {
       setErrores(e)
       return
@@ -158,21 +209,11 @@ export default function DashboardContratante() {
           Publicar un llamado
         </h2>
         <form onSubmit={handlePublicar}>
-          <Campo label="Título" value={form.titulo} onChange={v => setForm(f => ({ ...f, titulo: v }))} error={errores.titulo} placeholder="Ej: Limpieza de oficinas en Carrasco" />
-          <div style={{ marginBottom: '16px' }}>
-            <label style={labelStyle}>Descripción</label>
-            <textarea
-              value={form.descripcion}
-              onChange={e => setForm(f => ({ ...f, descripcion: e.target.value }))}
-              rows={4}
-              placeholder="Detalle del trabajo, frecuencia, requisitos..."
-              style={{ ...inputStyle, resize: 'vertical' }}
-            />
-            {errores.descripcion && <p style={{ color: '#dc3545', fontSize: '13px', margin: '6px 0 0' }}>{errores.descripcion}</p>}
-          </div>
-          <SelectCampo label="Rubro" value={form.rubro} onChange={v => setForm(f => ({ ...f, rubro: v }))} error={errores.rubro} options={RUBROS.map(r => ({ value: r.id, label: r.label }))} />
-          <SelectCampo label="Zona" value={form.zona} onChange={v => setForm(f => ({ ...f, zona: v }))} error={errores.zona} options={DEPARTAMENTOS.map(d => ({ value: d, label: d }))} />
-          <Campo label="Vencimiento (opcional)" type="date" value={form.expires_at} onChange={v => setForm(f => ({ ...f, expires_at: v }))} />
+          <LlamadoFormFields
+            form={form}
+            errores={errores}
+            onChange={setForm}
+          />
           {mensaje && <p style={{ margin: '0 0 12px', fontSize: '14px', color: mensaje.includes('No') ? '#dc3545' : TEAL }}>{mensaje}</p>}
           <button type="submit" style={btnPrimary} disabled={publicando}>
             {publicando ? 'Publicando...' : 'Publicar llamado'}
@@ -194,18 +235,62 @@ export default function DashboardContratante() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {llamadosVisibles.map(l => (
               <article key={l.id} style={{ padding: '16px', border: '1px solid #E9ECEF', borderRadius: '10px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                  <h3 style={{ margin: 0, fontSize: '15px', color: NAVY }}>{l.titulo}</h3>
-                  <EstadoBadge estado={l.estado} />
-                </div>
-                <p style={{ margin: '0 0 8px', fontSize: '14px', color: MUTED, lineHeight: 1.5 }}>{l.descripcion}</p>
-                <p style={{ margin: 0, fontSize: '12px', color: '#ADB5BD' }}>
-                  {l.rubro} · {l.zona} · {new Date(l.created_at).toLocaleDateString('es-UY')}
-                </p>
-                {l.estado === 'rechazado' && l.motivo_rechazo && (
-                  <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#dc3545' }}>
-                    Motivo: {l.motivo_rechazo}
-                  </p>
+                {editandoId === l.id ? (
+                  <form onSubmit={ev => handleGuardarEdicion(ev, l)}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                      <h3 style={{ margin: 0, fontSize: '15px', color: NAVY }}>Editar llamado</h3>
+                      <EstadoBadge estado={l.estado} />
+                    </div>
+                    <LlamadoFormFields
+                      form={editForm}
+                      errores={editErrores}
+                      onChange={setEditForm}
+                    />
+                    {l.estado === 'rechazado' && (
+                      <p style={{ margin: '0 0 12px', fontSize: '13px', color: MUTED, lineHeight: 1.5 }}>
+                        Al guardar, el llamado volverá a moderación para una nueva revisión.
+                      </p>
+                    )}
+                    {mensajeEdicion && (
+                      <p style={{ margin: '0 0 12px', fontSize: '14px', color: '#dc3545' }}>{mensajeEdicion}</p>
+                    )}
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                      <button type="submit" style={btnPrimary} disabled={guardandoEdicion}>
+                        {guardandoEdicion ? 'Guardando...' : 'Guardar cambios'}
+                      </button>
+                      <button type="button" style={btnOutline} onClick={cancelarEdicion} disabled={guardandoEdicion}>
+                        Cancelar
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                      <h3 style={{ margin: 0, fontSize: '15px', color: NAVY }}>{l.titulo}</h3>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <EstadoBadge estado={l.estado} />
+                        {llamadoEsEditable(l.estado) && (
+                          <button
+                            type="button"
+                            style={btnOutline}
+                            onClick={() => iniciarEdicion(l)}
+                            disabled={editandoId !== null}
+                          >
+                            Editar
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p style={{ margin: '0 0 8px', fontSize: '14px', color: MUTED, lineHeight: 1.5 }}>{l.descripcion}</p>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#ADB5BD' }}>
+                      {l.rubro} · {l.zona} · {new Date(l.created_at).toLocaleDateString('es-UY')}
+                    </p>
+                    {l.estado === 'rechazado' && l.motivo_rechazo && (
+                      <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#dc3545' }}>
+                        Motivo: {l.motivo_rechazo}
+                      </p>
+                    )}
+                  </>
                 )}
               </article>
             ))}
@@ -238,6 +323,59 @@ function EstadoBadge({ estado }: { estado: Llamado['estado'] }) {
     <span style={{ fontSize: '12px', fontWeight: 600, padding: '4px 10px', borderRadius: '999px', background: c.bg, color: c.color }}>
       {labelEstadoLlamado(estado)}
     </span>
+  )
+}
+
+function LlamadoFormFields({
+  form,
+  errores,
+  onChange,
+}: {
+  form: LlamadoForm
+  errores: Record<string, string>
+  onChange: (next: LlamadoForm) => void
+}) {
+  return (
+    <>
+      <Campo
+        label="Título"
+        value={form.titulo}
+        onChange={v => onChange({ ...form, titulo: v })}
+        error={errores.titulo}
+        placeholder="Ej: Limpieza de oficinas en Carrasco"
+      />
+      <div style={{ marginBottom: '16px' }}>
+        <label style={labelStyle}>Descripción</label>
+        <textarea
+          value={form.descripcion}
+          onChange={e => onChange({ ...form, descripcion: e.target.value })}
+          rows={4}
+          placeholder="Detalle del trabajo, frecuencia, requisitos..."
+          style={{ ...inputStyle, resize: 'vertical' }}
+        />
+        {errores.descripcion && <p style={{ color: '#dc3545', fontSize: '13px', margin: '6px 0 0' }}>{errores.descripcion}</p>}
+      </div>
+      <SelectCampo
+        label="Rubro"
+        value={form.rubro}
+        onChange={v => onChange({ ...form, rubro: v })}
+        error={errores.rubro}
+        options={RUBROS.map(r => ({ value: r.id, label: r.label }))}
+      />
+      <SelectCampo
+        label="Zona"
+        value={form.zona}
+        onChange={v => onChange({ ...form, zona: v })}
+        error={errores.zona}
+        options={DEPARTAMENTOS.map(d => ({ value: d, label: d }))}
+      />
+      <Campo
+        label="Vencimiento (opcional)"
+        type="date"
+        value={form.expires_at}
+        onChange={v => onChange({ ...form, expires_at: v })}
+      />
+    </>
   )
 }
 
