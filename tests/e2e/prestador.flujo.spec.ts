@@ -44,24 +44,33 @@ test.describe.serial('Prestador — flujo completo', () => {
     await loginWithEmail(page, email, password)
     await page.getByRole('button', { name: /Documentos/i }).click()
 
-    await page.locator('input[type="file"]').first().setInputFiles(VALID_PDF)
+    await expect(page.getByText('Legajo para tercerización')).toBeVisible()
+    await expect(page.getByText('Faltan 3 de 3')).toBeVisible()
+
+    const card = page.locator('article').filter({ hasText: 'Certificado DGI' })
+    await card.locator('input[type="file"]').setInputFiles(VALID_PDF)
 
     const future = new Date()
     future.setFullYear(future.getFullYear() + 1)
-    await page.locator('input[type="date"]').first().fill(future.toISOString().slice(0, 10))
-    await page.getByText('Declaro que este documento es auténtico', { exact: false }).first().click()
-    await page.getByRole('button', { name: 'Subir' }).first().click()
+    await card.locator('input[type="date"]').fill(future.toISOString().slice(0, 10))
+    await card.getByText('Declaro que este documento es auténtico', { exact: false }).click()
+    await card.getByRole('button', { name: 'Guardar documento' }).click()
 
-    await expect(page.getByText('v1 vigente').first()).toBeVisible({ timeout: 30_000 })
+    await expect(card.getByText('Al día')).toBeVisible({ timeout: 30_000 })
+    await expect(card.getByText(/v1/)).toBeVisible()
   })
 
   test('rechaza archivo inválido (exe)', async ({ page }) => {
     await loginWithEmail(page, email, password)
     await page.getByRole('button', { name: /Documentos/i }).click()
 
-    const fileInputs = page.locator('input[type="file"]')
-    const index = (await fileInputs.count()) > 1 ? 1 : 0
-    await fileInputs.nth(index).setInputFiles(INVALID_EXE)
+    const card = page.locator('article').filter({ hasText: 'Certificado BPS' })
+    // Si ya estaba cerrado (por upload previo), abrir
+    const cargar = card.getByRole('button', { name: 'Cargar' })
+    if (await cargar.isVisible().catch(() => false)) {
+      await cargar.click()
+    }
+    await card.locator('input[type="file"]').setInputFiles(INVALID_EXE)
 
     await expect(page.getByText(UPLOAD_REJECTION_MESSAGE)).toBeVisible()
   })

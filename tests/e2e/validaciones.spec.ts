@@ -101,16 +101,20 @@ test.describe.serial('Validaciones de formularios', () => {
   test('archivo mayor a 5MB rechazado', async ({ page }) => {
     await loginWithEmail(page, prestadorEmail, password)
     await page.getByRole('button', { name: /Documentos/i }).click()
-    await page.locator('input[type="file"]').first().setInputFiles(OVERSIZE_PDF)
+    const card = page.locator('article').filter({ hasText: 'Certificado DGI' })
+    const cargar = card.getByRole('button', { name: /Cargar|Actualizar/ })
+    if (await cargar.isVisible().catch(() => false)) await cargar.click()
+    await card.locator('input[type="file"]').setInputFiles(OVERSIZE_PDF)
     await expect(page.getByText(UPLOAD_REJECTION_MESSAGE)).toBeVisible()
   })
 
   test('archivo tipo incorrecto rechazado', async ({ page }) => {
     await loginWithEmail(page, prestadorEmail, password)
     await page.getByRole('button', { name: /Documentos/i }).click()
-    const fileInputs = page.locator('input[type="file"]')
-    const index = (await fileInputs.count()) > 1 ? 1 : 0
-    await fileInputs.nth(index).setInputFiles(INVALID_EXE)
+    const card = page.locator('article').filter({ hasText: 'Certificado BPS' })
+    const cargar = card.getByRole('button', { name: /Cargar|Actualizar/ })
+    if (await cargar.isVisible().catch(() => false)) await cargar.click()
+    await card.locator('input[type="file"]').setInputFiles(INVALID_EXE)
     await expect(page.getByText(UPLOAD_REJECTION_MESSAGE)).toBeVisible()
   })
 
