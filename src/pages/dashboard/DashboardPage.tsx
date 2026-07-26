@@ -1,17 +1,25 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { useNavigate, Navigate } from 'react-router-dom'
 import { X } from '@phosphor-icons/react'
 import { useAuth } from '../../contexts/useAuth'
 import type { Perfil } from '../../contexts/AuthContextType'
 import { supabase } from '../../lib/supabase'
+import {
+  resumenDocumentos,
+  semaforoDesdeResumen,
+  type ResumenDocumentos,
+} from '../../lib/documentoVencimiento'
+import { colorSemaforo, labelSemaforo } from '../../lib/semaforo'
+import type { SemaforoEstado } from '../../types/prestadorPublico'
 import DocumentosPrestador from './documentos/DocumentosPrestador'
+import { DOCUMENTOS_CONFIG } from './documentos/documentosConfig'
+import { fetchVigenteDocuments } from './documentos/uploadDocument'
 import PerfilPrestador from './PerfilPrestador'
 import PerfilPublicoCard from './PerfilPublicoCard'
 import AvatarIncentiveCard from './AvatarIncentiveCard'
 import DashboardContratante from './DashboardContratante'
 import CuentaSeguridadPanel from './CuentaSeguridadPanel'
 import { useContratanteProfile } from '../../hooks/useContratanteProfile'
-import { Navigate } from 'react-router-dom'
 import { DISCLAIMER_PLATAFORMA } from '../legal/legalCopy'
 
 export { formatZonaDisplay } from './formatZona'
@@ -153,26 +161,37 @@ export default function DashboardPage() {
 
 function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerfilUpdate: (p: Perfil) => void }) {
   const [tabActiva, setTabActiva] = useState<'perfil' | 'documentos' | 'cuenta'>('perfil')
-  const [semaforo, setSemaforo] = useState<string>('rojo')
+  const [semaforo, setSemaforo] = useState<SemaforoEstado>('rojo')
   const [docsCount, setDocsCount] = useState(0)
+  const [resumenDocs, setResumenDocs] = useState<ResumenDocumentos | null>(null)
   const [generandoPdf, setGenerandoPdf] = useState(false)
 
-  useEffect(() => {
-    const loadData = async () => {
-      const { count, error } = await supabase
-        .from('documentos').select('*', { count: 'exact', head: true })
-        .eq('prestador_id', perfil.id)
-        .eq('estado', 'vigente')
-      if (error) console.error('Error semaforo:', error)
-      const total = count ?? 0
-      setDocsCount(total)
-      setSemaforo(total >= 3 ? 'verde' : total >= 1 ? 'amarillo' : 'rojo')
-    }
-    loadData().catch(console.error)
-  }, [perfil.id])
+  const aplicarResumen = useCallback((resumen: ResumenDocumentos, nextSemaforo: SemaforoEstado) => {
+    setResumenDocs(resumen)
+    setDocsCount(resumen.cargados)
+    setSemaforo(nextSemaforo)
+  }, [])
 
-  const semaforoIcon = semaforo === 'verde' ? '🟢' : semaforo === 'amarillo' ? '🟡' : '🔴'
-  const semaforoLabel = semaforo === 'verde' ? 'Completo' : semaforo === 'amarillo' ? 'En progreso' : 'Incompleto'
+  useEffect(() => {
+    fetchVigenteDocuments(perfil.id).then(({ data, error }) => {
+      if (error) {
+        console.error('Error semaforo:', error)
+        return
+      }
+      const byKey = new Map(
+        (data ?? []).map(row => [row.tipo_documento ?? row.nombre, row.fecha_vencimiento]),
+      )
+      const items = DOCUMENTOS_CONFIG.map(d => ({
+        subido: byKey.has(d.key),
+        fechaVencimiento: byKey.get(d.key) ?? null,
+      }))
+      const resumen = resumenDocumentos(items, DOCUMENTOS_CONFIG.length)
+      aplicarResumen(resumen, semaforoDesdeResumen(resumen))
+    }).catch(console.error)
+  }, [perfil.id, aplicarResumen])
+
+  const semaforoLabel = labelSemaforo(semaforo)
+  const semaforoColor = colorSemaforo(semaforo)
 
   const handleDescargarPdf = async () => {
     setGenerandoPdf(true)
@@ -240,7 +259,6 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
       {/* TAB: DOCUMENTOS */}
       {tabActiva === 'documentos' && (
         <div style={{ background: '#fff', borderRadius: '0 0 12px 12px', padding: '20px 16px' }}>
-          {/* Semáforo — informativo, no agresivo */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -251,18 +269,32 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
             borderRadius: '8px',
             marginBottom: '16px',
           }}>
-            <span style={{ fontSize: '24px' }}>{semaforoIcon}</span>
+            <span
+              aria-hidden
+              style={{
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+                background: semaforoColor,
+                flexShrink: 0,
+              }}
+            />
             <div>
               <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#1F3864' }}>
                 Documentación: {semaforoLabel}
               </p>
               <p style={{ margin: '2px 0 0', fontSize: '12px', color: '#8C96A3' }}>
-                {docsCount} de 3 certificados cargados
+                {docsCount} de 3 certificados
+                {resumenDocs && resumenDocs.vencidos > 0
+                  ? ` · ${resumenDocs.vencidos} vencido${resumenDocs.vencidos === 1 ? '' : 's'}`
+                  : resumenDocs && resumenDocs.porVencer > 0
+                    ? ` · ${resumenDocs.porVencer} por vencer`
+                    : ''}
               </p>
             </div>
           </div>
 
-          <DocumentosPrestador perfil={perfil} />
+          <DocumentosPrestador perfil={perfil} onResumenChange={aplicarResumen} />
 
           <p style={{ margin: '16px 0 0', fontSize: '11px', color: '#ADB5BD', lineHeight: 1.5 }}>
             {DISCLAIMER_PLATAFORMA}

@@ -6,6 +6,8 @@ export type DocEstado = {
   error: string
   declaracionAceptada: boolean
   versionActual: number | null
+  /** Fecha de vencimiento ya guardada en BD (para avisos). */
+  fechaVencimientoGuardada: string | null
 }
 
 export type DocumentoRow = {
@@ -26,6 +28,7 @@ export function emptyDocEstado(): DocEstado {
     error: '',
     declaracionAceptada: false,
     versionActual: null,
+    fechaVencimientoGuardada: null,
   }
 }
 
