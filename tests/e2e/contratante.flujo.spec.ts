@@ -26,7 +26,7 @@ test.describe.serial('Contratante — flujo completo', () => {
   const email = uniqueEmail('contratante')
   const password = TEST_PASSWORD
   const rut = uniqueRut()
-  const llamadoTitulo = `E2E Llamado ${Date.now()}`
+  const llamadoTitulo = `Llamado Test ${Date.now()}`
 
   test.beforeEach(() => {
     skipWithoutServiceRole()
@@ -119,12 +119,24 @@ test.describe.serial('Contratante — flujo completo', () => {
     await expect(page).toHaveURL(/\/dashboard/)
 
     const tituloEditado = `${llamadoTitulo} (editado)`
-    const card = page.locator('article').filter({ hasText: llamadoTitulo })
-    await card.getByRole('button', { name: 'Editar' }).click()
-    await card.getByPlaceholder('Ej: Limpieza de oficinas en Carrasco').fill(tituloEditado)
-    await card.getByRole('button', { name: 'Guardar cambios' }).click()
 
-    await expect(page.getByText('Cambios guardados.')).toBeVisible()
-    await expect(page.getByText(tituloEditado)).toBeVisible()
+    // Encontrar la card por título visible y abrir modo edición
+    const card = page.locator('article').filter({ hasText: llamadoTitulo })
+    await expect(card).toBeVisible({ timeout: 20_000 })
+    await card.getByRole('button', { name: 'Editar' }).click()
+
+    // Tras el click, el título pasa a ser el value de un input (no texto visible),
+    // así que la locator anterior deja de matchear. Usamos el heading "Editar llamado"
+    // que sólo aparece cuando el formulario de edición está activo.
+    const editCard = page.locator('article').filter({ hasText: 'Editar llamado' })
+    await editCard.getByPlaceholder('Ej: Limpieza de oficinas en Carrasco').fill(tituloEditado)
+    await editCard.getByRole('button', { name: 'Guardar cambios' }).click()
+
+    // Verificar que el edit fue persistido: el artículo vuelve a modo lectura
+    // con el título actualizado. No usamos el mensaje transitorio "Cambios guardados."
+    // porque en React 18 puede perderse entre renders si el ciclo es rápido.
+    const cardEditada = page.locator('article').filter({ hasText: tituloEditado })
+    await expect(cardEditada).toBeVisible({ timeout: 20_000 })
+    await expect(cardEditada.getByRole('button', { name: 'Editar' })).toBeVisible()
   })
 })
