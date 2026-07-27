@@ -1,7 +1,14 @@
 import type { Icon } from '@phosphor-icons/react'
+import {
+  ArrowsClockwise,
+  CloudCheck,
+  GlobeHemisphereWest,
+  Scales,
+  Wrench,
+} from '@phosphor-icons/react'
 import { useIsMobile } from '../../hooks/useIsMobile'
 import { revealStyle, useScrollReveal } from '../../hooks/useScrollReveal'
-import { POR_QUE_ORVALYA } from './landingContent'
+import { POR_QUE_ORVALYA, type IconoPorQue } from './landingContent'
 import {
   NAVY,
   TEAL,
@@ -10,6 +17,14 @@ import {
   iconBoxLargeStyle,
   sectionTitleStyle,
 } from './landingStyles'
+
+const ICONOS: Record<IconoPorQue, Icon> = {
+  nube: CloudCheck,
+  herramienta: Wrench,
+  balanza: Scales,
+  actualizar: ArrowsClockwise,
+  globo: GlobeHemisphereWest,
+}
 
 function BenefitCard({
   icon: IconComponent,
@@ -68,7 +83,9 @@ export default function PorQueOrvalyaGrid() {
         {POR_QUE_ORVALYA.map((item, i) => (
           <BenefitCard
             key={item.title}
-            {...item}
+            icon={ICONOS[item.iconKey]}
+            title={item.title}
+            text={item.text}
             visible={visible}
             staggerMs={i * 90}
           />

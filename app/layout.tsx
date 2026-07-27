@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { OG_IMAGE_DEFAULT, SITE_NAME, SITE_URL } from '../src/lib/seo'
 import '../src/index.css'
 import './publico.css'
+import './landing.css'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

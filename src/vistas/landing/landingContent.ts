@@ -1,41 +1,44 @@
-import type { Icon } from '@phosphor-icons/react'
-import {
-  ArrowsClockwise,
-  CloudCheck,
-  GlobeHemisphereWest,
-  Scales,
-  Wrench,
-} from '@phosphor-icons/react'
-
 export const QUIENES_SOMOS_TEXT =
   'Orvalya nace de más de una década de experiencia directa en el sector de servicios en Uruguay. Vimos de cerca lo que significa para un prestador independiente perder una oportunidad por no tener un papel a mano, y para una empresa asumir un riesgo legal por no saber con quién está trabajando. Construimos la plataforma que resuelve eso — simple y pensada para la realidad uruguaya.'
 
 export const VISION_TEXT =
   'Que cada prestador de servicios en Uruguay pueda demostrar su cumplimiento legal con un clic, y que cada empresa pueda contratar con la documentación a la vista. Sin trámites, sin intermediarios, sin sorpresas.'
 
-export const POR_QUE_ORVALYA: { icon: Icon; title: string; text: string }[] = [
+/**
+ * Sin componentes de icono acá: este módulo lo consumen también las páginas
+ * server-rendered de app/, y @phosphor-icons/react es solo de cliente.
+ * El icono se resuelve por clave en PorQueOrvalyaGrid.
+ */
+export type IconoPorQue =
+  | 'nube'
+  | 'herramienta'
+  | 'balanza'
+  | 'actualizar'
+  | 'globo'
+
+export const POR_QUE_ORVALYA: { iconKey: IconoPorQue; title: string; text: string }[] = [
   {
-    icon: CloudCheck,
+    iconKey: 'nube',
     title: 'Todo en un solo lugar',
     text: 'Legajos, certificados y vencimientos sin planillas sueltas',
   },
   {
-    icon: Wrench,
+    iconKey: 'herramienta',
     title: 'Diseñado para el prestador real',
     text: 'No solo para grandes corporaciones',
   },
   {
-    icon: Scales,
+    iconKey: 'balanza',
     title: 'Alineado con la Ley 18.099 y 18.251',
     text: 'Desde el primer día',
   },
   {
-    icon: ArrowsClockwise,
+    iconKey: 'actualizar',
     title: 'Tus documentos, siempre actualizados',
     text: 'Listos para mostrar cuando te buscan',
   },
   {
-    icon: GlobeHemisphereWest,
+    iconKey: 'globo',
     title: 'Plataforma 100% uruguaya',
     text: 'Pensada para nuestra realidad',
   },

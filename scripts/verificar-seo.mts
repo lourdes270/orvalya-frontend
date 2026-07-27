@@ -8,6 +8,11 @@ const BASE = process.env.BASE_URL ?? 'http://localhost:3000'
 type Chequeo = { url: string; etiqueta: string }
 
 const RUTAS: Chequeo[] = [
+  { url: '/', etiqueta: 'Portada' },
+  { url: '/quienes-somos', etiqueta: 'Quiénes somos' },
+  { url: '/como-funciona', etiqueta: 'Cómo funciona' },
+  { url: '/terminos', etiqueta: 'Términos' },
+  { url: '/privacidad', etiqueta: 'Privacidad' },
   { url: '/prestadores', etiqueta: 'Listado prestadores' },
   { url: '/prestadores/rubro/limpieza', etiqueta: 'Prestadores por rubro' },
   { url: '/prestadores/rubro/limpieza/montevideo', etiqueta: 'Rubro + zona' },
