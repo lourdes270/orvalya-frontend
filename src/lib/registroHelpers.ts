@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 import type { User } from '@supabase/supabase-js'
 import type { Perfil } from '../contexts/AuthContextType'
-import type { OnboardingForm, SeleccionCategorias, EstadoFiscal } from '../pages/onboarding/types'
+import type { OnboardingForm, SeleccionCategorias, EstadoFiscal } from '../vistas/onboarding/types'
 import { esIntentoRegistroContratante, limpiarRegistroContratante, capturarRegistroDesdeUrl } from './registroConstants'
 import { normalizarTelefono, validarTelefono } from './validaciones'
 import { hasCurrentLegalAcceptance } from './legalAcceptance'

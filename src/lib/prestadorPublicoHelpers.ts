@@ -1,9 +1,13 @@
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { supabase } from './supabase'
-import { getRubroLabel } from '../pages/onboarding/data/rubros'
+import { getRubroLabel } from '../vistas/onboarding/data/rubros'
 import type { PrestadorPublico } from '../types/prestadorPublico'
 
-export async function fetchPrestadorPublico(id: string): Promise<PrestadorPublico | null> {
-  const { data, error } = await supabase.rpc('fetch_prestador_publico', { p_id: id })
+export async function fetchPrestadorPublico(
+  id: string,
+  client: SupabaseClient = supabase,
+): Promise<PrestadorPublico | null> {
+  const { data, error } = await client.rpc('fetch_prestador_publico', { p_id: id })
   if (error) {
     if (error.message?.includes('rate_limit_exceeded')) {
       throw new Error('Demasiadas solicitudes. Intentá de nuevo en unos minutos.')
@@ -21,9 +25,8 @@ export function categoriaPrincipal(descripcion: string | null | undefined): stri
     const parsed = JSON.parse(descripcion) as Record<string, string[]>
     if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
       const firstKey = Object.keys(parsed)[0]
-      if (firstKey) {
-        if (firstKey) return getRubroLabel(firstKey)
-      }
+      // Si es JSON válido pero sin rubros, no caer al parseo legacy: mostraría el JSON crudo.
+      return firstKey ? getRubroLabel(firstKey) : 'servicios'
     }
   } catch {
     // texto plano legacy

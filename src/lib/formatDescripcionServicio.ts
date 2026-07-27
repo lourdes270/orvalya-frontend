@@ -1,4 +1,4 @@
-import { RUBROS } from '../pages/onboarding/data/rubros'
+import { RUBROS } from '../vistas/onboarding/data/rubros'
 
 const rubroMap = new Map(RUBROS.map(r => [r.id, r]))
 const subrubroMap = new Map(
@@ -20,9 +20,10 @@ export function formatDescripcionServicio(raw: string | null | undefined): strin
     const parsed = JSON.parse(raw) as Record<string, string[]>
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return raw
     const parts = Object.entries(parsed)
-      .filter(([, subs]) => Array.isArray(subs) && subs.length > 0)
+      .filter(([, subs]) => Array.isArray(subs))
       .map(([rubroId, subs]) => formatSegment(rubroId, subs))
-    return parts.length > 0 ? parts.join(' · ') : raw
+    // Un perfil sin rubros declarados no debe mostrar el JSON vacío como texto.
+    return parts.join(' · ')
   } catch {
     return raw
   }

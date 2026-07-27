@@ -27,7 +27,7 @@ for (const col of ['sobre_mi', 'experiencia', 'cursos', 'documentacion_adicional
 }
 
 console.log('\n=== PerfilPrestador UI ===')
-const perfil = readFileSync(resolve(root, 'src/pages/dashboard/PerfilPrestador.tsx'), 'utf8')
+const perfil = readFileSync(resolve(root, 'src/vistas/dashboard/PerfilPrestador.tsx'), 'utf8')
 assert('sección Presentación profesional', perfil.includes('Presentación profesional'))
 assert('campo Sobre mí', perfil.includes('Sobre mí'))
 assert('campo Mi experiencia', perfil.includes('Mi experiencia'))

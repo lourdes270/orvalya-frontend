@@ -1,4 +1,4 @@
-import privacidadContent from '@/content/legal/privacidad.md?raw'
+import privacidadContent from '@/content/legal/privacidad.gen'
 import { CURRENT_PRIVACY_VERSION } from '@/config/legalVersions'
 import LegalPage from './LegalPage'
 

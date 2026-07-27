@@ -1,4 +1,4 @@
-import terminosContent from '@/content/legal/terminos.md?raw'
+import terminosContent from '@/content/legal/terminos.gen'
 import { CURRENT_TERMS_VERSION } from '@/config/legalVersions'
 import { DISCLAIMER_PLATAFORMA, LEGAL_SUMMARY_BULLETS } from './legalCopy'
 import LegalPage from './LegalPage'

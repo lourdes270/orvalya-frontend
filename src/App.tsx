@@ -1,20 +1,19 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
-import AuthPage from './pages/auth/AuthPage'
-import ResetPasswordPage from './pages/auth/ResetPasswordPage'
-import DashboardPage from './pages/dashboard/DashboardPage'
-import LandingPage from './pages/landing/LandingPage'
-import QuienesSomosPage from './pages/landing/QuienesSomosPage'
-import ComoFuncionaPage from './pages/landing/ComoFuncionaPage'
-import OnboardingPage from './pages/onboarding/OnboardingPage'
-import NotFoundPage from './pages/NotFoundPage'
-import ContratantePerfilPage from './pages/contratante/ContratantePerfilPage'
-import AdminModeracionPage from './pages/admin/AdminModeracionPage'
-import PrestadorPublicoPage from './pages/prestador/PrestadorPublicoPage'
-import ContactoContratante from './pages/contacto/ContactoContratante'
-import LegalAcceptancePage from './pages/legal/LegalAcceptancePage'
-import TerminosPage from './pages/legal/TerminosPage'
-import PrivacidadPage from './pages/legal/PrivacidadPage'
+import AuthPage from './vistas/auth/AuthPage'
+import ResetPasswordPage from './vistas/auth/ResetPasswordPage'
+import DashboardPage from './vistas/dashboard/DashboardPage'
+import LandingPage from './vistas/landing/LandingPage'
+import QuienesSomosPage from './vistas/landing/QuienesSomosPage'
+import ComoFuncionaPage from './vistas/landing/ComoFuncionaPage'
+import OnboardingPage from './vistas/onboarding/OnboardingPage'
+import NotFoundPage from './vistas/NotFoundPage'
+import ContratantePerfilPage from './vistas/contratante/ContratantePerfilPage'
+import AdminModeracionPage from './vistas/admin/AdminModeracionPage'
+import ContactoContratante from './vistas/contacto/ContactoContratante'
+import LegalAcceptancePage from './vistas/legal/LegalAcceptancePage'
+import TerminosPage from './vistas/legal/TerminosPage'
+import PrivacidadPage from './vistas/legal/PrivacidadPage'
 import { ProtectedRoute, PublicRoute, LegalAcceptanceRoute } from './routing/RouteGuards'
 import { DocumentTitle } from './routing/DocumentTitle'
 
@@ -34,7 +33,8 @@ export default function App() {
           <Route path="/terminos" element={<TerminosPage />} />
           <Route path="/privacidad" element={<PrivacidadPage />} />
           <Route path="/aceptar-terminos" element={<LegalAcceptanceRoute><LegalAcceptancePage /></LegalAcceptanceRoute>} />
-          <Route path="/prestadores/:id" element={<PrestadorPublicoPage />} />
+          {/* /prestadores, /prestadores/[slug] y /llamados los sirve Next con render
+              de servidor (ver app/). No van acá o quedarían dos implementaciones. */}
           <Route path="/contratante/perfil" element={<ProtectedRoute><ContratantePerfilPage /></ProtectedRoute>} />
           <Route path="/admin/moderacion" element={<ProtectedRoute><AdminModeracionPage /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />

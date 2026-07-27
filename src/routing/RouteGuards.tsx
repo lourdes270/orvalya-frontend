@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/useAuth'
 import { useLegalGate } from '../hooks/useLegalGate'
-import { getOnboardingResumePath } from '../pages/onboarding/hooks/helpers'
+import { getOnboardingResumePath } from '../vistas/onboarding/hooks/helpers'
 
 function LoadingScreen({ text }: { text: string }) {
   return (
