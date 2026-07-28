@@ -21,7 +21,7 @@ function assert(label: string, condition: boolean, detail = '') {
 }
 
 console.log('\n=== emailRedirectTo en signUp ===')
-const helpers = readFileSync(resolve(root, 'src/pages/onboarding/hooks/helpers.ts'), 'utf8')
+const helpers = readFileSync(resolve(root, 'src/vistas/onboarding/hooks/helpers.ts'), 'utf8')
 const authCtx = readFileSync(resolve(root, 'src/contexts/AuthContext.tsx'), 'utf8')
 const validaciones = readFileSync(resolve(root, 'src/lib/validaciones.ts'), 'utf8')
 
@@ -33,7 +33,7 @@ assert('sin urlRedirectoOnboardingCompletar', !validaciones.includes('urlRedirec
 assert('borrador en metadata se mantiene', helpers.includes('onboarding_borrador'))
 
 console.log('\n=== Panel confirmación email ===')
-const panel = readFileSync(resolve(root, 'src/pages/onboarding/components/ConfirmacionEmailPanel.tsx'), 'utf8')
+const panel = readFileSync(resolve(root, 'src/vistas/onboarding/components/ConfirmacionEmailPanel.tsx'), 'utf8')
 assert('menciona iniciar sesión', panel.includes('iniciar sesión'))
 
 console.log(`\n=== Resultado: ${passed} ok, ${failed} fallos ===\n`)

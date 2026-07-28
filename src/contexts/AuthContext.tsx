@@ -15,7 +15,7 @@ import {
   obtenerMensajeErrorCallbackAuth,
   prepararBorradorParaOAuthOnboarding,
   restaurarBorradorOnboardingSiFalta,
-} from '../pages/onboarding/hooks/helpers'
+} from '../vistas/onboarding/hooks/helpers'
 import { urlRedirectoResetPassword } from '../lib/authHelpers'
 import { capturarRegistroDesdeUrl, metadataRegistroContratante, type RegistroTipo } from '../lib/registroConstants'
 import { activarPerfilContratanteSiCorresponde, obtenerUsuarioAutenticado, resolverFlujoContratante } from '../lib/registroHelpers'

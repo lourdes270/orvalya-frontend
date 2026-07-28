@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import orvalyaLogoUrl from '../assets/orvalya_logo.png'
+
+// Desde public/, así funciona igual en el bundler del cliente y en el render de servidor.
+const orvalyaLogoUrl = '/orvalya_logo.png'
 
 const NAVY = '#0F2D52'
 const TEAL = '#00B4A6'
