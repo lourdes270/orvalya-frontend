@@ -5,40 +5,27 @@ export const VISION_TEXT =
   'Que cada prestador de servicios en Uruguay pueda demostrar su cumplimiento legal con un clic, y que cada empresa pueda contratar con la documentación a la vista. Sin trámites, sin intermediarios, sin sorpresas.'
 
 /**
- * Sin componentes de icono acá: este módulo lo consumen también las páginas
+ * Sin componentes de icono acá: este módulo lo consumen las páginas
  * server-rendered de app/, y @phosphor-icons/react es solo de cliente.
- * El icono se resuelve por clave en PorQueOrvalyaGrid.
  */
-export type IconoPorQue =
-  | 'nube'
-  | 'herramienta'
-  | 'balanza'
-  | 'actualizar'
-  | 'globo'
-
-export const POR_QUE_ORVALYA: { iconKey: IconoPorQue; title: string; text: string }[] = [
+export const POR_QUE_ORVALYA: { title: string; text: string }[] = [
   {
-    iconKey: 'nube',
     title: 'Todo en un solo lugar',
     text: 'Legajos, certificados y vencimientos sin planillas sueltas',
   },
   {
-    iconKey: 'herramienta',
     title: 'Diseñado para el prestador real',
     text: 'No solo para grandes corporaciones',
   },
   {
-    iconKey: 'balanza',
     title: 'Alineado con la Ley 18.099 y 18.251',
     text: 'Desde el primer día',
   },
   {
-    iconKey: 'actualizar',
     title: 'Tus documentos, siempre actualizados',
     text: 'Listos para mostrar cuando te buscan',
   },
   {
-    iconKey: 'globo',
     title: 'Plataforma 100% uruguaya',
     text: 'Pensada para nuestra realidad',
   },
