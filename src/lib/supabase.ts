@@ -5,7 +5,10 @@ const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error(
-    'Faltan VITE_SUPABASE_URL y/o VITE_SUPABASE_ANON_KEY en .env. ' +
+    'Faltan VITE_SUPABASE_URL y/o VITE_SUPABASE_ANON_KEY. ' +
+    'En local van en .env; en Vercel, en Settings > Environment Variables, ' +
+    'habilitadas para Preview y no solo para Production: si no, el build de ' +
+    'los PR falla al prerenderizar /sitemap.xml. ' +
     'next.config.ts las re-expone como NEXT_PUBLIC_*.'
   )
 }
