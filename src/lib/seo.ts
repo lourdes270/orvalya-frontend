@@ -1,7 +1,14 @@
 import { DEPARTAMENTOS } from '../vistas/onboarding/data/zonas'
 import { RUBROS } from '../vistas/onboarding/data/rubros'
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://orvalya.com').replace(/\/$/, '')
+/**
+ * Con www, que es donde sirve Vercel: el ápex redirige 308 hacia acá, así que
+ * declarar el ápex dejaba canonicals, sitemap y og:url apuntando a URLs que
+ * redirigen. El trim() cubre saltos de línea al pegar la variable en el panel.
+ */
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.orvalya.com')
+  .trim()
+  .replace(/\/$/, '')
 export const SITE_NAME = 'Orvalya'
 /** La genera app/opengraph-image.tsx. Se referencia explícita porque cuando una
  *  página define su propio openGraph, Next reemplaza el del layout en vez de fusionarlo. */

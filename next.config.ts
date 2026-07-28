@@ -10,7 +10,7 @@ const publicEnv = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.VITE_SUPABASE_ANON_KEY ?? '',
   NEXT_PUBLIC_HCAPTCHA_SITE_KEY: process.env.VITE_HCAPTCHA_SITE_KEY ?? '',
   NEXT_PUBLIC_FORMSPREE_CONTRATANTE_URL: process.env.VITE_FORMSPREE_CONTRATANTE_URL ?? '',
-  NEXT_PUBLIC_SITE_URL: process.env.SITE_URL ?? 'https://orvalya.com',
+  NEXT_PUBLIC_SITE_URL: process.env.SITE_URL ?? 'https://www.orvalya.com',
 }
 
 const supabaseHost = (() => {
