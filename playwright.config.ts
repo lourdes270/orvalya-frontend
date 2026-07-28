@@ -8,7 +8,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: path.resolve(__dirname, '.env.e2e') })
 dotenv.config({ path: path.resolve(__dirname, '.env') })
 
-const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:5173'
+// 3000 es el puerto de `next dev`. Antes era 5173, el de Vite.
+const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3000'
 const isLocalBase = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(baseURL)
 
 export default defineConfig({
