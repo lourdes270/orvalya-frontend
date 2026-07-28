@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import { X } from '@phosphor-icons/react'
 import { useAuth } from '../../contexts/useAuth'
 import type { Perfil } from '../../contexts/AuthContextType'
 import { supabase } from '../../lib/supabase'
+import { irAPaginaPublica } from '../../lib/navegacionPublica'
 import {
   resumenDocumentos,
   semaforoDesdeResumen,
@@ -71,7 +72,6 @@ function BannerBienvenida({ esContratante, onClose }: { esContratante: boolean; 
 
 export default function DashboardPage() {
   const { user, perfil: perfilGlobal, setPerfil, signOut } = useAuth()
-  const navigate = useNavigate()
   const [perfil, setPerfilLocal] = useState<Perfil | null>(null)
   const [cargandoPerfil, setCargandoPerfil] = useState(true)
   const [bannerCerrado, setBannerCerrado] = useState(false)
@@ -117,7 +117,7 @@ export default function DashboardPage() {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/')
+    irAPaginaPublica('/')
   }
 
   const perfilActivo = perfil ?? perfilGlobal

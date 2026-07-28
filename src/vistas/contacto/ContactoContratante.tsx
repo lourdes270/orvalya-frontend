@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom'
+import { irAPaginaPublica } from '../../lib/navegacionPublica'
 import ContactoForm from './ContactoForm'
 import { NAVY, TEAL } from './contactoStyles'
 
-const FORMSPREE_ENDPOINT = import.meta.env.VITE_FORMSPREE_CONTRATANTE_URL as string
+const FORMSPREE_ENDPOINT = process.env.NEXT_PUBLIC_FORMSPREE_CONTRATANTE_URL as string
 
 export default function ContactoContratante() {
   const navigate = useNavigate()
@@ -22,7 +23,7 @@ export default function ContactoContratante() {
       }}>
         <button
           type="button"
-          onClick={() => navigate('/')}
+          onClick={() => irAPaginaPublica('/')}
           style={{
             fontSize: '22px',
             fontWeight: 700,

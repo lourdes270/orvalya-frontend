@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { esAdminPlataforma } from '../../lib/adminHelpers'
+import { irAPaginaPublica } from '../../lib/navegacionPublica'
 import {
   ERROR_MOTIVO_RECHAZO_REQUERIDO,
   fetchLlamadosPendientes,
@@ -16,7 +17,6 @@ const rubroLabel = (id: string) => getRubroLabel(id)
 
 export default function AdminModeracionPage() {
   const { user, perfil, signOut } = useAuth()
-  const navigate = useNavigate()
   const [llamados, setLlamados] = useState<Llamado[]>([])
   const [loading, setLoading] = useState(true)
   const [procesando, setProcesando] = useState<string | null>(null)
@@ -76,7 +76,7 @@ export default function AdminModeracionPage() {
             <Link to="/dashboard" style={{ ...btnOutline, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
               Dashboard
             </Link>
-            <button type="button" style={btnOutline} onClick={() => signOut().then(() => navigate('/'))}>
+            <button type="button" style={btnOutline} onClick={() => signOut().then(() => irAPaginaPublica('/'))}>
               Cerrar sesión
             </button>
           </div>

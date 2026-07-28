@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { irAPaginaPublica } from '../../lib/navegacionPublica'
 import { useAuth } from '../../contexts/useAuth'
 import { usuarioUsaEmailPassword, usuarioUsaGoogle } from '../../lib/authHelpers'
 import { mensajeErrorAuth, validarContrasena } from '../../lib/validaciones'
@@ -14,7 +14,6 @@ const cardStyle = {
 
 export default function CuentaSeguridadPanel() {
   const { user, updatePassword, resetPasswordForEmail, signOut } = useAuth()
-  const navigate = useNavigate()
   const usaEmail = usuarioUsaEmailPassword(user)
   const usaGoogle = usuarioUsaGoogle(user)
   const [password, setPassword] = useState('')
@@ -69,7 +68,7 @@ export default function CuentaSeguridadPanel() {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/')
+    irAPaginaPublica('/')
   }
 
   if (usaGoogle && !usaEmail) {

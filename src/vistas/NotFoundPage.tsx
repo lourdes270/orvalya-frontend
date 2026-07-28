@@ -1,12 +1,10 @@
-import { useNavigate } from 'react-router-dom'
 import { MapPin } from '@phosphor-icons/react'
+import { irAPaginaPublica } from '../lib/navegacionPublica'
 
 const NAVY = '#0F2D52'
 const TEAL = '#00B4A6'
 
 export default function NotFoundPage() {
-  const navigate = useNavigate()
-
   return (
     <div style={{
       minHeight: '100vh',
@@ -61,7 +59,7 @@ export default function NotFoundPage() {
       </p>
       <button
         type="button"
-        onClick={() => navigate('/')}
+        onClick={() => irAPaginaPublica('/')}
         style={{
           width: '100%',
           maxWidth: '280px',
