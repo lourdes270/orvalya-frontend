@@ -99,21 +99,21 @@ export default function Page() {
             </p>
 
             <div className="lp-roles">
-              <Link className="lp-rol lp-rol--contratante" href="/contacto/contratante">
+              <a className="lp-rol lp-rol--contratante" href="/contacto/contratante">
                 <span className="lp-rol-intencion">Necesito contratar</span>
                 <span className="lp-rol-titulo">Quiero contratar con papeles al día</span>
                 <span className="lp-rol-sub">
                   Certificados y seguimiento de cada prestador, todo en un lugar
                 </span>
-              </Link>
+              </a>
 
-              <Link className="lp-rol lp-rol--prestador" href="/auth">
+              <a className="lp-rol lp-rol--prestador" href="/auth">
                 <span className="lp-rol-intencion">Quiero conseguir trabajo</span>
                 <span className="lp-rol-titulo">Ofrecé tus servicios · Gratis</span>
                 <span className="lp-rol-sub">
                   Limpieza, construcción, jardinería, cuidados y más
                 </span>
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -147,9 +147,9 @@ export default function Page() {
             <p className="lp-cuerpo lp-cuerpo--apagado" style={{ fontSize: 14 }}>
               {PLAN_FEATURES.join(' · ')}
             </p>
-            <Link className="lp-btn lp-btn--teal lp-btn--bloque" href="/contacto/contratante">
+            <a className="lp-btn lp-btn--teal lp-btn--bloque" href="/contacto/contratante">
               Quiero el servicio
-            </Link>
+            </a>
             <p style={{ margin: '14px 0 0', fontSize: 14, lineHeight: 1.5, color: '#4a6078' }}>
               Sin permanencia. Sin tarjeta para empezar.
             </p>
@@ -205,9 +205,9 @@ export default function Page() {
           </ul>
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <Link className="lp-btn lp-btn--teal" href="/auth">
+            <a className="lp-btn lp-btn--teal" href="/auth">
               Quiero registrarme
-            </Link>
+            </a>
             <Link className="lp-btn lp-btn--navy" href="/llamados">
               Ver trabajos abiertos
             </Link>

@@ -37,7 +37,7 @@ function Header() {
           {NAV_LINKS.map(l => (
             <Link key={l.href} href={l.href}>{l.label}</Link>
           ))}
-          <Link className="ov-login" href="/auth">Iniciar sesión</Link>
+          <a className="ov-login" href="/auth">Iniciar sesión</a>
         </nav>
       </div>
     </header>
@@ -76,7 +76,7 @@ function Footer() {
             {NAV_SECUNDARIA.map(l => (
               <Link key={l.href} href={l.href}>{l.label}</Link>
             ))}
-            <Link href="/contacto/contratante">Soy empresa</Link>
+            <a href="/contacto/contratante">Soy empresa</a>
           </div>
         </div>
 

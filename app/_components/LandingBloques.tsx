@@ -8,14 +8,14 @@ export function CierreCta({ conVolver = false }: { conVolver?: boolean }) {
       <div className="lp-cierre-inner">
         <h2>¿Tercerizás? Sacate el papeleo de encima.</h2>
 
-        <Link className="lp-btn lp-btn--teal" href="/contacto/contratante">
+        <a className="lp-btn lp-btn--teal" href="/contacto/contratante">
           Quiero el servicio
-        </Link>
+        </a>
 
         <p>
-          <Link href="/auth">
+          <a href="/auth">
             ¿Sos prestador? Creá tu perfil bonificado en esta etapa de lanzamiento
-          </Link>
+          </a>
         </p>
 
         <p style={{ color: 'rgba(255,255,255,0.75)' }}>
