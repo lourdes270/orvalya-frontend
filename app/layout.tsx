@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { OG_IMAGE_DEFAULT, SITE_NAME, SITE_URL } from '../src/lib/seo'
+import { AuthCallbackRedirect } from './_components/AuthCallbackRedirect'
 import '../src/index.css'
 import './publico.css'
 import './landing.css'
@@ -59,7 +60,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es-UY">
-      <body>{children}</body>
+      <body>
+        <AuthCallbackRedirect />
+        {children}
+      </body>
     </html>
   )
 }
