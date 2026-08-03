@@ -12,7 +12,8 @@ export async function uploadAvatar(userId: string, blob: Blob): Promise<string |
   }
 
   const { data } = supabase.storage.from('avatars').getPublicUrl(path)
-  const avatarUrl = data.publicUrl
+  // Cache-buster: misma ruta en storage; sin query la UI puede seguir mostrando la foto vieja.
+  const avatarUrl = `${data.publicUrl}?t=${Date.now()}`
 
   const { error: updateError } = await supabase
     .from('perfiles')

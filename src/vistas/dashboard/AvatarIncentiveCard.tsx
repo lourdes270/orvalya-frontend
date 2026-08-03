@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type RefObject } from 'react'
+import { useRef, useState, type ChangeEvent, type CSSProperties, type RefObject } from 'react'
 import { cropImageSquare } from '../../lib/cropImageSquare'
 import { validateImageUpload } from '../../lib/fileValidation'
 import { uploadAvatar } from '../../lib/uploadAvatar'
@@ -15,6 +15,16 @@ interface AvatarIncentiveCardProps {
   generandoPdf: boolean
 }
 
+const btnFotoBase: CSSProperties = {
+  flex: 1,
+  padding: '10px',
+  color: '#fff',
+  border: 'none',
+  borderRadius: '8px',
+  fontSize: '13px',
+  fontWeight: 600,
+}
+
 export default function AvatarIncentiveCard({
   perfil,
   onPerfilUpdate,
@@ -27,17 +37,20 @@ export default function AvatarIncentiveCard({
   const galleryInputRef = useRef<HTMLInputElement>(null)
   const [subiendo, setSubiendo] = useState(false)
   const [error, setError] = useState('')
-  const [autorizado, setAutorizado] = useState(false)
+  const [autorizado, setAutorizado] = useState(Boolean(perfil.avatar_url))
+  const [exito, setExito] = useState(false)
 
   const semaforoIcon = semaforo === 'verde' ? '🟢' : semaforo === 'amarillo' ? '🟡' : '🔴'
   const semaforoLabel = semaforo === 'verde' ? 'Documentación completa' : semaforo === 'amarillo' ? 'En progreso' : 'Documentación incompleta'
   const descripcionTexto = formatDescripcionServicio(perfil.descripcion)
   const zona = formatZonaDisplay(perfil.zona)
+  const tieneFoto = Boolean(perfil.avatar_url)
 
   const handleFile = async (file: File) => {
     if (!autorizado) return
     setSubiendo(true)
     setError('')
+    setExito(false)
     try {
       const validacion = await validateImageUpload(file)
       if (!validacion.ok) { setError(validacion.message); return }
@@ -45,6 +58,8 @@ export default function AvatarIncentiveCard({
       const url = await uploadAvatar(perfil.id, blob)
       if (!url) throw new Error('No se pudo subir la imagen')
       onPerfilUpdate({ ...perfil, avatar_url: url })
+      setExito(true)
+      setTimeout(() => setExito(false), 3000)
     } catch {
       setError('No pudimos subir la imagen. Intentá de nuevo.')
     } finally {
@@ -63,6 +78,8 @@ export default function AvatarIncentiveCard({
     ref.current?.click()
   }
 
+  const disabledFoto = subiendo || !autorizado
+
   return (
     <div style={{
       background: '#fff',
@@ -71,7 +88,6 @@ export default function AvatarIncentiveCard({
       overflow: 'hidden',
       marginBottom: '16px',
     }}>
-      {/* Header navy con foto */}
       <div style={{
         background: '#0F2D52',
         padding: '24px 20px 20px',
@@ -80,8 +96,21 @@ export default function AvatarIncentiveCard({
         alignItems: 'center',
         gap: '12px',
       }}>
-        {/* Foto o placeholder */}
-        <div style={{ position: 'relative' }}>
+        <button
+          type="button"
+          onClick={() => abrirInput(galleryInputRef)}
+          disabled={disabledFoto}
+          aria-label={tieneFoto ? 'Cambiar foto de perfil' : 'Agregar foto de perfil'}
+          title={autorizado ? (tieneFoto ? 'Cambiar foto' : 'Agregar foto') : 'Marcá la autorización para cambiar la foto'}
+          style={{
+            position: 'relative',
+            padding: 0,
+            border: 'none',
+            background: 'transparent',
+            cursor: disabledFoto ? 'not-allowed' : 'pointer',
+            borderRadius: '50%',
+          }}
+        >
           {perfil.avatar_url ? (
             <img
               src={perfil.avatar_url}
@@ -92,6 +121,7 @@ export default function AvatarIncentiveCard({
                 borderRadius: '50%',
                 objectFit: 'cover',
                 border: '3px solid #00B4A6',
+                display: 'block',
               }}
             />
           ) : (
@@ -107,9 +137,25 @@ export default function AvatarIncentiveCard({
               fontSize: '36px',
             }}>👤</div>
           )}
-        </div>
+          <span style={{
+            position: 'absolute',
+            right: 0,
+            bottom: 0,
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            background: '#00B4A6',
+            color: '#fff',
+            fontSize: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '2px solid #0F2D52',
+          }}>
+            📷
+          </span>
+        </button>
 
-        {/* Nombre */}
         <div style={{ textAlign: 'center' }}>
           <p style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#fff' }}>
             {perfil.nombre || 'Tu nombre'}
@@ -126,7 +172,6 @@ export default function AvatarIncentiveCard({
           )}
         </div>
 
-        {/* Semáforo */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -141,7 +186,6 @@ export default function AvatarIncentiveCard({
         </div>
       </div>
 
-      {/* Botón PDF */}
       <div style={{ padding: '14px 20px', borderBottom: '1px solid #F1F3F5' }}>
         <button
           type="button"
@@ -163,74 +207,62 @@ export default function AvatarIncentiveCard({
         </button>
       </div>
 
-      {/* Subir foto — solo si no tiene */}
-      {!perfil.avatar_url && (
-        <div style={{ padding: '14px 20px' }}>
-          <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: 600, color: '#1F3864' }}>
-            Sumá tu foto — las empresas confían más cuando ven a quién contratan
-          </p>
-          <label style={{
-            display: 'flex',
-            gap: '8px',
-            marginBottom: '10px',
-            fontSize: '12px',
-            color: '#495057',
-            cursor: 'pointer',
-            alignItems: 'flex-start',
-          }}>
-            <input
-              type="checkbox"
-              checked={autorizado}
-              onChange={e => setAutorizado(e.target.checked)}
-              style={{ marginTop: '2px', flexShrink: 0 }}
-            />
-            <span>Autorizo a Orvalya a mostrar esta imagen a empresas contratantes.</span>
-          </label>
-          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleInputChange} />
-          <input ref={galleryInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleInputChange} />
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <button
-              type="button"
-              disabled={subiendo || !autorizado}
-              onClick={() => abrirInput(cameraInputRef)}
-              style={{
-                flex: 1,
-                padding: '10px',
-                background: '#00B4A6',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: (subiendo || !autorizado) ? 'not-allowed' : 'pointer',
-                opacity: (subiendo || !autorizado) ? 0.5 : 1,
-              }}
-            >
-              📷 Tomar foto
-            </button>
-            <button
-              type="button"
-              disabled={subiendo || !autorizado}
-              onClick={() => abrirInput(galleryInputRef)}
-              style={{
-                flex: 1,
-                padding: '10px',
-                background: '#1F3864',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: 600,
-                cursor: (subiendo || !autorizado) ? 'not-allowed' : 'pointer',
-                opacity: (subiendo || !autorizado) ? 0.5 : 1,
-              }}
-            >
-              🖼 Subir desde galería
-            </button>
-          </div>
-          {error && <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#dc2626' }}>{error}</p>}
+      <div style={{ padding: '14px 20px' }}>
+        <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: 600, color: '#1F3864' }}>
+          {tieneFoto
+            ? 'Cambiar foto de perfil'
+            : 'Sumá tu foto — las empresas confían más cuando ven a quién contratan'}
+        </p>
+        <label style={{
+          display: 'flex',
+          gap: '8px',
+          marginBottom: '10px',
+          fontSize: '12px',
+          color: '#495057',
+          cursor: 'pointer',
+          alignItems: 'flex-start',
+        }}>
+          <input
+            type="checkbox"
+            checked={autorizado}
+            onChange={e => setAutorizado(e.target.checked)}
+            style={{ marginTop: '2px', flexShrink: 0 }}
+          />
+          <span>Autorizo a Orvalya a mostrar esta imagen a empresas contratantes.</span>
+        </label>
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleInputChange} />
+        <input ref={galleryInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleInputChange} />
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            disabled={disabledFoto}
+            onClick={() => abrirInput(cameraInputRef)}
+            style={{
+              ...btnFotoBase,
+              background: '#00B4A6',
+              cursor: disabledFoto ? 'not-allowed' : 'pointer',
+              opacity: disabledFoto ? 0.5 : 1,
+            }}
+          >
+            {subiendo ? 'Subiendo...' : '📷 Tomar foto'}
+          </button>
+          <button
+            type="button"
+            disabled={disabledFoto}
+            onClick={() => abrirInput(galleryInputRef)}
+            style={{
+              ...btnFotoBase,
+              background: '#1F3864',
+              cursor: disabledFoto ? 'not-allowed' : 'pointer',
+              opacity: disabledFoto ? 0.5 : 1,
+            }}
+          >
+            {subiendo ? 'Subiendo...' : tieneFoto ? '🖼 Elegir otra foto' : '🖼 Subir desde galería'}
+          </button>
         </div>
-      )}
+        {error && <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#dc2626' }}>{error}</p>}
+        {exito && <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#2B8A3E' }}>Foto actualizada</p>}
+      </div>
     </div>
   )
 }
