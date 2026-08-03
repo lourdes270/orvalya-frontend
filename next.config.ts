@@ -21,13 +21,17 @@ const supabaseHost = (() => {
   }
 })()
 
+// hCaptcha necesita worker-src + img-src propios: sin eso el checkbox se ve
+// pero el desafío falla al marcar (CSP default-src 'self' bloquea el worker).
 const csp = [
   "default-src 'self'",
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.hcaptcha.com https://hcaptcha.com",
-  "style-src 'self' 'unsafe-inline' https://*.hcaptcha.com",
-  "img-src 'self' data: blob: https://*.supabase.co",
+  "style-src 'self' 'unsafe-inline' https://*.hcaptcha.com https://hcaptcha.com",
+  "img-src 'self' data: blob: https://*.supabase.co https://*.hcaptcha.com https://hcaptcha.com",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.hcaptcha.com https://hcaptcha.com https://formspree.io",
   "frame-src https://*.hcaptcha.com https://hcaptcha.com",
+  "worker-src 'self' blob: https://*.hcaptcha.com https://hcaptcha.com",
+  "child-src 'self' blob: https://*.hcaptcha.com https://hcaptcha.com",
   "font-src 'self' data:",
   "object-src 'none'",
   "base-uri 'self'",

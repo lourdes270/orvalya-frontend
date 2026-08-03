@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import HCaptcha from '@hcaptcha/react-hcaptcha'
 import { requireHcaptchaSiteKey } from '../../config/hcaptcha'
 
@@ -11,10 +11,15 @@ interface RegistrationCaptchaProps {
 export function RegistrationCaptcha({ onVerify, onExpire, resetKey = 0 }: RegistrationCaptchaProps) {
   const siteKey = requireHcaptchaSiteKey()
   const captchaRef = useRef<HCaptcha>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
     if (resetKey > 0) {
-      captchaRef.current?.resetCaptcha()
+      try {
+        captchaRef.current?.resetCaptcha()
+      } catch {
+        /* el iframe a veces ya no está en el DOM */
+      }
     }
   }, [resetKey])
 
@@ -26,10 +31,25 @@ export function RegistrationCaptcha({ onVerify, onExpire, resetKey = 0 }: Regist
       <HCaptcha
         ref={captchaRef}
         sitekey={siteKey}
-        onVerify={onVerify}
-        onExpire={onExpire}
+        onVerify={(token) => {
+          setErrorMsg(null)
+          onVerify(token)
+        }}
+        onExpire={() => {
+          setErrorMsg(null)
+          onExpire()
+        }}
+        onError={() => {
+          setErrorMsg('No pudimos cargar el captcha. Recargá la página e intentá de nuevo.')
+          onExpire()
+        }}
         theme="light"
       />
+      {errorMsg && (
+        <p style={{ margin: '8px 0 0', fontSize: '13px', color: '#c0392b', textAlign: 'center' }}>
+          {errorMsg}
+        </p>
+      )}
     </div>
   )
 }
