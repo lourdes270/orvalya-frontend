@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type CSSProperties, type RefObject } from 'react'
+import { useId, useRef, useState, type ChangeEvent, type CSSProperties } from 'react'
 import { cropImageSquare } from '../../lib/cropImageSquare'
 import { validateImageUpload } from '../../lib/fileValidation'
 import { uploadAvatar } from '../../lib/uploadAvatar'
@@ -23,6 +23,9 @@ const btnFotoBase: CSSProperties = {
   borderRadius: '8px',
   fontSize: '13px',
   fontWeight: 600,
+  textAlign: 'center',
+  display: 'block',
+  boxSizing: 'border-box',
 }
 
 export default function AvatarIncentiveCard({
@@ -33,6 +36,9 @@ export default function AvatarIncentiveCard({
   onDescargarPdf,
   generandoPdf,
 }: AvatarIncentiveCardProps) {
+  const uid = useId()
+  const cameraId = `${uid}-camera`
+  const galleryId = `${uid}-gallery`
   const cameraInputRef = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
   const [subiendo, setSubiendo] = useState(false)
@@ -45,23 +51,34 @@ export default function AvatarIncentiveCard({
   const descripcionTexto = formatDescripcionServicio(perfil.descripcion)
   const zona = formatZonaDisplay(perfil.zona)
   const tieneFoto = Boolean(perfil.avatar_url)
+  const disabledFoto = subiendo || !autorizado
 
   const handleFile = async (file: File) => {
-    if (!autorizado) return
+    if (!autorizado) {
+      setError('Marcá la casilla de autorización para subir la foto.')
+      return
+    }
     setSubiendo(true)
     setError('')
     setExito(false)
     try {
       const validacion = await validateImageUpload(file)
-      if (!validacion.ok) { setError(validacion.message); return }
+      if (!validacion.ok) {
+        setError(validacion.message)
+        return
+      }
       const blob = await cropImageSquare(file)
-      const url = await uploadAvatar(perfil.id, blob)
-      if (!url) throw new Error('No se pudo subir la imagen')
-      onPerfilUpdate({ ...perfil, avatar_url: url })
+      const result = await uploadAvatar(perfil.id, blob)
+      if (!result.ok) {
+        setError(result.message)
+        return
+      }
+      onPerfilUpdate({ ...perfil, avatar_url: result.url })
       setExito(true)
       setTimeout(() => setExito(false), 3000)
-    } catch {
-      setError('No pudimos subir la imagen. Intentá de nuevo.')
+    } catch (err) {
+      console.error('avatar upload:', err)
+      setError('No pudimos procesar la imagen. Probá con JPG o PNG.')
     } finally {
       setSubiendo(false)
     }
@@ -69,16 +86,9 @@ export default function AvatarIncentiveCard({
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
-    if (f && autorizado) handleFile(f)
     e.target.value = ''
+    if (f) void handleFile(f)
   }
-
-  const abrirInput = (ref: RefObject<HTMLInputElement | null>) => {
-    if (subiendo || !autorizado) return
-    ref.current?.click()
-  }
-
-  const disabledFoto = subiendo || !autorizado
 
   return (
     <div style={{
@@ -96,10 +106,8 @@ export default function AvatarIncentiveCard({
         alignItems: 'center',
         gap: '12px',
       }}>
-        <button
-          type="button"
-          onClick={() => abrirInput(galleryInputRef)}
-          disabled={disabledFoto}
+        <label
+          htmlFor={autorizado && !subiendo ? galleryId : undefined}
           aria-label={tieneFoto ? 'Cambiar foto de perfil' : 'Agregar foto de perfil'}
           title={autorizado ? (tieneFoto ? 'Cambiar foto' : 'Agregar foto') : 'Marcá la autorización para cambiar la foto'}
           style={{
@@ -109,6 +117,7 @@ export default function AvatarIncentiveCard({
             background: 'transparent',
             cursor: disabledFoto ? 'not-allowed' : 'pointer',
             borderRadius: '50%',
+            display: 'inline-block',
           }}
         >
           {perfil.avatar_url ? (
@@ -151,10 +160,11 @@ export default function AvatarIncentiveCard({
             alignItems: 'center',
             justifyContent: 'center',
             border: '2px solid #0F2D52',
+            pointerEvents: 'none',
           }}>
             📷
           </span>
-        </button>
+        </label>
 
         <div style={{ textAlign: 'center' }}>
           <p style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#fff' }}>
@@ -230,13 +240,31 @@ export default function AvatarIncentiveCard({
           />
           <span>Autorizo a Orvalya a mostrar esta imagen a empresas contratantes.</span>
         </label>
-        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleInputChange} />
-        <input ref={galleryInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleInputChange} />
+
+        <input
+          id={cameraId}
+          ref={cameraInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/*"
+          capture="environment"
+          style={{ display: 'none' }}
+          onChange={handleInputChange}
+          disabled={disabledFoto}
+        />
+        <input
+          id={galleryId}
+          ref={galleryInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/*"
+          style={{ display: 'none' }}
+          onChange={handleInputChange}
+          disabled={disabledFoto}
+        />
+
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button
-            type="button"
-            disabled={disabledFoto}
-            onClick={() => abrirInput(cameraInputRef)}
+          <label
+            htmlFor={disabledFoto ? undefined : cameraId}
+            aria-disabled={disabledFoto}
             style={{
               ...btnFotoBase,
               background: '#00B4A6',
@@ -245,11 +273,10 @@ export default function AvatarIncentiveCard({
             }}
           >
             {subiendo ? 'Subiendo...' : '📷 Tomar foto'}
-          </button>
-          <button
-            type="button"
-            disabled={disabledFoto}
-            onClick={() => abrirInput(galleryInputRef)}
+          </label>
+          <label
+            htmlFor={disabledFoto ? undefined : galleryId}
+            aria-disabled={disabledFoto}
             style={{
               ...btnFotoBase,
               background: '#1F3864',
@@ -258,10 +285,15 @@ export default function AvatarIncentiveCard({
             }}
           >
             {subiendo ? 'Subiendo...' : tieneFoto ? '🖼 Elegir otra foto' : '🖼 Subir desde galería'}
-          </button>
+          </label>
         </div>
         {error && <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#dc2626' }}>{error}</p>}
         {exito && <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#2B8A3E' }}>Foto actualizada</p>}
+        {!autorizado && (
+          <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#8C96A3' }}>
+            Marcá la autorización para poder elegir una foto.
+          </p>
+        )}
       </div>
     </div>
   )

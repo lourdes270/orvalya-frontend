@@ -19,6 +19,9 @@ const MIME_LABELS: Record<AllowedUploadMime, string> = {
 export const UPLOAD_REJECTION_MESSAGE =
   'El archivo debe ser PDF, JPG, PNG o WEBP y no superar los 5 MB.'
 
+export const IMAGE_UPLOAD_REJECTION_MESSAGE =
+  'Usá una foto JPG, PNG o WEBP de hasta 5 MB. Si es del iPhone, elegí “Más compatible” o convertí HEIC a JPG.'
+
 type FileValidationResult =
   | { ok: true; mime: AllowedUploadMime }
   | { ok: false; message: string }
@@ -96,9 +99,15 @@ export async function validateUploadFile(file: File): Promise<FileValidationResu
 
 export async function validateImageUpload(file: File): Promise<FileValidationResult> {
   const result = await validateUploadFile(file)
-  if (!result.ok) return result
+  if (!result.ok) {
+    const name = file.name.toLowerCase()
+    if (name.endsWith('.heic') || name.endsWith('.heif') || file.type.includes('heic') || file.type.includes('heif')) {
+      return { ok: false, message: IMAGE_UPLOAD_REJECTION_MESSAGE }
+    }
+    return { ok: false, message: IMAGE_UPLOAD_REJECTION_MESSAGE }
+  }
   if (result.mime === 'application/pdf') {
-    return { ok: false, message: UPLOAD_REJECTION_MESSAGE }
+    return { ok: false, message: IMAGE_UPLOAD_REJECTION_MESSAGE }
   }
   return result
 }
