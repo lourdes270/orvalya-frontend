@@ -251,8 +251,8 @@ function DashboardPrestador({ perfil, onPerfilUpdate }: { perfil: Perfil; onPerf
             onDescargarPdf={handleDescargarPdf}
             generandoPdf={generandoPdf}
           />
-          <PerfilPublicoCard perfil={perfil} />
           <PerfilPrestador perfil={perfil} onPerfilUpdate={onPerfilUpdate} />
+          <PerfilPublicoCard perfil={perfil} />
         </div>
       )}
 

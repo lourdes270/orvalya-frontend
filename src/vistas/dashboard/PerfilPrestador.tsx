@@ -1,4 +1,4 @@
-import { useState, useEffect, type CSSProperties } from 'react'
+import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { supabase } from '../../lib/supabase'
 import type { DocumentacionAdicional, Perfil } from '../../contexts/AuthContextType'
 import { isDescripcionJson } from '../../lib/formatDescripcionServicio'
@@ -89,6 +89,29 @@ const TIPOS_VEHICULO = [
   { value: 'otro', label: 'Otro' },
 ] as const
 
+const btnPrimario: CSSProperties = {
+  padding: '12px 20px',
+  background: '#1F3864',
+  color: '#fff',
+  border: 'none',
+  borderRadius: '8px',
+  fontSize: '14px',
+  fontWeight: 600,
+  cursor: 'pointer',
+  width: '100%',
+}
+
+const btnSecundario: CSSProperties = {
+  padding: '12px 16px',
+  background: '#fff',
+  color: '#1F3864',
+  border: '1px solid #DEE2E6',
+  borderRadius: '8px',
+  fontSize: '14px',
+  fontWeight: 500,
+  cursor: 'pointer',
+}
+
 function parseNumero(valor: string): number | null {
   const n = parseFloat(valor.replace(',', '.'))
   return Number.isFinite(n) ? n : null
@@ -105,60 +128,91 @@ function rutSinInformar(rut: string): boolean {
   return !t || t === 'pendiente_verificacion'
 }
 
+function formDesdePerfil(perfil: Perfil): FormState {
+  return {
+    nombre: perfil.nombre ?? '',
+    telefono: perfil.telefono ?? '',
+    whatsapp: perfil.whatsapp ?? '',
+    zona: formatZonaDisplay(perfil.zona),
+    rut: perfil.rut ?? '',
+    descripcion: perfil.descripcion ?? '',
+    rango_edad: perfil.rango_edad ?? '',
+    tarifa_hora: perfil.tarifa_hora != null ? String(perfil.tarifa_hora) : '',
+    tarifa_modalidad: perfil.tarifa_modalidad ?? '',
+    acepta_viatico: perfil.acepta_viatico ?? false,
+    viatico_diario: perfil.viatico_diario != null ? String(perfil.viatico_diario) : '',
+    tiene_vehiculo: perfil.tiene_vehiculo ?? false,
+    tipo_vehiculo: perfil.tipo_vehiculo ?? '',
+    sobre_mi: perfil.sobre_mi ?? '',
+    experiencia: perfil.experiencia ?? '',
+    cursos: perfil.cursos ?? '',
+    documentacion_adicional: parseDocumentacionAdicional(perfil.documentacion_adicional),
+  }
+}
+
+function labelModalidad(valor: string): string {
+  return TARIFA_MODALIDADES.find(o => o.value === valor)?.label ?? ''
+}
+
+function labelVehiculo(valor: string): string {
+  return TIPOS_VEHICULO.find(o => o.value === valor)?.label ?? ''
+}
+
+function FilaLectura({ label, valor }: { label: string; valor: string }) {
+  return (
+    <div style={{ marginBottom: '14px' }}>
+      <div style={labelStyle}>{label}</div>
+      <p style={{
+        margin: 0,
+        fontSize: '15px',
+        color: valor.trim() ? '#212529' : '#ADB5BD',
+        lineHeight: 1.4,
+        whiteSpace: 'pre-wrap',
+      }}>
+        {valor.trim() || 'Sin completar'}
+      </p>
+    </div>
+  )
+}
+
 export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPrestadorProps) {
-  const [form, setForm] = useState<FormState>({
-    nombre: '',
-    telefono: '',
-    whatsapp: '',
-    zona: '',
-    rut: '',
-    descripcion: '',
-    rango_edad: '',
-    tarifa_hora: '',
-    tarifa_modalidad: '',
-    acepta_viatico: false,
-    viatico_diario: '',
-    tiene_vehiculo: false,
-    tipo_vehiculo: '',
-    sobre_mi: '',
-    experiencia: '',
-    cursos: '',
-    documentacion_adicional: { ...DOCUMENTACION_VACIA },
-  })
+  const [modo, setModo] = useState<'ver' | 'editar'>('ver')
+  const [form, setForm] = useState<FormState>(() => formDesdePerfil(perfil))
   const [guardando, setGuardando] = useState(false)
   const [guardado, setGuardado] = useState(false)
   const [error, setError] = useState('')
   const [erroresCampo, setErroresCampo] = useState<Record<string, string>>({})
   const [honeypot, setHoneypot] = useState('')
+  const seccionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!perfil) return
-    setForm({
-      nombre: perfil.nombre ?? '',
-      telefono: perfil.telefono ?? '',
-      whatsapp: perfil.whatsapp ?? '',
-      zona: formatZonaDisplay(perfil.zona),
-      rut: perfil.rut ?? '',
-      descripcion: perfil.descripcion ?? '',
-      rango_edad: perfil.rango_edad ?? '',
-      tarifa_hora: perfil.tarifa_hora != null ? String(perfil.tarifa_hora) : '',
-      tarifa_modalidad: perfil.tarifa_modalidad ?? '',
-      acepta_viatico: perfil.acepta_viatico ?? false,
-      viatico_diario: perfil.viatico_diario != null ? String(perfil.viatico_diario) : '',
-      tiene_vehiculo: perfil.tiene_vehiculo ?? false,
-      tipo_vehiculo: perfil.tipo_vehiculo ?? '',
-      sobre_mi: perfil.sobre_mi ?? '',
-      experiencia: perfil.experiencia ?? '',
-      cursos: perfil.cursos ?? '',
-      documentacion_adicional: parseDocumentacionAdicional(perfil.documentacion_adicional),
+    if (modo === 'ver') setForm(formDesdePerfil(perfil))
+  }, [perfil, modo])
+
+  const entrarEdicion = () => {
+    setForm(formDesdePerfil(perfil))
+    setError('')
+    setErroresCampo({})
+    setModo('editar')
+    requestAnimationFrame(() => {
+      seccionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
-  }, [perfil])
+  }
+
+  const cancelarEdicion = () => {
+    setForm(formDesdePerfil(perfil))
+    setError('')
+    setErroresCampo({})
+    setModo('ver')
+  }
 
   const guardar = async () => {
     if (!perfil) return
     if (isProfileHoneypotTriggered(honeypot, 'perfil-prestador')) {
       setGuardado(true)
       setTimeout(() => setGuardado(false), 3000)
+      setModo('ver')
       return
     }
     const nextErrores: Record<string, string> = {}
@@ -207,8 +261,8 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         documentacion_adicional: form.documentacion_adicional,
       }
       if (!isDescripcionJson(form.descripcion)) payload.descripcion = sanitizeText(form.descripcion)
-      const { error } = await supabase.from('perfiles').update(payload).eq('id', perfil.id)
-      if (error) throw error
+      const { error: updateError } = await supabase.from('perfiles').update(payload).eq('id', perfil.id)
+      if (updateError) throw updateError
       onPerfilUpdate({
         ...perfil,
         nombre: form.nombre,
@@ -230,6 +284,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
       })
       setGuardado(true)
       setTimeout(() => setGuardado(false), 3000)
+      setModo('ver')
     } catch {
       setError('No se pudo guardar. Intentá de nuevo.')
     } finally {
@@ -239,7 +294,7 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
 
   const campo = (
     label: string,
-    key: 'nombre' | 'rut' | 'telefono' | 'whatsapp' | 'zona',
+    key: 'nombre' | 'rut' | 'telefono' | 'whatsapp',
     placeholder: string,
     opciones?: { inputMode?: 'numeric'; normalizar?: boolean },
   ) => (
@@ -360,9 +415,76 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
     }))
   }
 
+  const docsExtras = DOCUMENTACION_OPCIONES
+    .filter(o => form.documentacion_adicional[o.key])
+    .map(o => o.label)
+    .join(' · ')
+
+  const tarifaResumen = [
+    form.tarifa_hora.trim() ? `USD ${form.tarifa_hora.trim()}/h` : '',
+    labelModalidad(form.tarifa_modalidad),
+    form.acepta_viatico
+      ? (form.viatico_diario.trim() ? `Viático USD ${form.viatico_diario.trim()}` : 'Cobra viático')
+      : '',
+    form.tiene_vehiculo
+      ? (labelVehiculo(form.tipo_vehiculo) ? `Vehículo: ${labelVehiculo(form.tipo_vehiculo)}` : 'Tiene vehículo')
+      : '',
+  ].filter(Boolean).join(' · ')
+
+  if (modo === 'ver') {
+    return (
+      <div
+        ref={seccionRef}
+        style={{ background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: '16px' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '8px' }}>
+          <h2 style={{ color: '#1F3864', fontSize: '16px', fontWeight: 600, margin: 0 }}>Mi perfil</h2>
+        </div>
+        <p style={{ margin: '0 0 16px', fontSize: '13px', color: '#8C96A3', lineHeight: 1.4 }}>
+          Así figuran tus datos. Tocá Editar perfil para cambiarlos.
+        </p>
+
+        <button type="button" onClick={entrarEdicion} style={{ ...btnPrimario, marginBottom: '20px' }}>
+          Editar perfil
+        </button>
+
+        {guardado && (
+          <p style={{ margin: '0 0 16px', fontSize: '13px', color: '#2B8A3E', fontWeight: 500 }}>
+            Cambios guardados
+          </p>
+        )}
+
+        <FilaLectura label="Nombre de la empresa o persona" valor={form.nombre} />
+        <FilaLectura label="RUT" valor={rutValorVisible(form.rut) || 'No informado'} />
+        <FilaLectura label="Teléfono" valor={form.telefono} />
+        <FilaLectura label="WhatsApp" valor={form.whatsapp} />
+        <FilaLectura label="Tarifa y disponibilidad" valor={tarifaResumen} />
+        <FilaLectura label="Zona de trabajo" valor={form.zona} />
+        <FilaLectura label="Rango de edad" valor={form.rango_edad ? `${form.rango_edad} años` : ''} />
+        <DescripcionServicioField raw={form.descripcion} />
+        <FilaLectura label="Sobre mí" valor={form.sobre_mi} />
+        <FilaLectura label="Mi experiencia" valor={form.experiencia} />
+        <FilaLectura label="Cursos y estudios" valor={form.cursos} />
+        <FilaLectura label="Documentación adicional" valor={docsExtras} />
+      </div>
+    )
+  }
+
   return (
-    <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: '16px' }}>
-      <h2 style={{ color: '#1F3864', fontSize: '16px', fontWeight: 600, margin: '0 0 20px' }}>Mi perfil</h2>
+    <div
+      ref={seccionRef}
+      style={{ background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', marginBottom: '16px', paddingBottom: '88px' }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '8px' }}>
+        <h2 style={{ color: '#1F3864', fontSize: '16px', fontWeight: 600, margin: 0 }}>Editar perfil</h2>
+        <button type="button" onClick={cancelarEdicion} style={{ ...btnSecundario, padding: '8px 12px', fontSize: '13px' }}>
+          Cancelar
+        </button>
+      </div>
+      <p style={{ margin: '0 0 20px', fontSize: '13px', color: '#8C96A3' }}>
+        Cambiá lo que necesites y guardá al final.
+      </p>
+
       {campo('Nombre de la empresa o persona', 'nombre', 'Ej: Limpieza Industrial García')}
       <div style={{ marginBottom: '16px' }}>
         <label style={labelStyle}>RUT</label>
@@ -430,7 +552,22 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
         )}
       </div>
 
-      {campo('Zona de trabajo', 'zona', 'Ej: Montevideo, Canelones')}
+      <div style={{ marginBottom: '16px' }}>
+        <label style={labelStyle}>Zona de trabajo</label>
+        <div style={{
+          padding: '10px 12px',
+          background: '#F8F9FA',
+          borderRadius: '8px',
+          fontSize: '14px',
+          color: form.zona ? '#212529' : '#ADB5BD',
+          border: '1px solid #E9ECEF',
+        }}>
+          {form.zona || 'Sin zona definida'}
+        </div>
+        <p style={{ fontSize: '12px', color: '#8C96A3', margin: '6px 0 0' }}>
+          Definida en el registro. Para cambiarla, contactá soporte.
+        </p>
+      </div>
       <div style={{ marginBottom: '16px' }}>
         <label style={labelStyle}>Rango de edad (opcional)</label>
         <select value={form.rango_edad} onChange={e => setForm(prev => ({ ...prev, rango_edad: e.target.value }))} style={selectRangoEdadStyle}>
@@ -491,9 +628,38 @@ export default function PerfilPrestador({ perfil, onPerfilUpdate }: PerfilPresta
 
       {error && <p style={{ color: '#dc2626', fontSize: '13px', margin: '0 0 12px' }}>{error}</p>}
       <HoneypotField value={honeypot} onChange={setHoneypot} />
-      <button onClick={guardar} disabled={guardando} style={{ padding: '10px 24px', background: guardado ? '#40C057' : '#1F3864', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
-        {guardando ? 'Guardando...' : guardado ? 'Guardado ✓' : 'Guardar perfil'}
-      </button>
+
+      <div style={{
+        position: 'sticky',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        margin: '16px -24px -24px',
+        padding: '12px 24px calc(12px + env(safe-area-inset-bottom, 0px))',
+        background: 'rgba(255,255,255,0.96)',
+        borderTop: '1px solid #DEE2E6',
+        display: 'flex',
+        gap: '8px',
+        zIndex: 20,
+        backdropFilter: 'blur(6px)',
+      }}>
+        <button type="button" onClick={cancelarEdicion} style={{ ...btnSecundario, flex: '0 0 auto' }}>
+          Cancelar
+        </button>
+        <button
+          type="button"
+          onClick={guardar}
+          disabled={guardando}
+          style={{
+            ...btnPrimario,
+            flex: 1,
+            background: guardado ? '#40C057' : '#1F3864',
+            opacity: guardando ? 0.7 : 1,
+          }}
+        >
+          {guardando ? 'Guardando...' : guardado ? 'Guardado ✓' : 'Guardar cambios'}
+        </button>
+      </div>
     </div>
   )
 }
