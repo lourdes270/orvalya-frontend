@@ -17,7 +17,10 @@
 }
 
 .lp-section--degradado {
-  background: linear-gradient(180deg, #f4f8fb 0%, #fff 100%);
+  background:
+    radial-gradient(ellipse 90% 60% at 10% 0%, rgba(0, 180, 166, 0.14), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 20%, rgba(15, 45, 82, 0.1), transparent 50%),
+    linear-gradient(180deg, #e8f1f8 0%, #f4f8fb 42%, #fff 100%);
 }
 
 .lp-inner {
@@ -150,29 +153,69 @@
   font-weight: 700;
   text-decoration: none;
   box-sizing: border-box;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 2px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .lp-btn--teal {
   background: #00b4a6;
   color: #fff;
-  box-shadow: 0 4px 16px rgba(0, 180, 166, 0.3);
+  border-color: #00a396;
+  box-shadow: 0 8px 24px rgba(0, 180, 166, 0.4);
 }
 
 .lp-btn--navy {
   background: #0f2d52;
   color: #fff;
-  box-shadow: 0 4px 16px rgba(15, 45, 82, 0.25);
+  border-color: #0a203c;
+  box-shadow: 0 8px 24px rgba(15, 45, 82, 0.35);
+}
+
+.lp-btn--grande {
+  min-height: 60px;
+  padding: 18px 32px;
+  font-size: 18px;
+  font-weight: 800;
+  border-radius: 14px;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .lp-btn--grande { width: auto; min-width: 240px; }
 }
 
 .lp-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(15, 45, 82, 0.22);
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+  box-shadow: 0 12px 28px rgba(15, 45, 82, 0.28);
 }
 
 .lp-btn--bloque { width: 100%; }
 
-/* ─── Selector de rol del hero ─── */
+.lp-cta-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 8px 0 10px;
+}
+
+@media (min-width: 640px) {
+  .lp-cta-grupo {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+}
+
+.lp-cta-hint {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a6078;
+  line-height: 1.45;
+}
+
+/* ─── Selector de rol del hero (legacy / otras páginas) ─── */
 .lp-roles {
   display: grid;
   grid-template-columns: 1fr;
@@ -326,8 +369,8 @@
   margin: 40px auto 0;
   background: #fff;
   border-radius: 16px;
-  border: 1px solid #d8e3ed;
-  box-shadow: 0 4px 20px rgba(15, 45, 82, 0.06);
+  border: 2px solid #00b4a6;
+  box-shadow: 0 10px 32px rgba(0, 180, 166, 0.18);
   padding: 28px 20px;
   text-align: center;
 }
