@@ -63,6 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: absoluteUrl('/llamados'), lastModified: ahora, changeFrequency: 'daily', priority: 0.9 },
     { url: absoluteUrl('/quienes-somos'), lastModified: ahora, changeFrequency: 'monthly', priority: 0.5 },
     { url: absoluteUrl('/como-funciona'), lastModified: ahora, changeFrequency: 'monthly', priority: 0.5 },
+    { url: absoluteUrl('/contacto/contratante'), lastModified: ahora, changeFrequency: 'monthly', priority: 0.6 },
     { url: absoluteUrl('/terminos'), lastModified: ahora, changeFrequency: 'yearly', priority: 0.2 },
     { url: absoluteUrl('/privacidad'), lastModified: ahora, changeFrequency: 'yearly', priority: 0.2 },
   ]
