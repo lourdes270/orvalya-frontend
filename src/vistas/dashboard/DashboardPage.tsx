@@ -127,8 +127,25 @@ export default function DashboardPage() {
 
   if (cargandoPerfil) {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', color: '#8C96A3' }}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '14px',
+        minHeight: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#8C96A3',
+      }}>
+        <div style={{
+          width: '28px',
+          height: '28px',
+          border: '3px solid #d8e3ed',
+          borderTopColor: '#00b4a6',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+        }} />
         Cargando perfil...
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }

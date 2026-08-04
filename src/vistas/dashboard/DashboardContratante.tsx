@@ -152,7 +152,7 @@ export default function DashboardContratante() {
       const nuevo = await crearLlamado(contratante.id, form)
       setLlamados(prev => [nuevo, ...prev])
       setForm(emptyLlamado)
-      setMensaje('Llamado enviado. Quedará visible cuando un administrador lo apruebe.')
+      setMensaje('¡Listo! Tu llamado ya está publicado y visible para los prestadores.')
     } catch (err) {
       console.error(err)
       setMensaje('No pudimos publicar el llamado. Intentá de nuevo.')
@@ -186,9 +186,7 @@ export default function DashboardContratante() {
             Panel de moderación
           </p>
           <p style={{ margin: '0 0 12px', fontSize: '14px', color: MUTED, lineHeight: 1.5 }}>
-            {pendientes > 0
-              ? `Tenés ${pendientes} llamado${pendientes === 1 ? '' : 's'} esperando aprobación.`
-              : 'Revisá y aprobá llamados de empresas antes de que se publiquen.'}
+            Los llamados se publican al instante. Revisalos después y rechazá los que no correspondan.
           </p>
           <Link
             to="/admin/moderacion"
@@ -199,7 +197,7 @@ export default function DashboardContratante() {
               textAlign: 'center',
             }}
           >
-            Moderar llamados →
+            Ver llamados sin revisar →
           </Link>
         </div>
       )}
