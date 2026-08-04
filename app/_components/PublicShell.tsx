@@ -3,6 +3,7 @@ import { RUBROS } from '../../src/vistas/onboarding/data/rubros'
 import { DEPARTAMENTOS } from '../../src/vistas/onboarding/data/zonas'
 import { rutaListado, slugDeDepartamento } from '../../src/lib/seo'
 import { rutaListadoLlamados } from '../../src/lib/llamadosPublicos'
+import { AuthAwareNavLink } from './AuthAwareNavLink'
 
 const NAV_LINKS = [
   { label: 'Independientes', href: '/prestadores' },
@@ -37,7 +38,7 @@ function Header() {
           {NAV_LINKS.map(l => (
             <Link key={l.href} href={l.href}>{l.label}</Link>
           ))}
-          <a className="ov-login" href="/auth">Iniciar sesión</a>
+          <AuthAwareNavLink />
         </nav>
       </div>
     </header>
