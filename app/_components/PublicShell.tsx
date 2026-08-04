@@ -5,7 +5,7 @@ import { rutaListado, slugDeDepartamento } from '../../src/lib/seo'
 import { rutaListadoLlamados } from '../../src/lib/llamadosPublicos'
 
 const NAV_LINKS = [
-  { label: 'Prestadores', href: '/prestadores' },
+  { label: 'Independientes', href: '/prestadores' },
   { label: 'Trabajos', href: '/llamados' },
   { label: 'Cómo Funciona', href: '/como-funciona' },
 ]
@@ -58,7 +58,7 @@ function Footer() {
           <div>
             <h2>Departamentos</h2>
             {DEPARTAMENTOS_DESTACADOS.map(d => (
-              <Link key={d} href={rutaListado({ zona: d })}>Prestadores en {d}</Link>
+              <Link key={d} href={rutaListado({ zona: d })}>Independientes en {d}</Link>
             ))}
           </div>
           <div>
@@ -72,7 +72,7 @@ function Footer() {
           </div>
           <div>
             <h2>Orvalya</h2>
-            <Link href="/prestadores">Todos los prestadores</Link>
+            <Link href="/prestadores">Todos los prestadores independientes</Link>
             {NAV_SECUNDARIA.map(l => (
               <Link key={l.href} href={l.href}>{l.label}</Link>
             ))}

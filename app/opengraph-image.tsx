@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-export const alt = 'Orvalya — Prestadores de servicios verificados en Uruguay'
+export const alt = 'Orvalya — Prestadores independientes verificados en Uruguay'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -31,7 +31,7 @@ export default function OpengraphImage() {
         </div>
 
         <div style={{ display: 'flex', fontSize: 68, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em' }}>
-          Prestadores de servicios
+          Prestadores independientes
         </div>
         <div
           style={{
@@ -43,11 +43,11 @@ export default function OpengraphImage() {
             marginTop: 6,
           }}
         >
-          verificados en Uruguay
+          en Uruguay
         </div>
 
         <div style={{ display: 'flex', marginTop: 34, fontSize: 30, color: '#9FC4E4' }}>
-          Documentación al día · 19 departamentos
+          Unipersonales · Monotributistas · 19 departamentos
         </div>
       </div>
     ),

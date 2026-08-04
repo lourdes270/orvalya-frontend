@@ -10,7 +10,7 @@ import { absoluteUrl, OG_IMAGE_DEFAULT, OG_IMAGE_SIZE } from '../../src/lib/seo'
 const TITULO = 'Quiénes somos'
 const DESCRIPCION =
   'Orvalya nace de más de una década de experiencia en el sector de servicios en Uruguay. ' +
-  'Conocé por qué construimos la plataforma de seguimiento documental para prestadores y empresas.'
+  'Conocé por qué construimos la plataforma de seguimiento documental para prestadores independientes y empresas.'
 
 export const metadata: Metadata = {
   title: TITULO,

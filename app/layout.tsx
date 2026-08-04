@@ -9,11 +9,11 @@ import './landing.css'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Orvalya — Prestadores de servicios verificados en Uruguay',
+    default: 'Orvalya — Prestadores independientes verificados en Uruguay',
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    'Encontrá prestadores de servicios en Uruguay con documentación verificada. ' +
+    'Encontrá prestadores independientes en Uruguay: unipersonales, monotributistas y freelancers. ' +
     'Limpieza, cuidados, oficios, gastronomía y más, en los 19 departamentos.',
   applicationName: SITE_NAME,
   alternates: { canonical: '/' },
@@ -22,16 +22,16 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: 'es_UY',
     url: SITE_URL,
-    title: 'Orvalya — Prestadores de servicios verificados en Uruguay',
+    title: 'Orvalya — Prestadores independientes verificados en Uruguay',
     description:
-      'Encontrá prestadores de servicios en Uruguay con documentación verificada.',
+      'Independientes, unipersonales y monotributistas con documentación verificada en Uruguay.',
     images: [{ url: OG_IMAGE_DEFAULT, width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Orvalya — Prestadores de servicios verificados en Uruguay',
+    title: 'Orvalya — Prestadores independientes verificados en Uruguay',
     description:
-      'Encontrá prestadores de servicios en Uruguay con documentación verificada.',
+      'Independientes, unipersonales y monotributistas con documentación verificada en Uruguay.',
     images: [OG_IMAGE_DEFAULT],
   },
   robots: {

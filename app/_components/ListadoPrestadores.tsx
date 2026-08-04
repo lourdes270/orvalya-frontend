@@ -238,7 +238,7 @@ export function ListadoPrestadores({
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Inicio', item: absoluteUrl('/') },
-      { '@type': 'ListItem', position: 2, name: 'Prestadores', item: absoluteUrl('/prestadores') },
+      { '@type': 'ListItem', position: 2, name: 'Prestadores independientes', item: absoluteUrl('/prestadores') },
       ...(rubroLabel
         ? [{
             '@type': 'ListItem',
@@ -287,7 +287,7 @@ export function ListadoPrestadores({
           borderRadius: 14,
         }}>
           <p style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 600, color: '#0f2d52' }}>
-            Todavía no hay prestadores {zona ? `en ${zona}` : ''} para esta búsqueda
+            Todavía no hay independientes {zona ? `en ${zona}` : ''} para esta búsqueda
           </p>
           <p style={{ margin: 0, fontSize: 14, color: '#4a6078' }}>
             Probá con otro departamento o servicio desde los filtros de arriba.
@@ -296,7 +296,7 @@ export function ListadoPrestadores({
       ) : (
         <>
           <p style={{ margin: '0 0 16px', fontSize: 13, color: '#4a6078' }}>
-            {prestadores.length} prestador{prestadores.length !== 1 ? 'es' : ''}
+            {prestadores.length} independiente{prestadores.length !== 1 ? 's' : ''}
             {rubroLabel ? ` de ${rubroLabel.toLowerCase()}` : ''}
             {zona ? ` en ${zona}` : ' en Uruguay'}
             {paginas > 1 ? ` · página ${paginaActual} de ${paginas}` : ''}

@@ -65,7 +65,7 @@ export default function Page() {
           <h2 className="lp-h2">Empezá por acá</h2>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <Link className="lp-btn lp-btn--teal" href="/prestadores">
-              Buscar prestadores
+              Buscar independientes
             </Link>
             <Link className="lp-btn lp-btn--navy" href="/llamados">
               Ver trabajos abiertos

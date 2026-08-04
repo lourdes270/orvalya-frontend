@@ -4,17 +4,19 @@ import { PublicShell } from './_components/PublicShell'
 import { CierreCta, Pasos, PorQueOrvalya } from './_components/LandingBloques'
 import { absoluteUrl, OG_IMAGE_DEFAULT, OG_IMAGE_SIZE, SITE_NAME, SITE_URL } from '../src/lib/seo'
 
-const TITULO = 'Orvalya — Prestadores y servicios tercerizados en Uruguay'
+const TITULO = 'Orvalya — Prestadores independientes y servicios tercerizados en Uruguay'
 const DESCRIPCION =
-  'Prestadores de limpieza, cuidados, oficios y más en Uruguay. ' +
-  'Empresas: seguimiento documental de tercerizados (BPS, BSE, DGI). ' +
-  'Buscá por departamento y contratá con papeles al día.'
+  'Prestadores independientes en Uruguay: unipersonales, monotributistas y freelancers. ' +
+  'Limpieza, cuidados, oficios y más. Empresas: seguimiento documental de tercerizados (BPS, BSE, DGI).'
 
 export const metadata: Metadata = {
   title: { absolute: TITULO },
   description: DESCRIPCION,
   keywords: [
-    'prestadores Uruguay',
+    'prestadores independientes',
+    'unipersonal',
+    'monotributista',
+    'freelancers Uruguay',
     'limpieza',
     'tercerizados',
     'servicios',
@@ -84,7 +86,7 @@ export default function Page() {
     description: DESCRIPCION,
     about: {
       '@type': 'Thing',
-      name: 'Prestadores de servicios y seguimiento documental en Uruguay',
+      name: 'Prestadores independientes y seguimiento documental en Uruguay',
     },
   }
 
@@ -136,7 +138,7 @@ export default function Page() {
                 <span className="lp-rol-intencion">Quiero conseguir trabajo</span>
                 <span className="lp-rol-titulo">Ofrecé tus servicios · Gratis</span>
                 <span className="lp-rol-sub">
-                  Limpieza, construcción, jardinería, cuidados y más
+                  Para independientes, unipersonales y monotributistas
                 </span>
               </a>
             </div>
@@ -193,7 +195,7 @@ export default function Page() {
               contratar. Y si querés que lo llevemos por vos, ese es nuestro servicio.
             </p>
             <Link className="lp-btn lp-btn--teal" href="/prestadores">
-              Ver prestadores disponibles
+              Ver independientes disponibles
             </Link>
           </div>
           <div className="lp-hero-img">
@@ -211,13 +213,14 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Prestadores */}
+      {/* Prestadores independientes */}
       <section className="lp-section lp-section--blanca">
         <div className="lp-inner">
-          <p className="lp-badge lp-badge--suave">Para prestadores</p>
+          <p className="lp-badge lp-badge--suave">Para prestadores independientes</p>
           <h2 className="lp-h2">Hacé que las empresas te encuentren a vos</h2>
           <p className="lp-cuerpo">
-            Mostrá tus papeles al día. Aparecé cuando te buscan. Gratis.
+            Si sos unipersonal, monotributista o freelancer: mostrá tus papeles al día,
+            aparecé cuando te buscan. Gratis.
           </p>
 
           <ul className="lp-tarjetas" style={{ marginBottom: 24 }}>

@@ -33,7 +33,7 @@ export function SeoListadoBloque({ seo, rubro, zona, variante }: Props) {
   const cruzada = variante === 'prestadores' ? rutaListadoLlamados : rutaListado
   const labelCruzada = variante === 'prestadores'
     ? `Ver trabajos y llamados${zona ? ` en ${zona}` : ''}`
-    : `Ver prestadores${zona ? ` en ${zona}` : ''}`
+    : `Ver independientes${zona ? ` en ${zona}` : ''}`
 
   const zonasRelacionadas = zona
     ? DEPARTAMENTOS.filter(d => d !== zona).slice(0, 8)

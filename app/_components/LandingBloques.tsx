@@ -14,7 +14,7 @@ export function CierreCta({ conVolver = false }: { conVolver?: boolean }) {
 
         <p>
           <a href="/auth">
-            ¿Sos prestador? Creá tu perfil bonificado en esta etapa de lanzamiento
+            ¿Sos prestador independiente? Creá tu perfil bonificado en esta etapa de lanzamiento
           </a>
         </p>
 

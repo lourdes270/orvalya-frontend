@@ -219,7 +219,7 @@ export function ListadoLlamados({
             Probá con otro rubro o departamento.
           </p>
           <Link className="ov-chip" href={rutaListado({ rubro, zona })}>
-            Ver prestadores disponibles
+            Ver independientes disponibles
           </Link>
         </div>
       ) : (
