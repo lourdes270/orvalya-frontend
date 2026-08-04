@@ -65,7 +65,9 @@ export async function crearLlamado(
     descripcion: sanitizeText(form.descripcion),
     rubro: form.rubro,
     zona: form.zona,
-    estado: 'pendiente_moderacion' as const,
+    // El trigger guard_llamado_moderacion_fields fuerza esto igual: se publica
+    // directo, sin espera. Ver migración 024.
+    estado: 'activo' as const,
     expires_at: form.expires_at.trim() ? new Date(form.expires_at).toISOString() : null,
   }
 
@@ -76,7 +78,24 @@ export async function crearLlamado(
     .single()
 
   if (error) throw error
+
+  notificarLlamadoNuevo(data.id).catch(err =>
+    console.error('No se pudo avisar al admin del llamado nuevo:', err),
+  )
+
   return data as Llamado
+}
+
+/**
+ * Aviso "por las dudas" al admin de que se publicó un llamado, para que lo
+ * revise después (moderación posterior, no bloquea la publicación). Si falla
+ * el envío del mail no rompe el flujo de publicar: el llamado ya quedó activo.
+ */
+async function notificarLlamadoNuevo(llamadoId: string): Promise<void> {
+  const { error } = await supabase.functions.invoke('notificar-llamado', {
+    body: { llamado_id: llamadoId },
+  })
+  if (error) throw error
 }
 
 export function llamadoEsEditable(estado: EstadoLlamado): boolean {
@@ -116,11 +135,17 @@ export async function actualizarLlamado(
   return data as Llamado
 }
 
-export async function fetchLlamadosPendientes(): Promise<Llamado[]> {
+/**
+ * Llamados ya activos (publicados al instante) que el admin todavía no revisó.
+ * "Sin revisar" = activo con moderado_at NULL. Ver migración 024: ya no existe
+ * una cola de "pendiente_moderacion" para llamados nuevos, es revisión posterior.
+ */
+export async function fetchLlamadosSinRevisar(): Promise<Llamado[]> {
   const { data, error } = await supabase
     .from('llamados')
     .select('*')
-    .eq('estado', 'pendiente_moderacion')
+    .eq('estado', 'activo')
+    .is('moderado_at', null)
     .order('created_at', { ascending: true })
 
   if (error) throw error
