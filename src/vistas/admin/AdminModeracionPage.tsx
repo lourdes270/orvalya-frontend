@@ -5,7 +5,7 @@ import { esAdminPlataforma } from '../../lib/adminHelpers'
 import { irAPaginaPublica } from '../../lib/navegacionPublica'
 import {
   ERROR_MOTIVO_RECHAZO_REQUERIDO,
-  fetchLlamadosPendientes,
+  fetchLlamadosSinRevisar,
   labelEstadoLlamado,
   moderarLlamado,
 } from '../../lib/contratanteHelpers'
@@ -27,7 +27,7 @@ export default function AdminModeracionPage() {
 
   useEffect(() => {
     if (!esAdmin) return
-    fetchLlamadosPendientes()
+    fetchLlamadosSinRevisar()
       .then(setLlamados)
       .catch(console.error)
       .finally(() => setLoading(false))
@@ -69,8 +69,10 @@ export default function AdminModeracionPage() {
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
-            <h1 style={{ margin: '0 0 4px', fontSize: '24px', color: NAVY }}>Moderación de llamados</h1>
-            <p style={{ margin: 0, color: MUTED, fontSize: '14px' }}>Cola de llamados pendientes de aprobación</p>
+            <h1 style={{ margin: '0 0 4px', fontSize: '24px', color: NAVY }}>Llamados sin revisar</h1>
+            <p style={{ margin: 0, color: MUTED, fontSize: '14px' }}>
+              Se publican al instante. Esta es la revisión posterior: marcalos como revisados o rechazalos para bajarlos.
+            </p>
           </div>
           <div style={{ display: 'flex', gap: '8px' }}>
             <Link to="/dashboard" style={{ ...btnOutline, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
@@ -86,12 +88,20 @@ export default function AdminModeracionPage() {
           <p style={{ color: MUTED }}>Cargando cola...</p>
         ) : llamados.length === 0 ? (
           <div style={cardStyle}>
-            <p style={{ margin: 0, color: MUTED, textAlign: 'center' }}>No hay llamados pendientes de moderación.</p>
+            <p style={{ margin: 0, color: MUTED, textAlign: 'center' }}>No hay llamados nuevos por revisar.</p>
           </div>
         ) : (
           llamados.map(l => (
             <article key={l.id} style={cardStyle}>
-              <h2 style={{ margin: '0 0 8px', fontSize: '18px', color: NAVY }}>{l.titulo}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                <h2 style={{ margin: 0, fontSize: '18px', color: NAVY }}>{l.titulo}</h2>
+                <span style={{
+                  fontSize: '11px', fontWeight: 700, color: '#155724', background: '#D4EDDA',
+                  borderRadius: '999px', padding: '2px 8px', textTransform: 'uppercase',
+                }}>
+                  Ya publicado
+                </span>
+              </div>
               <p style={{ margin: '0 0 12px', color: MUTED, lineHeight: 1.55 }}>{l.descripcion}</p>
               <p style={{ margin: '0 0 16px', fontSize: '13px', color: '#ADB5BD' }}>
                 {rubroLabel(l.rubro)} · {l.zona} · {labelEstadoLlamado(l.estado)} · {new Date(l.created_at).toLocaleString('es-UY')}
@@ -132,7 +142,7 @@ export default function AdminModeracionPage() {
                   disabled={procesando === l.id}
                   onClick={() => handleModerar(l.id, 'activo')}
                 >
-                  Aprobar
+                  Marcar revisado
                 </button>
                 <button
                   type="button"
@@ -140,7 +150,7 @@ export default function AdminModeracionPage() {
                   disabled={procesando === l.id || !motivos[l.id]?.trim()}
                   onClick={() => handleModerar(l.id, 'rechazado')}
                 >
-                  Rechazar
+                  Rechazar y bajar
                 </button>
               </div>
             </article>
