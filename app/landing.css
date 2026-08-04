@@ -17,10 +17,7 @@
 }
 
 .lp-section--degradado {
-  background:
-    radial-gradient(ellipse 90% 60% at 10% 0%, rgba(0, 180, 166, 0.14), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 100% 20%, rgba(15, 45, 82, 0.1), transparent 50%),
-    linear-gradient(180deg, #e8f1f8 0%, #f4f8fb 42%, #fff 100%);
+  background: linear-gradient(180deg, #f4f8fb 0%, #fff 100%);
 }
 
 .lp-inner {
@@ -192,34 +189,12 @@
 
 .lp-btn--bloque { width: 100%; }
 
-.lp-cta-grupo {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 8px 0 10px;
-}
-
-@media (min-width: 640px) {
-  .lp-cta-grupo {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: stretch;
-  }
-}
-
-.lp-cta-hint {
-  margin: 0 0 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #4a6078;
-  line-height: 1.45;
-}
-
-/* ─── Selector de rol del hero (legacy / otras páginas) ─── */
+/* ─── Selector de rol del hero (gradientes animados de pre-Next) ─── */
 .lp-roles {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
+  width: 100%;
 }
 
 @media (min-width: 768px) {
@@ -235,13 +210,19 @@
   padding: 22px 20px;
   border-radius: 16px;
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+  color: #fff;
 }
 
-.lp-rol:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(15, 45, 82, 0.2); }
+@media (min-width: 768px) {
+  .lp-rol { min-height: 148px; padding: 24px 22px; }
+}
 
-.lp-rol--contratante { background: #0f2d52; }
-.lp-rol--prestador { background: #00b4a6; }
+/* No pisar el box-shadow animado de landing-btn-*-signup */
+.lp-rol.landing-btn-contratante-signup:hover,
+.lp-rol.landing-btn-prestador-signup:hover {
+  color: #fff;
+}
 
 .lp-rol-intencion {
   font-size: 13px;
@@ -369,8 +350,8 @@
   margin: 40px auto 0;
   background: #fff;
   border-radius: 16px;
-  border: 2px solid #00b4a6;
-  box-shadow: 0 10px 32px rgba(0, 180, 166, 0.18);
+  border: 1px solid #d8e3ed;
+  box-shadow: 0 4px 20px rgba(15, 45, 82, 0.06);
   padding: 28px 20px;
   text-align: center;
 }

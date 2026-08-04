@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { OG_IMAGE_DEFAULT, SITE_NAME, SITE_URL } from '../src/lib/seo'
 import { AuthCallbackRedirect } from './_components/AuthCallbackRedirect'
 import '../src/index.css'
+import '../src/vistas/landing/landing.css'
 import './publico.css'
 import './landing.css'
 

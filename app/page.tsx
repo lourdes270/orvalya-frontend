@@ -117,17 +117,29 @@ export default function Page() {
               Servicio para empresas de todo Uruguay.
             </p>
 
-            <div className="lp-cta-grupo">
-              <a className="lp-btn lp-btn--navy lp-btn--grande" href="/contacto/contratante">
-                Necesito contratar
+            <div className="lp-roles">
+              <a
+                className="lp-rol landing-btn landing-btn-contratante-signup"
+                href="/contacto/contratante"
+              >
+                <span className="lp-rol-intencion">Necesito contratar</span>
+                <span className="lp-rol-titulo">Quiero contratar con papeles al día</span>
+                <span className="lp-rol-sub">
+                  Certificados y seguimiento de cada prestador, todo en un lugar
+                </span>
               </a>
-              <a className="lp-btn lp-btn--teal lp-btn--grande" href="/auth">
-                Quiero ofrecer mis servicios
+
+              <a
+                className="lp-rol landing-btn landing-btn-prestador-signup"
+                href="/auth"
+              >
+                <span className="lp-rol-intencion">Quiero conseguir trabajo</span>
+                <span className="lp-rol-titulo">Ofrecé tus servicios · Gratis</span>
+                <span className="lp-rol-sub">
+                  Limpieza, construcción, jardinería, cuidados y más
+                </span>
               </a>
             </div>
-            <p className="lp-cta-hint">
-              Empresas: papeles al día · Prestadores: registro gratis en lanzamiento
-            </p>
           </div>
 
           <div className="lp-hero-img">
