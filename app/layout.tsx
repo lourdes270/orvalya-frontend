@@ -9,12 +9,23 @@ import './landing.css'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Orvalya — Prestadores independientes verificados en Uruguay',
+    default: 'Orvalya — Monotributistas, unipersonales y pymes en Uruguay',
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    'Encontrá prestadores independientes en Uruguay: unipersonales, monotributistas y freelancers. ' +
-    'Limpieza, cuidados, oficios, gastronomía y más, en los 19 departamentos.',
+    'Web app para monotributistas, unipersonales, independientes y pymes en Uruguay. ' +
+    'Ofrecé o contratá servicios con documentación verificada en los 19 departamentos.',
+  keywords: [
+    'monotributista',
+    'monotributo',
+    'unipersonal',
+    'pyme',
+    'independiente',
+    'freelancer',
+    'tercerizados',
+    'Uruguay',
+    'Orvalya',
+  ],
   applicationName: SITE_NAME,
   alternates: { canonical: '/' },
   openGraph: {
@@ -22,16 +33,16 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: 'es_UY',
     url: SITE_URL,
-    title: 'Orvalya — Prestadores independientes verificados en Uruguay',
+    title: 'Orvalya — Monotributistas, unipersonales y pymes en Uruguay',
     description:
-      'Independientes, unipersonales y monotributistas con documentación verificada en Uruguay.',
+      'Independientes, monotributistas, unipersonales y pymes con documentación verificada en Uruguay.',
     images: [{ url: OG_IMAGE_DEFAULT, width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Orvalya — Prestadores independientes verificados en Uruguay',
+    title: 'Orvalya — Monotributistas, unipersonales y pymes en Uruguay',
     description:
-      'Independientes, unipersonales y monotributistas con documentación verificada en Uruguay.',
+      'Independientes, monotributistas, unipersonales y pymes con documentación verificada en Uruguay.',
     images: [OG_IMAGE_DEFAULT],
   },
   robots: {

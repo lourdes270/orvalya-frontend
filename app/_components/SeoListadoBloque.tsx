@@ -55,8 +55,8 @@ export function SeoListadoBloque({ seo, rubro, zona, variante }: Props) {
 
       <h2 style={{ margin: '0 0 10px', fontSize: 17, fontWeight: 700, color: '#0f2d52' }}>
         {zona
-          ? `Servicios y zona: ${zona}, Uruguay`
-          : 'Servicios en todo Uruguay'}
+          ? `Independientes, mono y pymes en ${zona}, Uruguay`
+          : 'Para monotributistas, unipersonales, independientes y pymes'}
       </h2>
       <p style={{ margin: '0 0 20px', fontSize: 14, color: '#4a6078', lineHeight: 1.65, maxWidth: 720 }}>
         {seo.cuerpo}

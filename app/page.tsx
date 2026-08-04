@@ -4,27 +4,35 @@ import { PublicShell } from './_components/PublicShell'
 import { CierreCta, Pasos, PorQueOrvalya } from './_components/LandingBloques'
 import { absoluteUrl, OG_IMAGE_DEFAULT, OG_IMAGE_SIZE, SITE_NAME, SITE_URL } from '../src/lib/seo'
 
-const TITULO = 'Orvalya — Prestadores independientes y servicios tercerizados en Uruguay'
+const TITULO = 'Orvalya — Monotributistas, unipersonales y pymes en Uruguay'
 const DESCRIPCION =
-  'Prestadores independientes en Uruguay: unipersonales, monotributistas y freelancers. ' +
-  'Limpieza, cuidados, oficios y más. Empresas: seguimiento documental de tercerizados (BPS, BSE, DGI).'
+  'Web app para monotributistas, unipersonales, independientes y pymes en Uruguay. ' +
+  'Ofrecé o contratá servicios (limpieza, oficios, cuidados) con documentación BPS, BSE y DGI al día.'
 
 export const metadata: Metadata = {
   title: { absolute: TITULO },
   description: DESCRIPCION,
   keywords: [
-    'prestadores independientes',
-    'unipersonal',
     'monotributista',
-    'freelancers Uruguay',
-    'limpieza',
+    'monotributo',
+    'mono',
+    'unipersonal',
+    'empresa unipersonal',
+    'pyme',
+    'pymes',
+    'prestadores independientes',
+    'trabajador independiente',
+    'freelancer Uruguay',
+    'autónomo',
+    'cuenta propia',
     'tercerizados',
-    'servicios',
-    'documentación',
+    'limpieza',
     'BPS',
     'BSE',
-    'trabajo',
+    'DGI',
     'Montevideo',
+    'Uruguay',
+    'LATAM',
     'Orvalya',
   ],
   alternates: { canonical: '/' },
@@ -73,8 +81,19 @@ export default function Page() {
     url: SITE_URL,
     logo: absoluteUrl('/logo512.png'),
     description: DESCRIPCION,
-    areaServed: { '@type': 'Country', name: 'Uruguay' },
+    areaServed: [
+      { '@type': 'Country', name: 'Uruguay' },
+      { '@type': 'AdministrativeArea', name: 'LATAM' },
+    ],
     knowsLanguage: 'es-UY',
+    knowsAbout: [
+      'prestadores independientes',
+      'monotributistas',
+      'empresas unipersonales',
+      'pymes',
+      'tercerización de servicios',
+      'documentación BPS BSE DGI',
+    ],
   }
 
   const sitio = {
@@ -86,8 +105,46 @@ export default function Page() {
     description: DESCRIPCION,
     about: {
       '@type': 'Thing',
-      name: 'Prestadores independientes y seguimiento documental en Uruguay',
+      name: 'Monotributistas, unipersonales, independientes y pymes en Uruguay',
     },
+    audience: {
+      '@type': 'Audience',
+      audienceType: 'Monotributistas, unipersonales, freelancers, pymes y empresas contratantes',
+    },
+  }
+
+  const faqHome = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: [
+      {
+        '@type': 'Question',
+        name: '¿Orvalya es para monotributistas y unipersonales?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text:
+            'Sí. Orvalya es una web app para prestadores independientes: monotributistas, empresas unipersonales, freelancers y pymes de servicios en Uruguay, con documentación al día.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: '¿Sirve si tengo una pyme y necesito contratar independientes?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text:
+            'Sí. Las pymes y empresas usan Orvalya para encontrar monotributistas e independientes verificados y llevar el seguimiento documental de la tercerización.',
+        },
+      },
+      {
+        '@type': 'Question',
+        name: '¿Cómo llego a Orvalya si soy independiente?',
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text:
+            'Registrate gratis en orvalya.com, creá tu perfil, cargá papeles y aparecé en búsquedas por rubro y departamento en todo Uruguay.',
+        },
+      },
+    ],
   }
 
   return (
@@ -99,6 +156,10 @@ export default function Page() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(sitio) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqHome) }}
       />
 
       <section className="lp-section lp-section--degradado">

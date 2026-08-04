@@ -1,7 +1,7 @@
 /**
  * Copy SEO para landings de prestadores/llamados.
- * Combina keywords cortas, zona/región y términos colaterales
- * (servicio, empresa, personal, empleo, trabajo) sin relleno artificial.
+ * Apunta a búsquedas LATAM: monotributista, unipersonal, pyme,
+ * independiente, autónomo + rubro + zona.
  */
 
 export type SeoCopy = {
@@ -14,7 +14,41 @@ export type SeoCopy = {
   faqs: Array<{ pregunta: string; respuesta: string }>
 }
 
-/** Términos colaterales por rubro: lo que la gente busca aunque no diga “prestador”. */
+/** Audiencia LATAM: cómo se buscan a sí mismos / los buscan las empresas. */
+export const AUDIENCIA_LATAM = [
+  'prestadores independientes',
+  'trabajador independiente',
+  'independiente',
+  'unipersonal',
+  'empresa unipersonal',
+  'monotributista',
+  'monotributo',
+  'mono',
+  'pyme',
+  'pymes',
+  'pequeña empresa',
+  'autónomo',
+  'freelancer',
+  'freelancers',
+  'cuenta propia',
+  'tercerizados',
+  'servicio tercerizado',
+] as const
+
+const FAQ_AUDIENCIA: SeoCopy['faqs'] = [
+  {
+    pregunta: '¿Orvalya es para monotributistas y unipersonales?',
+    respuesta:
+      'Sí. Está pensada para prestadores independientes: monotributistas, unipersonales, freelancers y pequeños negocios (pyme) que ofrecen servicios con documentación al día.',
+  },
+  {
+    pregunta: '¿También sirve si soy una pyme o empresa chica?',
+    respuesta:
+      'Sí. Las pymes y empresas contratantes usan Orvalya para encontrar independientes verificados y llevar el seguimiento documental de quienes tercerizan.',
+  },
+]
+
+/** Términos colaterales por rubro. */
 const COLATERALES: Record<string, string[]> = {
   limpieza: [
     'limpieza',
@@ -26,6 +60,7 @@ const COLATERALES: Record<string, string[]> = {
     'desinfección',
     'limpieza de oficinas',
     'limpieza de hogares',
+    'monotributista limpieza',
   ],
   cuidados: [
     'cuidados',
@@ -35,6 +70,7 @@ const COLATERALES: Record<string, string[]> = {
     'cuidado de adultos mayores',
     'cuidado infantil',
     'salud a domicilio',
+    'cuidador independiente',
   ],
   mascotas: [
     'mascotas',
@@ -52,6 +88,7 @@ const COLATERALES: Record<string, string[]> = {
     'mantenimiento',
     'reparaciones',
     'jardinería',
+    'oficio independiente',
   ],
   comercio: [
     'comercio',
@@ -88,11 +125,12 @@ const COLATERALES: Record<string, string[]> = {
   ],
   profesionales: [
     'freelancers',
-    'profesionales',
+    'profesionales independientes',
     'diseño',
     'desarrollo web',
     'contabilidad',
     'marketing',
+    'autónomo',
   ],
   arte: [
     'clases particulares',
@@ -102,28 +140,16 @@ const COLATERALES: Record<string, string[]> = {
     'peluquería',
     'estética',
   ],
-  varios: ['servicios', 'tercerizados', 'prestadores'],
+  varios: ['servicios independientes', 'tercerizados', 'monotributista', 'pyme'],
 }
 
-const COLATERALES_GENERALES = [
-  'prestadores independientes',
-  'unipersonal',
-  'monotributista',
-  'freelancers',
-  'servicios',
-  'tercerizados',
-  'documentación verificada',
-  'Uruguay',
-]
-
 function colateralesDe(rubroId: string | null): string[] {
-  if (!rubroId) return COLATERALES_GENERALES
-  return COLATERALES[rubroId] ?? COLATERALES_GENERALES
+  if (!rubroId) return [...AUDIENCIA_LATAM]
+  return [...(COLATERALES[rubroId] ?? []), ...AUDIENCIA_LATAM.slice(0, 8)]
 }
 
 function cortoRubro(rubroLabel: string | null): string {
   if (!rubroLabel) return 'servicios'
-  // "Limpieza y sanitización" → "limpieza"
   return rubroLabel.split(/y|,/)[0]!.trim().toLowerCase()
 }
 
@@ -141,19 +167,41 @@ function keywordsBase(
   const corto = cortoRubro(rubroLabel)
   const cols = colateralesDe(rubroId)
   const base = [
-    ...cols.slice(0, 6),
+    ...AUDIENCIA_LATAM,
+    ...cols.slice(0, 8),
     corto,
     zona ?? 'Uruguay',
     'Uruguay',
-    tipo === 'prestadores' ? 'prestadores independientes' : 'trabajos',
-    tipo === 'prestadores' ? 'unipersonal' : 'empleo',
-    tipo === 'prestadores' ? 'monotributista' : 'llamados laborales',
-    tipo === 'llamados' ? 'llamados laborales' : 'directorio',
+    'LATAM',
+    'Montevideo',
+    tipo === 'prestadores' ? 'directorio de independientes' : 'trabajos',
+    tipo === 'prestadores' ? 'contratar independiente' : 'empleo',
+    tipo === 'llamados' ? 'llamados laborales' : 'documentación BPS BSE DGI',
   ]
   if (zona) {
-    base.push(`${corto} ${zona}`, `servicios en ${zona}`, `${zona} Uruguay`)
+    base.push(
+      `${corto} ${zona}`,
+      `independiente ${zona}`,
+      `monotributista ${zona}`,
+      `pyme ${zona}`,
+      `servicios en ${zona}`,
+      `${zona} Uruguay`,
+    )
+  }
+  if (corto !== 'servicios') {
+    base.push(
+      `monotributista ${corto}`,
+      `independiente ${corto}`,
+      `unipersonal ${corto}`,
+      `pyme ${corto}`,
+    )
   }
   return [...new Set(base.filter(Boolean))]
+}
+
+function conFaqAudiencia(faqs: SeoCopy['faqs']): SeoCopy['faqs'] {
+  const keys = new Set(faqs.map(f => f.pregunta))
+  return [...faqs, ...FAQ_AUDIENCIA.filter(f => !keys.has(f.pregunta))]
 }
 
 export function copyPrestadores(
@@ -171,36 +219,37 @@ export function copyPrestadores(
     return {
       titulo: `${corto.charAt(0).toUpperCase() + corto.slice(1)} en ${zona}`,
       intro:
-        `Prestadores independientes de ${corto} y servicios relacionados ${region}. ` +
-        `Unipersonales, monotributistas y freelancers con documentación verificada: compará tarifas, zona y contactá directo.`,
-      metaTitle: `${corto.charAt(0).toUpperCase() + corto.slice(1)} en ${zona} | Independientes Uruguay`,
+        `Independientes, monotributistas, unipersonales y pymes de ${corto} ${region}. ` +
+        `Perfiles con documentación verificada: compará tarifas, zona y contactá directo.`,
+      metaTitle: `${corto.charAt(0).toUpperCase() + corto.slice(1)} ${zona} | Mono · Pyme · Independiente`,
       metaDesc:
-        `${rubroLabel} en ${zona}, Uruguay. Contratá independientes (unipersonal, monotributista): ` +
-        `${ejemplos}. Documentación al día en Orvalya.`,
+        `${rubroLabel} en ${zona}, Uruguay. Monotributistas, unipersonales, independientes y pymes: ` +
+        `${ejemplos}. Papeles al día en Orvalya.`,
       keywords,
       cuerpo:
-        `Si buscás ${corto} en ${zona} —servicio puntual, personal independiente o unipersonal— ` +
-        `en Orvalya encontrás perfiles con papeles declarados (BPS, BSE, DGI cuando aplica). ` +
-        `También podés filtrar por otros departamentos del Uruguay o mirar llamados abiertos en la misma zona.`,
-      faqs: [
+        `Si buscás ${corto} en ${zona} —monotributista, unipersonal, freelancer o pyme de servicios— ` +
+        `en Orvalya encontrás prestadores independientes con papeles declarados (BPS, BSE, DGI cuando aplica). ` +
+        `Ideal para empresas que tercerizan y para independientes que quieren que los encuentren. ` +
+        `Filtrá por departamento o mirá llamados abiertos en la misma zona.`,
+      faqs: conFaqAudiencia([
         {
           pregunta: `¿Cómo encuentro ${corto} en ${zona}?`,
           respuesta:
-            `En esta página ves prestadores independientes de ${rubroLabel.toLowerCase()} que trabajan en ${zona}. ` +
+            `Acá ves independientes de ${rubroLabel.toLowerCase()} en ${zona}: monotributistas, unipersonales y freelancers. ` +
             `Entrá al perfil, mirá tarifa, zona y documentación, y contactá directo.`,
         },
         {
-          pregunta: `¿Sirve si busco unipersonal o monotributista de ${corto}?`,
+          pregunta: `¿Hay monotributistas o unipersonales de ${corto} en ${zona}?`,
           respuesta:
-            `Sí. Orvalya está pensada para independientes, unipersonales y monotributistas que ofrecen ${corto} ` +
-            `(${ejemplos}) con seguimiento documental para contratantes.`,
+            `Sí. El directorio prioriza prestadores independientes (mono, unipersonal, cuenta propia) que ofrecen ${corto} ` +
+            `(${ejemplos}) con seguimiento documental para contratantes y pymes.`,
         },
         {
-          pregunta: `¿Los independientes son solo de ${zona}?`,
+          pregunta: `¿Los perfiles son solo de ${zona}?`,
           respuesta:
             `Listamos quienes declaran trabajar en ${zona}. Algunos también cubren departamentos vecinos o todo Uruguay.`,
         },
-      ],
+      ]),
     }
   }
 
@@ -208,88 +257,88 @@ export function copyPrestadores(
     return {
       titulo: `${corto.charAt(0).toUpperCase() + corto.slice(1)} en Uruguay`,
       intro:
-        `Prestadores independientes de ${corto} en todo el país. Filtrá por departamento (Montevideo, Canelones, Maldonado y más) ` +
-        `para ver quién trabaja en tu zona.`,
-      metaTitle: `${corto.charAt(0).toUpperCase() + corto.slice(1)} en Uruguay | Independientes`,
+        `Independientes, monotributistas y unipersonales de ${corto} en todo el país. ` +
+        `Filtrá por departamento para ver quién trabaja en tu zona.`,
+      metaTitle: `${corto.charAt(0).toUpperCase() + corto.slice(1)} Uruguay | Monotributista e independiente`,
       metaDesc:
-        `${rubroLabel} en Uruguay: independientes, unipersonales y monotributistas de ${corto}. ` +
-        `Directorio con documentación verificada por departamento.`,
+        `${rubroLabel} en Uruguay: monotributistas, unipersonales, pymes e independientes de ${corto}. ` +
+        `Documentación verificada por departamento.`,
       keywords,
       cuerpo:
-        `Buscás ${corto} en Uruguay —independiente, unipersonal o monotributista— y querés ver opciones por región. ` +
-        `Orvalya agrupa prestadores independientes de ${rubroLabel.toLowerCase()} con perfiles públicos y papeles al día. ` +
-        `Usá el filtro de departamento para acotar a tu zona o ciudad.`,
-      faqs: [
+        `Buscás ${corto} en Uruguay —monotributista, unipersonal, autónomo o pyme chica— y querés filtrar por región. ` +
+        `Orvalya reúne prestadores independientes de ${rubroLabel.toLowerCase()} con perfiles públicos y papeles al día. ` +
+        `Usá el filtro de departamento (Montevideo, Canelones, Maldonado, etc.) para acotar la búsqueda.`,
+      faqs: conFaqAudiencia([
         {
           pregunta: `¿Dónde hay ${corto} cerca de mí?`,
           respuesta:
-            `Elegí tu departamento en los filtros. Vas a ver independientes que declaran cubrir esa zona del Uruguay.`,
+            `Elegí tu departamento. Vas a ver independientes (mono, unipersonal, freelancer) que cubren esa zona.`,
         },
         {
           pregunta: `¿Qué incluye ${rubroLabel.toLowerCase()}?`,
-          respuesta:
-            `Rubros y tareas frecuentes: ${ejemplos}. Cada perfil detalla qué ofrece.`,
+          respuesta: `Rubros y tareas frecuentes: ${ejemplos}. Cada perfil detalla qué ofrece.`,
         },
-      ],
+      ]),
     }
   }
 
   if (zona) {
     return {
-      titulo: `Independientes y servicios en ${zona}`,
+      titulo: `Independientes, mono y pymes en ${zona}`,
       intro:
-        `Prestadores independientes en ${zona}, Uruguay: limpieza, cuidados, oficios, gastronomía, logística y más. ` +
-        `Unipersonales y monotributistas con documentación verificada.`,
-      metaTitle: `Independientes y servicios en ${zona} | Orvalya Uruguay`,
+        `Prestadores independientes en ${zona}, Uruguay: monotributistas, unipersonales y pymes de servicios. ` +
+        `Limpieza, cuidados, oficios, gastronomía, logística y más.`,
+      metaTitle: `Monotributistas e independientes en ${zona} | Orvalya`,
       metaDesc:
-        `Prestadores independientes en ${zona}, Uruguay. Limpieza, cuidados, oficios, gastronomía y más. ` +
-        `Unipersonales y monotributistas con papeles al día.`,
+        `Independientes, monotributistas, unipersonales y pymes en ${zona}, Uruguay. ` +
+        `Servicios con documentación al día. Contratá o registrate gratis.`,
       keywords,
       cuerpo:
-        `${zona} y alrededores: si necesitás contratar un servicio o personal independiente ` +
-        `(limpieza, cuidados, oficios, delivery, gastronomía, etc.), acá ves prestadores independientes de la zona. ` +
-        `Filtrá por tipo de servicio o mirá llamados laborales abiertos en ${zona}.`,
-      faqs: [
+        `En ${zona} y alrededores: si sos monotributista, unipersonal o pyme de servicios —o necesitás contratarlos— ` +
+        `Orvalya conecta independientes con empresas. Limpieza, cuidados, oficios, delivery, gastronomía y más, ` +
+        `con papeles a la vista. Filtrá por rubro o mirá llamados laborales abiertos en ${zona}.`,
+      faqs: conFaqAudiencia([
         {
           pregunta: `¿Qué servicios hay en ${zona}?`,
           respuesta:
-            `Limpieza, cuidados y salud, oficios, gastronomía, logística, seguridad y más, según los independientes registrados en Orvalya.`,
+            `Limpieza, cuidados, oficios, gastronomía, logística, seguridad y más, según los independientes registrados.`,
         },
         {
-          pregunta: `¿Puedo contratar desde otra ciudad?`,
+          pregunta: `¿Puedo registrarme si soy mono o unipersonal en ${zona}?`,
           respuesta:
-            `Sí, si el independiente cubre ${zona} o todo Uruguay. Revisá la zona declarada en cada perfil.`,
+            `Sí. Creá tu perfil gratis, cargá documentación y aparecé cuando empresas y pymes busquen en ${zona}.`,
         },
-      ],
+      ]),
     }
   }
 
   return {
-    titulo: 'Prestadores independientes en Uruguay',
+    titulo: 'Independientes, monotributistas y pymes en Uruguay',
     intro:
-      'Directorio de independientes, unipersonales y monotributistas en Uruguay: limpieza, cuidados, oficios, gastronomía, logística y más. ' +
+      'Directorio de prestadores independientes en Uruguay: monotributistas, unipersonales, freelancers y pymes de servicios. ' +
       'Buscá por rubro y departamento.',
-    metaTitle: 'Prestadores independientes en Uruguay | Unipersonales y monotributistas',
+    metaTitle: 'Monotributistas, unipersonales y pymes | Independientes Uruguay',
     metaDesc:
-      'Encontrá prestadores independientes en Uruguay: unipersonales, monotributistas y freelancers. ' +
-      'Limpieza, cuidados, oficios. Documentación verificada por departamento.',
+      'Orvalya: monotributistas, unipersonales, independientes y pymes en Uruguay. ' +
+      'Limpieza, oficios, cuidados. Documentación verificada. Registro gratis.',
     keywords,
     cuerpo:
-      'Orvalya conecta empresas y particulares con prestadores independientes en todo Uruguay. ' +
-      'Si buscás limpieza, oficios, cuidados, gastronomía o logística —por ciudad o departamento— ' +
-      'podés comparar perfiles de unipersonales y monotributistas, tarifas y estado documental antes de contactar.',
-    faqs: [
+      'Orvalya es la web app para prestadores independientes y empresas en Uruguay y LATAM: ' +
+      'monotributistas (mono), empresas unipersonales, freelancers, autónomos y pymes que ofrecen o contratan servicios. ' +
+      'Compará perfiles, tarifas y documentación (BPS, BSE, DGI) por rubro y departamento. ' +
+      'Si sos independiente, registrate gratis; si sos empresa o pyme, encontrá terceros con papeles al día.',
+    faqs: conFaqAudiencia([
       {
         pregunta: '¿Quiénes se registran en Orvalya?',
         respuesta:
-          'Prestadores independientes: unipersonales, monotributistas y freelancers de limpieza, cuidados, oficios, gastronomía, logística, seguridad y más.',
+          'Prestadores independientes: monotributistas, unipersonales, freelancers y pequeños negocios de limpieza, cuidados, oficios, gastronomía, logística, seguridad y más. También empresas y pymes que tercerizan.',
       },
       {
-        pregunta: '¿Cómo filtro por zona?',
+        pregunta: '¿Cómo empiezo si soy mono o unipersonal?',
         respuesta:
-          'Elegí el departamento (Artigas, Montevideo, Canelones, Maldonado, etc.) en los filtros de esta página.',
+          'Registrate gratis, completá tu perfil, subí documentación y aparecé en búsquedas por rubro y zona en todo Uruguay.',
       },
-    ],
+    ]),
   }
 }
 
@@ -308,27 +357,28 @@ export function copyLlamados(
     return {
       titulo: `Trabajo de ${corto} en ${zona}`,
       intro:
-        `Llamados y ofertas de ${corto} ${region}. Empleos y trabajos publicados por empresas y particulares que buscan prestadores ahora.`,
-      metaTitle: `Trabajo ${corto} en ${zona} | Empleos y llamados`,
+        `Llamados de ${corto} ${region} para independientes, monotributistas y unipersonales. ` +
+        `Publicados por empresas y pymes que buscan prestadores ahora.`,
+      metaTitle: `Trabajo ${corto} ${zona} | Mono · Independiente · Pyme`,
       metaDesc:
-        `Trabajo de ${corto} en ${zona}, Uruguay. Empleos, llamados laborales y ofertas: ${ejemplos}. Publicados en Orvalya.`,
+        `Trabajo de ${corto} en ${zona} para monotributistas e independientes. ` +
+        `Llamados de empresas y pymes: ${ejemplos}.`,
       keywords,
       cuerpo:
-        `Si buscás trabajo de ${corto} en ${zona} —empleo, jornada, o llamado puntual— ` +
-        `acá figuran avisos abiertos de quienes necesitan personal o servicio. ` +
-        `También podés ver prestadores de ${corto} ya registrados en la misma zona.`,
-      faqs: [
+        `Si sos monotributista, unipersonal o independiente y buscás trabajo de ${corto} en ${zona}, ` +
+        `acá hay llamados abiertos de empresas y pymes. También podés ver el directorio de independientes del mismo rubro.`,
+      faqs: conFaqAudiencia([
         {
-          pregunta: `¿Hay empleo de ${corto} en ${zona}?`,
+          pregunta: `¿Hay empleo de ${corto} en ${zona} para mono o independiente?`,
           respuesta:
-            `Los llamados abiertos de esta página son avisos actuales de ${rubroLabel.toLowerCase()} en ${zona}. Revisá requisitos y postulate o contactá.`,
+            `Los llamados de esta página son avisos de ${rubroLabel.toLowerCase()} en ${zona}, pensados para prestadores independientes.`,
         },
         {
-          pregunta: '¿Es lo mismo que un portal de empleos?',
+          pregunta: '¿Es un portal de empleos tradicional?',
           respuesta:
-            'Orvalya se enfoca en prestadores y tercerización con documentación. Los llamados son pedidos reales de servicio o personal en Uruguay.',
+            'Orvalya se enfoca en independientes y tercerización con documentación. Los llamados son pedidos reales de servicio o personal en Uruguay.',
         },
-      ],
+      ]),
     }
   }
 
@@ -336,62 +386,62 @@ export function copyLlamados(
     return {
       titulo: `Trabajos de ${corto} en Uruguay`,
       intro:
-        `Llamados abiertos de ${corto} en todo el país. Filtrá por departamento para ver empleos y trabajos en tu zona.`,
-      metaTitle: `Trabajo de ${corto} en Uruguay | Llamados abiertos`,
+        `Llamados abiertos de ${corto} para independientes, monotributistas y unipersonales en todo el país. Filtrá por departamento.`,
+      metaTitle: `Trabajo ${corto} Uruguay | Independientes y monotributistas`,
       metaDesc:
-        `Empleos y trabajos de ${corto} en Uruguay: ${ejemplos}. Llamados laborales abiertos por zona.`,
+        `Empleos y llamados de ${corto} en Uruguay para mono, unipersonal e independiente: ${ejemplos}.`,
       keywords,
       cuerpo:
-        `Ofertas y llamados de ${rubroLabel.toLowerCase()} en Uruguay. Buscá por región para encontrar trabajo cerca tuyo, ` +
-        `o explorá prestadores del mismo rubro si preferís ofrecer tu servicio.`,
-      faqs: [
+        `Ofertas de ${rubroLabel.toLowerCase()} en Uruguay orientadas a independientes y pymes de servicios. ` +
+        `Filtrá por zona o mirá el directorio si preferís ofrecer tu servicio.`,
+      faqs: conFaqAudiencia([
         {
           pregunta: `¿Cómo busco trabajo de ${corto} cerca?`,
-          respuesta: 'Usá el filtro de departamento. Vas a ver solo los llamados de esa zona del Uruguay.',
+          respuesta: 'Usá el filtro de departamento. Vas a ver solo los llamados de esa zona.',
         },
-      ],
+      ]),
     }
   }
 
   if (zona) {
     return {
-      titulo: `Trabajos y empleos en ${zona}`,
+      titulo: `Trabajos para independientes en ${zona}`,
       intro:
-        `Llamados abiertos en ${zona}: limpieza, cuidados, oficios, gastronomía y más. Publicados por quienes buscan prestadores hoy.`,
-      metaTitle: `Trabajo en ${zona} | Empleos y llamados Uruguay`,
+        `Llamados abiertos en ${zona} para monotributistas, unipersonales y pymes: limpieza, cuidados, oficios y más.`,
+      metaTitle: `Trabajo en ${zona} | Monotributistas e independientes`,
       metaDesc:
-        `Trabajos y empleos en ${zona}, Uruguay. Llamados laborales de limpieza, oficios, cuidados y más.`,
+        `Trabajos y llamados en ${zona}, Uruguay, para independientes, mono y unipersonales. Servicios con demanda real.`,
       keywords,
       cuerpo:
-        `Empleos y llamados laborales en ${zona} y zona. Si buscás trabajo corto o continuo en servicios, ` +
-        `revisá los avisos abiertos o el directorio de prestadores de la misma región.`,
-      faqs: [
+        `Empleos y llamados laborales en ${zona} para quien trabaja por cuenta propia o con pyme chica. ` +
+        `Revisá avisos abiertos o el directorio de independientes de la misma región.`,
+      faqs: conFaqAudiencia([
         {
           pregunta: `¿Qué trabajos hay en ${zona}?`,
           respuesta:
             'Depende de lo publicado: limpieza, cuidados, oficios, gastronomía, logística y otros servicios.',
         },
-      ],
+      ]),
     }
   }
 
   return {
-    titulo: 'Trabajos y llamados abiertos en Uruguay',
+    titulo: 'Trabajos para independientes, mono y pymes en Uruguay',
     intro:
-      'Empleos y llamados laborales en Uruguay: limpieza, cuidados, oficios, gastronomía, logística y más. Filtrá por rubro y departamento.',
-    metaTitle: 'Trabajos y empleos en Uruguay | Llamados laborales',
+      'Llamados laborales en Uruguay para monotributistas, unipersonales, freelancers y pymes de servicios. Filtrá por rubro y departamento.',
+    metaTitle: 'Trabajos Uruguay | Independientes, monotributistas y pymes',
     metaDesc:
-      'Trabajo en Uruguay: llamados laborales y empleos de limpieza, oficios, cuidados, gastronomía. Avisos abiertos por zona.',
+      'Llamados y empleos en Uruguay para monotributistas, unipersonales e independientes. Limpieza, oficios, cuidados y más.',
     keywords,
     cuerpo:
-      'Orvalya publica llamados de empresas y particulares que necesitan prestadores en Uruguay. ' +
-      'Buscá trabajo por rubro o por departamento, o pasá al directorio de prestadores si querés ofrecer tu servicio.',
-    faqs: [
+      'Orvalya publica llamados de empresas y pymes que necesitan prestadores independientes en Uruguay. ' +
+      'Si sos mono, unipersonal o freelancer, buscá por rubro o departamento; si ofrecés servicio, también podés crear tu perfil gratis.',
+    faqs: conFaqAudiencia([
       {
         pregunta: '¿Qué tipo de trabajos se publican?',
         respuesta:
-          'Pedidos de servicio y personal: limpieza, cuidados, oficios, comercio, gastronomía, logística, seguridad y más.',
+          'Pedidos de servicio y personal para independientes: limpieza, cuidados, oficios, comercio, gastronomía, logística, seguridad y más.',
       },
-    ],
+    ]),
   }
 }
