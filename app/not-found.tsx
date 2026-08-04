@@ -20,7 +20,7 @@ export default function NotFound() {
 
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 24 }}>
           <Link className="ov-chip" href={rutaListado({})}>
-            Ver prestadores
+            Ver independientes
           </Link>
           <Link className="ov-chip" href={rutaListadoLlamados({})}>
             Ver llamados abiertos
