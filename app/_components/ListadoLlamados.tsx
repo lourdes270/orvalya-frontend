@@ -12,6 +12,8 @@ import {
 } from '../../src/lib/llamadosPublicos'
 import { absoluteUrl, rutaListado } from '../../src/lib/seo'
 import { paginar, totalPaginas } from '../../src/lib/prestadoresHelpers'
+import type { SeoCopy } from '../../src/lib/seoCopy'
+import { SeoListadoBloque } from './SeoListadoBloque'
 
 const RUBROS_FILTRO = RUBROS.filter(r => r.id !== 'otro' && r.subrubros.length > 0)
 
@@ -155,6 +157,7 @@ export type ListadoLlamadosProps = {
   zona: string | null
   titulo: string
   intro: string
+  seo: SeoCopy
 }
 
 export function ListadoLlamados({
@@ -165,6 +168,7 @@ export function ListadoLlamados({
   zona,
   titulo,
   intro,
+  seo,
 }: ListadoLlamadosProps) {
   const paginas = totalPaginas(llamados.length, LLAMADOS_POR_PAGINA)
   const paginaActual = Math.min(Math.max(pagina, 1), paginas)
@@ -235,6 +239,8 @@ export function ListadoLlamados({
           <Paginacion base={base} pagina={paginaActual} total={paginas} />
         </>
       )}
+
+      <SeoListadoBloque seo={seo} rubro={rubro} zona={zona} variante="llamados" />
     </div>
   )
 }

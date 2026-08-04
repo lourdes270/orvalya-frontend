@@ -12,7 +12,8 @@ import {
   type PrestadorLista,
 } from '../../src/lib/prestadoresHelpers'
 import { absoluteUrl, rutaListado, rutaPrestador } from '../../src/lib/seo'
-import { rutaListadoLlamados } from '../../src/lib/llamadosPublicos'
+import type { SeoCopy } from '../../src/lib/seoCopy'
+import { SeoListadoBloque } from './SeoListadoBloque'
 
 const RUBROS_FILTRO = RUBROS.filter(r => r.id !== 'otro' && r.subrubros.length > 0)
 
@@ -194,6 +195,7 @@ export type ListadoProps = {
   zona: string | null
   titulo: string
   intro: string
+  seo: SeoCopy
 }
 
 export function ListadoPrestadores({
@@ -204,6 +206,7 @@ export function ListadoPrestadores({
   zona,
   titulo,
   intro,
+  seo,
 }: ListadoProps) {
   const paginas = totalPaginas(prestadores.length)
   const paginaActual = Math.min(Math.max(pagina, 1), paginas)
@@ -307,17 +310,7 @@ export function ListadoPrestadores({
         </>
       )}
 
-      <section style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid #d8e3ed' }}>
-        <h2 style={{ margin: '0 0 6px', fontSize: 16, fontWeight: 700, color: '#0f2d52' }}>
-          ¿Sos prestador y buscás trabajo?
-        </h2>
-        <p style={{ margin: '0 0 12px', fontSize: 14, color: '#4a6078' }}>
-          Empresas y particulares publican lo que necesitan en Orvalya.
-        </p>
-        <Link className="ov-chip" href={rutaListadoLlamados({ rubro, zona })}>
-          Ver llamados abiertos{zona ? ` en ${zona}` : ''}
-        </Link>
-      </section>
+      <SeoListadoBloque seo={seo} rubro={rubro} zona={zona} variante="prestadores" />
     </div>
   )
 }

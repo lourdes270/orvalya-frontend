@@ -4,20 +4,34 @@ import { PublicShell } from './_components/PublicShell'
 import { CierreCta, Pasos, PorQueOrvalya } from './_components/LandingBloques'
 import { absoluteUrl, OG_IMAGE_DEFAULT, OG_IMAGE_SIZE, SITE_NAME, SITE_URL } from '../src/lib/seo'
 
-const TITULO = 'Orvalya — Seguimiento documental de prestadores tercerizados en Uruguay'
+const TITULO = 'Orvalya — Prestadores y servicios tercerizados en Uruguay'
 const DESCRIPCION =
-  'Legajos, certificados y alertas de vencimiento de tus prestadores tercerizados, ' +
-  'en un solo lugar. Leyes 18.099 y 18.251. Servicio para empresas uruguayas.'
+  'Prestadores de limpieza, cuidados, oficios y más en Uruguay. ' +
+  'Empresas: seguimiento documental de tercerizados (BPS, BSE, DGI). ' +
+  'Buscá por departamento y contratá con papeles al día.'
 
 export const metadata: Metadata = {
   title: { absolute: TITULO },
   description: DESCRIPCION,
+  keywords: [
+    'prestadores Uruguay',
+    'limpieza',
+    'tercerizados',
+    'servicios',
+    'documentación',
+    'BPS',
+    'BSE',
+    'trabajo',
+    'Montevideo',
+    'Orvalya',
+  ],
   alternates: { canonical: '/' },
   openGraph: {
     type: 'website',
     title: TITULO,
     description: DESCRIPCION,
     url: SITE_URL,
+    locale: 'es_UY',
     images: [{ url: OG_IMAGE_DEFAULT, ...OG_IMAGE_SIZE, alt: SITE_NAME }],
   },
 }
@@ -67,6 +81,11 @@ export default function Page() {
     name: SITE_NAME,
     url: SITE_URL,
     inLanguage: 'es-UY',
+    description: DESCRIPCION,
+    about: {
+      '@type': 'Thing',
+      name: 'Prestadores de servicios y seguimiento documental en Uruguay',
+    },
   }
 
   return (
