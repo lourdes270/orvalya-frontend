@@ -25,10 +25,13 @@ const defaultForm: OnboardingForm = {
   apellido: '',
   email: '',
   telefono: '',
+  telefono_pais: '598',
   zona: '',
   whatsapp: '',
+  whatsapp_igual_telefono: true,
   otroTexto: '',
   rango_edad: '',
+  formacion: '',
 }
 
 function normalizarBorrador(raw: unknown): OnboardingDraft | null {
@@ -37,7 +40,14 @@ function normalizarBorrador(raw: unknown): OnboardingDraft | null {
   if (!data.form || typeof data.form !== 'object') return null
   return {
     paso: (data.paso ?? 0) as PasoOnboarding,
-    form: { ...defaultForm, ...data.form, rango_edad: data.form.rango_edad ?? '' },
+    form: {
+      ...defaultForm,
+      ...data.form,
+      telefono_pais: data.form.telefono_pais ?? '598',
+      whatsapp_igual_telefono: data.form.whatsapp_igual_telefono ?? true,
+      rango_edad: data.form.rango_edad ?? '',
+      formacion: data.form.formacion ?? '',
+    },
     selecciones: data.selecciones ?? {},
     estadoFiscal: data.estadoFiscal ?? null,
   }
@@ -259,15 +269,17 @@ export function puedeAvanzar(paso: PasoOnboarding, form: OnboardingForm, selecci
   switch (paso) {
     case 1:
       return Object.values(selecciones).some(arr => arr.length > 0) || form.otroTexto.trim().length > 0
-    case 2:
+    case 2: {
       if (form.nombre.trim().length === 0 || form.apellido.trim().length === 0) return false
       if (validarEmail(form.email)) return false
       if (validarTelefono(form.telefono, { requerido: true })) return false
-      if (!esWhatsappValido(form.whatsapp)) return false
+      const wa = form.whatsapp_igual_telefono ? form.telefono : form.whatsapp
+      if (!esWhatsappValido(wa)) return false
       if (typeof form.zona === 'string') {
         return form.zona.trim().length > 0
       }
       return form.zona.todoUruguay || form.zona.departamentos.length > 0
+    }
     case 3:
       return estadoFiscal !== null
     default:

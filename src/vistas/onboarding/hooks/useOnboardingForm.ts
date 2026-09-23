@@ -15,10 +15,13 @@ const defaultForm: OnboardingForm = {
   apellido: '',
   email: '',
   telefono: '',
+  telefono_pais: '598',
   zona: '',
   whatsapp: '',
+  whatsapp_igual_telefono: true,
   otroTexto: '',
   rango_edad: '',
+  formacion: '',
 }
 
 function loadDraft(): { paso: PasoOnboarding; form: OnboardingForm; selecciones: SeleccionCategorias; estadoFiscal: EstadoFiscal | null } | null {
@@ -28,7 +31,14 @@ function loadDraft(): { paso: PasoOnboarding; form: OnboardingForm; selecciones:
     const parsed = JSON.parse(saved) as { paso?: PasoOnboarding; form?: OnboardingForm; selecciones?: SeleccionCategorias; estadoFiscal?: EstadoFiscal | null; avatarDataUrl?: unknown }
     return {
       paso: parsed.paso ?? 0,
-      form: { ...defaultForm, ...parsed.form, rango_edad: parsed.form?.rango_edad ?? '' },
+      form: {
+        ...defaultForm,
+        ...parsed.form,
+        telefono_pais: parsed.form?.telefono_pais ?? '598',
+        whatsapp_igual_telefono: parsed.form?.whatsapp_igual_telefono ?? true,
+        rango_edad: parsed.form?.rango_edad ?? '',
+        formacion: parsed.form?.formacion ?? '',
+      },
       selecciones: parsed.selecciones ?? {},
       estadoFiscal: parsed.estadoFiscal ?? null,
     }

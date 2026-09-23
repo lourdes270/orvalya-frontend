@@ -26,11 +26,17 @@ export interface OnboardingForm {
   apellido: string
   email: string
   telefono: string
+  /** Prefijo país del teléfono (solo dígitos, ej. 598). */
+  telefono_pais: string
   zona: string | ZonasSeleccion
   /** Obligatorio: mínimo 8 dígitos numéricos */
   whatsapp: string
+  /** Si true, WhatsApp = teléfono (menos fricción). */
+  whatsapp_igual_telefono: boolean
   otroTexto: string
   rango_edad: string
+  /** Nivel educativo breve (opcional) → se guarda en perfiles.cursos */
+  formacion: string
 }
 
 export interface SeleccionCategorias {

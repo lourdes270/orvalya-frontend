@@ -22,3 +22,12 @@ sign_in_sign_ups = 5
 
 [functions.verify-captcha]
 verify_jwt = false
+
+# La llama un usuario logueado desde el cliente.
+[functions.notificar-llamado]
+verify_jwt = true
+
+# La llama pg_cron/pg_net con apikey + header x-cron-secret, sin JWT de usuario.
+# La cerradura es AVISOS_CRON_SECRET (fail-closed en la function).
+[functions.avisos-documentos]
+verify_jwt = false

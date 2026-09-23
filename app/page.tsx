@@ -193,9 +193,10 @@ export default function Page() {
               </a>
 
               <a
-                className="lp-rol landing-btn landing-btn-prestador-signup"
-                href="/auth"
+                className="lp-rol lp-rol--atencion landing-btn landing-btn-prestador-signup"
+                href="/onboarding"
               >
+                <span className="lp-rol-chip">Registrate gratis</span>
                 <span className="lp-rol-intencion">Quiero conseguir trabajo</span>
                 <span className="lp-rol-titulo">Ofrecé tus servicios · Gratis</span>
                 <span className="lp-rol-sub">
@@ -206,15 +207,20 @@ export default function Page() {
           </div>
 
           <div className="lp-hero-img">
-            <figure className="lp-figura" style={{ margin: 0 }}>
-              <img
-                src="/hero-servicios.jpg"
-                alt="Prestador de servicios acordando trabajo con una empresa en Uruguay"
-                width={840}
-                height={630}
-                fetchPriority="high"
-                decoding="async"
-              />
+            <figure className="lp-figura lp-figura--video" style={{ margin: 0 }}>
+              <video
+                className="lp-hero-video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                poster="/hero-servicios.jpg"
+                aria-label="Prestador de servicios acordando trabajo con una empresa en Uruguay"
+              >
+                <source src="/hero-servicios.mp4" type="video/mp4" />
+                <source src="/hero-servicios.webm" type="video/webm" />
+              </video>
             </figure>
           </div>
         </div>

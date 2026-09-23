@@ -12,6 +12,15 @@ export function normalizarWhatsapp(valor: string): string {
   return normalizarTelefono(valor)
 }
 
+/** Guarda el número con prefijo internacional si no es Uruguay (UY se deja local como hasta ahora). */
+export function telefonoConPrefijoPais(local: string, dial: string): string {
+  const digits = normalizarTelefono(local)
+  if (!digits) return digits
+  if (!dial || dial === '598') return digits
+  if (digits.startsWith(dial)) return digits
+  return `${dial}${digits.replace(/^0+/, '')}`
+}
+
 export function esWhatsappValido(valor: string): boolean {
   return validarTelefono(valor, { requerido: true, etiqueta: 'WhatsApp' }) === null
 }
@@ -21,17 +30,21 @@ export function buildPrestadorPerfilUpdate(
   selecciones: SeleccionCategorias,
   estadoFiscal: EstadoFiscal | null,
 ) {
+  const dial = form.telefono_pais || '598'
+  const telefono = telefonoConPrefijoPais(form.telefono, dial)
+  const whatsappLocal = form.whatsapp_igual_telefono ? form.telefono : form.whatsapp
   const zonaValue = typeof form.zona === 'string' ? form.zona.trim() : JSON.stringify(form.zona)
   return {
     tipo: 'prestador' as const,
     nombre: `${form.nombre.trim()} ${form.apellido.trim()}`.trim(),
     email: form.email.trim().toLowerCase(),
-    telefono: normalizarTelefono(form.telefono),
+    telefono,
     zona: zonaValue,
-    whatsapp: normalizarWhatsapp(form.whatsapp),
+    whatsapp: telefonoConPrefijoPais(whatsappLocal, dial),
     descripcion: JSON.stringify(selecciones),
     rut: estadoFiscal === 'activo' ? 'pendiente_verificacion' : estadoFiscal,
     rango_edad: form.rango_edad?.trim() || null,
+    cursos: form.formacion?.trim() || null,
   }
 }
 

@@ -68,13 +68,15 @@ Deno.serve(async (req) => {
     return json({ ok: false, error: 'Método no permitido' }, 405)
   }
 
-  // Proteger con secret opcional (cron / GitHub Action)
+  // Secret obligatorio. Sin env la function no corre (fail-closed).
   const cronSecret = Deno.env.get('AVISOS_CRON_SECRET')
-  if (cronSecret) {
-    const header = req.headers.get('x-cron-secret')
-    if (header !== cronSecret) {
-      return json({ ok: false, error: 'No autorizado' }, 401)
-    }
+  if (!cronSecret) {
+    console.error('AVISOS_CRON_SECRET no configurado')
+    return json({ ok: false, error: 'Configuración incompleta' }, 500)
+  }
+  const header = req.headers.get('x-cron-secret')
+  if (header !== cronSecret) {
+    return json({ ok: false, error: 'No autorizado' }, 401)
   }
 
   try {

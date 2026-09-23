@@ -17,7 +17,22 @@
 }
 
 .lp-section--degradado {
-  background: linear-gradient(180deg, #f4f8fb 0%, #fff 100%);
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 60% at 85% 15%, rgba(0, 180, 166, 0.16), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 10% 80%, rgba(15, 45, 82, 0.08), transparent 50%),
+    linear-gradient(180deg, #eef5fa 0%, #fff 72%);
+  animation: lp-hero-ambient 14s ease-in-out infinite alternate;
+}
+
+@keyframes lp-hero-ambient {
+  0% {
+    background-position: 0% 0%, 0% 100%, 0 0;
+  }
+  100% {
+    background-position: 8% 6%, -6% 90%, 0 0;
+  }
 }
 
 .lp-inner {
@@ -63,7 +78,8 @@
   box-shadow: 0 12px 32px rgba(15, 45, 82, 0.1);
 }
 
-.lp-figura img {
+.lp-figura img,
+.lp-hero-video {
   display: block;
   width: 100%;
   height: 100%;
@@ -72,9 +88,44 @@
   object-position: 55% 40%;
 }
 
+.lp-figura--video {
+  box-shadow:
+    0 16px 40px rgba(15, 45, 82, 0.16),
+    0 0 0 1px rgba(0, 180, 166, 0.12);
+}
+
+.lp-hero-video {
+  background: #0f2d52;
+  transform-origin: center center;
+  /* Arranca grande y se achica (luego vuelve, en loop suave) */
+  animation: lp-hero-zoom-out 10s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes lp-hero-zoom-out {
+  from { transform: scale(1.18); }
+  to { transform: scale(1); }
+}
+
 @media (min-width: 768px) {
   .lp-figura { border-radius: 20px; }
-  .lp-figura img { aspect-ratio: 5 / 4; }
+  .lp-figura img,
+  .lp-hero-video { aspect-ratio: 5 / 4; }
+}
+
+.lp-hero-texto {
+  animation: lp-fade-up 0.7s ease-out both;
+}
+
+@keyframes lp-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ─── Tipografía ─── */
@@ -202,6 +253,7 @@
 }
 
 .lp-rol {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -217,6 +269,30 @@
 @media (min-width: 768px) {
   .lp-rol { min-height: 148px; padding: 24px 22px; }
 }
+
+.lp-rol--atencion.landing-btn-prestador-signup {
+  z-index: 1;
+  animation:
+    landing-prestador-signup-gradient 9s ease-in-out infinite,
+    landing-prestador-signup-pulse 2.8s ease-in-out infinite;
+}
+
+.lp-rol-chip {
+  position: absolute;
+  top: -10px;
+  right: 14px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f2d52;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 6px 16px rgba(15, 45, 82, 0.18);
+}
+
+/* El zoom grande→chico es del video del hero, no de la tarjeta */
 
 /* No pisar el box-shadow animado de landing-btn-*-signup */
 .lp-rol.landing-btn-contratante-signup:hover,
@@ -246,6 +322,16 @@
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-section--degradado,
+  .lp-hero-texto,
+  .lp-rol--atencion,
+  .lp-rol-chip,
+  .lp-hero-video {
+    animation: none !important;
+  }
 }
 
 /* ─── Pasos numerados ─── */

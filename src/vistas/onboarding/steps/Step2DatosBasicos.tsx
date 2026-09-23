@@ -5,6 +5,15 @@ import { normalizarWhatsapp } from '../../../lib/registroHelpers'
 import { normalizarTelefono, validarEmail, validarTelefono } from '../../../lib/validaciones'
 import type { OnboardingForm, ZonasSeleccion } from '../types'
 import { DEPARTAMENTOS, ZONAS_MONTEVIDEO } from '../data/zonas'
+import {
+  NIVELES_FORMACION,
+  PAISES_TELEFONO,
+  opcionesAnioNacimiento,
+  opcionesDia,
+  opcionesMes,
+  rangoEdadDesdeFecha,
+  selectFacilStyle,
+} from '../data/listasFaciles'
 
 const CARACTERES_NO_NOMBRE = /[^\p{L}\s]/gu
 
@@ -32,6 +41,9 @@ export default function Step2DatosBasicos({
   puedeAvanzar,
 }: Step2DatosBasicosProps) {
   const [errores, setErrores] = useState<Record<string, string>>({})
+  const [nacDia, setNacDia] = useState(0)
+  const [nacMes, setNacMes] = useState(0)
+  const [nacAnio, setNacAnio] = useState(0)
 
   const zonasVacias: ZonasSeleccion = {
     todoUruguay: false,
@@ -112,6 +124,13 @@ export default function Step2DatosBasicos({
   }
 
   const validarWhatsapp = () => {
+    if (form.whatsapp_igual_telefono) {
+      setErrores(prev => {
+        const { whatsapp, ...rest } = prev
+        return rest
+      })
+      return
+    }
     const error = validarTelefono(form.whatsapp, { requerido: true, etiqueta: 'WhatsApp' })
     if (error) {
       setErrores(prev => ({ ...prev, whatsapp: error }))
@@ -132,16 +151,51 @@ export default function Step2DatosBasicos({
   }
 
   const handleTelefonoChange = (valor: string) => {
-    handleChange('telefono', normalizarTelefono(valor))
+    const tel = normalizarTelefono(valor)
+    if (form.whatsapp_igual_telefono) {
+      setForm({ ...form, telefono: tel, whatsapp: tel })
+    } else {
+      setForm({ ...form, telefono: tel })
+    }
+    if (errores.telefono || errores.whatsapp) {
+      setErrores(prev => {
+        const next = { ...prev }
+        delete next.telefono
+        if (form.whatsapp_igual_telefono) delete next.whatsapp
+        return next
+      })
+    }
   }
 
   const handleWhatsappChange = (valor: string) => {
     handleChange('whatsapp', normalizarWhatsapp(valor))
   }
 
-  const handleChange = (campo: keyof OnboardingForm, valor: string) => {
+  const handleWhatsappIgual = (checked: boolean) => {
+    setForm({
+      ...form,
+      whatsapp_igual_telefono: checked,
+      whatsapp: checked ? form.telefono : form.whatsapp,
+    })
+    if (checked) {
+      setErrores(prev => {
+        const { whatsapp, ...rest } = prev
+        return rest
+      })
+    }
+  }
+
+  const handleNacimiento = (dia: number, mes: number, anio: number) => {
+    setNacDia(dia)
+    setNacMes(mes)
+    setNacAnio(anio)
+    const rango = rangoEdadDesdeFecha(dia, mes, anio)
+    setForm({ ...form, rango_edad: rango })
+  }
+
+  const handleChange = (campo: keyof OnboardingForm, valor: string | boolean) => {
     setForm({ ...form, [campo]: valor })
-    if (errores[campo]) {
+    if (typeof campo === 'string' && errores[campo]) {
       setErrores(prev => {
         const { [campo]: _, ...rest } = prev
         return rest
@@ -278,42 +332,81 @@ export default function Step2DatosBasicos({
           />
           {errores.email && <p style={STYLES.error()}>{errores.email}</p>}
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
-            Teléfono
+            {COPY.paso2.campos.telefono.label}
           </label>
-          <input
-            type="tel"
-            autoComplete="tel"
-            style={{
-              ...STYLES.input(isMobile),
-              height: isMobile ? '52px' : undefined,
-              fontSize: isMobile ? '16px' : undefined,
-            }}
-            placeholder="099123456"
-            inputMode="numeric"
-            value={form.telefono}
-            onChange={(e) => handleTelefonoChange(e.target.value)}
-            onBlur={validarTelefonoCampo}
-          />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <select
+              aria-label="Código de país"
+              value={form.telefono_pais}
+              onChange={e => handleChange('telefono_pais', e.target.value)}
+              style={{
+                ...selectFacilStyle(isMobile),
+                width: isMobile ? 120 : 130,
+                flexShrink: 0,
+              }}
+            >
+              {PAISES_TELEFONO.map(p => (
+                <option key={p.code} value={p.dial}>{p.flag} {p.label}</option>
+              ))}
+            </select>
+            <input
+              type="tel"
+              autoComplete="tel-national"
+              style={{
+                ...STYLES.input(isMobile),
+                height: isMobile ? '52px' : undefined,
+                fontSize: isMobile ? '16px' : undefined,
+                flex: 1,
+              }}
+              placeholder={COPY.paso2.campos.telefono.placeholder}
+              inputMode="numeric"
+              value={form.telefono}
+              onChange={(e) => handleTelefonoChange(e.target.value)}
+              onBlur={validarTelefonoCampo}
+            />
+          </div>
           {errores.telefono && <p style={STYLES.error()}>{errores.telefono}</p>}
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
-            {COPY.paso2.campos.whatsapp.label}
+
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            marginTop: 14,
+            fontSize: 14,
+            color: '#212529',
+            cursor: 'pointer',
+          }}>
+            <input
+              type="checkbox"
+              checked={form.whatsapp_igual_telefono}
+              onChange={e => handleWhatsappIgual(e.target.checked)}
+              style={{ width: 18, height: 18 }}
+            />
+            {COPY.paso2.campos.whatsapp.igualTelefono}
           </label>
-          <input
-            type="tel"
-            autoComplete="tel"
-            inputMode="numeric"
-            style={{
-              ...STYLES.input(isMobile),
-              height: isMobile ? '52px' : undefined,
-              fontSize: isMobile ? '16px' : undefined,
-            }}
-            placeholder={COPY.paso2.campos.whatsapp.placeholder}
-            value={form.whatsapp}
-            onChange={(e) => handleWhatsappChange(e.target.value)}
-            onBlur={validarWhatsapp}
-            required
-          />
-          {errores.whatsapp && <p style={STYLES.error()}>{errores.whatsapp}</p>}
+
+          {!form.whatsapp_igual_telefono && (
+            <>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '16px' }}>
+                {COPY.paso2.campos.whatsapp.label}
+              </label>
+              <input
+                type="tel"
+                autoComplete="tel"
+                inputMode="numeric"
+                style={{
+                  ...STYLES.input(isMobile),
+                  height: isMobile ? '52px' : undefined,
+                  fontSize: isMobile ? '16px' : undefined,
+                }}
+                placeholder={COPY.paso2.campos.whatsapp.placeholder}
+                value={form.whatsapp}
+                onChange={(e) => handleWhatsappChange(e.target.value)}
+                onBlur={validarWhatsapp}
+              />
+              {errores.whatsapp && <p style={STYLES.error()}>{errores.whatsapp}</p>}
+            </>
+          )}
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
             Zonas de trabajo
           </label>
@@ -440,24 +533,54 @@ export default function Step2DatosBasicos({
           )}
 
           {errores.zona && <p style={STYLES.error()}>{errores.zona}</p>}
+
           <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '20px' }}>
-            {COPY.paso2.campos.rangoEdad.label}
+            {COPY.paso2.campos.nacimiento.label}
+          </label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr 1fr', gap: 8 }}>
+            <select
+              aria-label="Día"
+              value={nacDia || ''}
+              onChange={e => handleNacimiento(Number(e.target.value) || 0, nacMes, nacAnio)}
+              style={selectFacilStyle(isMobile)}
+            >
+              <option value="">Día</option>
+              {opcionesDia().map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+            <select
+              aria-label="Mes"
+              value={nacMes || ''}
+              onChange={e => handleNacimiento(nacDia, Number(e.target.value) || 0, nacAnio)}
+              style={selectFacilStyle(isMobile)}
+            >
+              <option value="">Mes</option>
+              {opcionesMes().map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+            </select>
+            <select
+              aria-label="Año"
+              value={nacAnio || ''}
+              onChange={e => handleNacimiento(nacDia, nacMes, Number(e.target.value) || 0)}
+              style={selectFacilStyle(isMobile)}
+            >
+              <option value="">Año</option>
+              {opcionesAnioNacimiento().map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+          <p style={STYLES.ayuda()}>{COPY.paso2.campos.nacimiento.ayuda}</p>
+
+          <label style={{ display: 'block', fontSize: '14px', fontWeight: 500, color: '#212529', marginBottom: '6px', marginTop: '16px' }}>
+            {COPY.paso2.campos.formacion.label}
           </label>
           <select
-            value={form.rango_edad}
-            onChange={(e) => handleChange('rango_edad', e.target.value)}
-            style={{
-              ...STYLES.input(isMobile),
-              height: isMobile ? '52px' : undefined,
-              fontSize: isMobile ? '16px' : undefined,
-            }}
+            value={form.formacion}
+            onChange={e => handleChange('formacion', e.target.value)}
+            style={selectFacilStyle(isMobile)}
           >
-            <option value="">Preferir no indicar</option>
-            {['18-25', '26-35', '36-45', '46-55', '55+'].map(r => (
-              <option key={r} value={r}>{r} años</option>
+            {NIVELES_FORMACION.map(n => (
+              <option key={n.value || 'vacio'} value={n.value}>{n.label}</option>
             ))}
           </select>
-          <p style={STYLES.ayuda()}>{COPY.paso2.campos.rangoEdad.ayuda}</p>
+          <p style={STYLES.ayuda()}>{COPY.paso2.campos.formacion.ayuda}</p>
         </div>
         {!isMobile && (
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
