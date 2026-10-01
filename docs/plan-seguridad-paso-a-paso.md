@@ -68,7 +68,7 @@ Proyecto: orvalya-frontend · Fecha inicio: ____
 ## Tarea A1 · Proteger `notificar-llamado` + declarar `verify_jwt` de las 3 functions + investigar el cron
 **Tipo:** 🛠️ + ✅  
 **Tiempo estimado:** 2–3 h (incluye investigación + migración)  
-**Estado:** [x]
+**Estado:** [X]
 
 ### Estado ACTUAL en este repo (verificado)
 - Archivo: `supabase/functions/notificar-llamado/index.ts`
