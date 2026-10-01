@@ -69,6 +69,7 @@ Proyecto: orvalya-frontend · Fecha inicio: ____
 **Tipo:** 🛠️ + ✅  
 **Tiempo estimado:** 2–3 h (incluye investigación + migración)  
 **Estado:** [X]
+### Evidencia: ver docs/SECURITY.md (23 sep 2026) - test end-to-end, email recibido
 
 ### Estado ACTUAL en este repo (verificado)
 - Archivo: `supabase/functions/notificar-llamado/index.ts`
