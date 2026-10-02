@@ -163,7 +163,7 @@ grant select, insert on public.notificar_llamado_attempts to service_role;
 ## Tarea A2 · Cerrar `avisos-documentos` (secret fail-closed + aplicar decisión de `verify_jwt`)
 **Tipo:** 🛠️  
 **Tiempo estimado:** 25–45 min  
-**Estado:** [ ]  
+**Estado:** [x]  
 **Dependencia:** terminá el paso de investigación de A1 (cron) antes de fijar `verify_jwt` acá.
 
 ### Estado ACTUAL en este repo (verificado)
@@ -196,6 +196,14 @@ Si el env **no** existe → **fail-open**.
 5. Confirmá que no falla en silencio por `verify_jwt`.
 
 ### Evidencia: ___
+| Lo que pide A2                                   | ¿Está hecho? | Evidencia                                                                                                                  |
+| ------------------------------------------------ | ------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Fail-closed (sin env → 500, header malo → 401)   | ✅            | Deployado el 23/09 (versión 2 de la función)                                                                               |
+| `verify_jwt` decidido y declarado en config.toml | ✅            | `avisos-documentos` quedó en `false` (la llama el cron con secret, no un usuario)                                          |
+| Secret `AVISOS_CRON_SECRET` confirmado           | ✅            | Cargado en Supabase → Secrets                                                                                              |
+| Cron alineado (manda el secret)                  | ✅            | pg\_cron `avisos-documentos-diario`, corre solo a las 11:00 UY                                                             |
+| Llamada correcta funciona                        | ✅            | **Test de fuego superado: aviso generado + email recibido en tu inbox el 23/09** (`avisos_generados:1, emails_enviados:1`) |
+
 
 ---
 

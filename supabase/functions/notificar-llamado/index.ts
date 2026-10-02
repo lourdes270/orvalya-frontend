@@ -23,6 +23,27 @@ function getServiceRoleKey(): string {
   throw new Error('Service role key no disponible')
 }
 
+function getAnonKey(): string {
+  const legacy = Deno.env.get('SUPABASE_ANON_KEY')
+  if (legacy) return legacy
+  const publishableRaw = Deno.env.get('SUPABASE_PUBLISHABLE_KEYS')
+  if (publishableRaw) {
+    const parsed = JSON.parse(publishableRaw) as Record<string, string>
+    return parsed.anon ?? parsed.publishable ?? Object.values(parsed)[0]
+  }
+  throw new Error('Anon key no disponible')
+}
+
+function bearerToken(req: Request): string {
+  const header = req.headers.get('Authorization') ?? ''
+  if (!header.startsWith('Bearer ')) return ''
+  return header.slice('Bearer '.length).trim()
+}
+
+function esRateLimit(error: { code?: string; message?: string }): boolean {
+  return error.code === 'P0001' || (error.message ?? '').includes('rate_limit_exceeded')
+}
+
 async function sendResendEmail(to: string, subject: string, text: string): Promise<boolean> {
   const apiKey = Deno.env.get('RESEND_API_KEY')
   const from = Deno.env.get('AVISOS_FROM_EMAIL') ?? 'Orvalya <avisos@orvalya.com>'
@@ -60,13 +81,29 @@ Deno.serve(async (req) => {
     return json({ ok: false, error: 'Método no permitido' }, 405)
   }
 
+  // Autenticación: hay un JWT y Auth confirma que corresponde a un usuario.
+  const token = bearerToken(req)
+  if (!token) {
+    return json({ ok: false, error: 'No autorizado' }, 401)
+  }
+
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const userClient = createClient(supabaseUrl, getAnonKey(), {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+    const { data: userData, error: userErr } = await userClient.auth.getUser(token)
+    if (userErr || !userData.user) {
+      return json({ ok: false, error: 'No autorizado' }, 401)
+    }
+    const user = userData.user
+
     const { llamado_id } = await req.json()
     if (!llamado_id || typeof llamado_id !== 'string') {
       return json({ ok: false, error: 'llamado_id requerido' }, 400)
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const admin = createClient(supabaseUrl, getServiceRoleKey())
 
     const { data: llamado, error: llamadoErr } = await admin
@@ -77,6 +114,23 @@ Deno.serve(async (req) => {
 
     if (llamadoErr || !llamado) {
       return json({ ok: false, error: 'Llamado no encontrado' }, 404)
+    }
+
+    // Autorización: el JWT identifica a alguien; esto exige que sea el dueño.
+    if (llamado.contratante_id !== user.id) {
+      return json({ ok: false, error: 'Prohibido' }, 403)
+    }
+
+    const { error: limitErr } = await admin.rpc('enforce_notificar_llamado_limits', {
+      p_user: user.id,
+      p_llamado: llamado_id,
+    })
+    if (limitErr) {
+      if (esRateLimit(limitErr)) {
+        return json({ ok: false, error: 'rate_limit_exceeded' }, 429)
+      }
+      console.error('enforce_notificar_llamado_limits:', limitErr)
+      return json({ ok: false, error: limitErr.message }, 500)
     }
 
     const { data: contratante } = await admin
